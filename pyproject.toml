@@ -1,0 +1,49 @@
+[tool.poetry]
+name = "odap"
+version = "1.0.0"
+description = "ODAP framework"
+readme = "README.md"
+
+license = "MIT"
+
+authors = [
+    "Jiri Koutny <jiri.koutny@datasentics.com>"
+]
+
+packages = [
+    { include = "feature_factory", from = "src"},
+]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+
+[tool.poetry.dev-dependencies]
+databricks-cli = "^0.17.3"
+pyspark = {url = "https://daipe-packages.s3.eu-central-1.amazonaws.com/pyspark-3.2.0-py2.py3-none-any.whl"}
+delta-spark = {url = "https://daipe-packages.s3.eu-central-1.amazonaws.com/delta_spark-1.1.0-py3-none-any.whl"}
+ipython = "^8.5.0"
+PyYAML = "^6.0"
+pylint = "^2.15.4"
+pyre-check = "^0.9.16"
+black = "^22.10.0"
+poethepoet = "^0.16.4"
+databricks-feature-store = "^0.7.0"
+
+[tool.black]
+line-length = 120
+
+
+[tool.pylint.messages_control]
+disable = [
+    "missing-docstring",
+    "line-too-long",
+    "too-many-arguments",
+    "too-few-public-methods",
+    "ungrouped-imports",
+]
+good-names = ["e", "i", "k", "n", "f", "v", "df", "sc"]
+
+[tool.poe.tasks]
+black = "black src"
+black-check = "black --check src"
+pylint = "pylint src --max-nested-blocks 2 --max-statements 10"
