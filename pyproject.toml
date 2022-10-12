@@ -7,11 +7,14 @@ readme = "README.md"
 license = "MIT"
 
 authors = [
-    "Jiri Koutny <jiri.koutny@datasentics.com>"
+    "Jiri Koutny <jiri.koutny@datasentics.com>",
+    "Karel Gudera <karel.gudera@datasentics.com>",
+    "Jakub Vins <jakub.vins@datasentics.com>",
+    "Jakub Vaclavik <jakub.vaclavik@datasentics.com>"
 ]
 
 packages = [
-    { include = "feature_factory", from = "src"},
+    { include = "odap", from = "src"}
 ]
 
 [tool.poetry.dependencies]

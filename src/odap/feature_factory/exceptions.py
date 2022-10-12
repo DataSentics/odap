@@ -8,11 +8,3 @@ class FeaturesTableNotDefinedException(Exception):
 
 class FeaturesTablePathNotDefinedException(Exception):
     pass
-
-
-class FeaturesNotDefinedException(Exception):
-    pass
-
-
-class InvalidFeatureException(Exception):
-    pass

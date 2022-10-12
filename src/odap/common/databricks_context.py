@@ -1,5 +1,7 @@
 import IPython
 from pyspark.dbutils import DBUtils
+from databricks_cli.workspace.api import WorkspaceApi
+from databricks_cli.sdk.api_client import ApiClient
 
 
 def resolve_dbutils() -> DBUtils:
@@ -9,6 +11,11 @@ def resolve_dbutils() -> DBUtils:
         raise Exception("dbutils cannot be resolved")
 
     return ipython.user_ns["dbutils"]
+
+
+def get_workspace_api(dbutils: DBUtils) -> WorkspaceApi:
+    api_client = ApiClient(host=get_host(dbutils), token=get_token(dbutils))
+    return WorkspaceApi(api_client)
 
 
 def get_host(dbutils: DBUtils) -> str:
