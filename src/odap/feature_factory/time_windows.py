@@ -5,6 +5,8 @@ from pyspark.sql import Column
 from pyspark.sql import DataFrame
 from pyspark.sql import functions as f
 
+from odap.common.config import TIMESTAMP_COLUMN
+
 
 WindowedColumn = Callable[[str], Column]
 
@@ -169,7 +171,7 @@ def collect_list_windowed(name: str, col: Column) -> WindowedColumn:
 
 
 class WindowedDataFrame(DataFrame):
-    __timestamp_column = "timestamp"
+    __timestamp_column = TIMESTAMP_COLUMN
 
     def __init__(self, df: DataFrame, time_column: str, time_windows: List[str]):
         super().__init__(df._jdf, df.sql_ctx)  # noqa # pyre-ignore[6]
