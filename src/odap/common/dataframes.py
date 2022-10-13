@@ -1,4 +1,4 @@
-from pyspark.sql import DataFrame, SparkSession, functions as f
+from pyspark.sql import DataFrame, SparkSession
 from databricks_cli.workspace.api import WorkspaceApi
 from odap.common.databricks_context import resolve_dbutils
 from odap.common.exceptions import InvalidNoteboookException
@@ -6,10 +6,10 @@ from odap.common.utils import get_notebook_content
 
 
 def get_python_dataframe(notebook_content: str) -> DataFrame:
-    dbutils = resolve_dbutils()  # pylint: disable=W0641
-    spark = SparkSession.getActiveSession()  # pylint: disable=W0641
+    globals()["spark"] = SparkSession.getActiveSession()
+    globals()["dbutils"] = resolve_dbutils()
 
-    exec(notebook_content, globals(), locals())  # pylint: disable=W0122
+    exec(notebook_content, globals())  # pylint: disable=W0122
     return eval("df_final")  # pylint: disable=W0123
 
 
