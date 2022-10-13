@@ -2,15 +2,19 @@ import os
 import sys
 import re
 from base64 import b64decode
-from pyspark.dbutils import DBUtils
 from databricks_cli.workspace.api import WorkspaceApi
 
 
-def get_absolute_path(*paths: str) -> str:
-    workspace_root = min([path for path in sys.path if path.startswith("/Workspace/Repos")], key=len)
-    repos_root = re.sub("^/Workspace", "", workspace_root)
+def get_repository_root_fs_path() -> str:
+    return min([path for path in sys.path if path.startswith("/Workspace/Repos")], key=len)
 
-    return os.path.join(repos_root, *paths)
+
+def get_repository_root_api_path() -> str:
+    return re.sub("^/Workspace", "", get_repository_root_fs_path())
+
+
+def get_absolute_path(*paths: str) -> str:
+    return os.path.join(get_repository_root_api_path(), *paths)
 
 
 def get_notebook_content(notebook_path: str, workspace_api: WorkspaceApi) -> str:
