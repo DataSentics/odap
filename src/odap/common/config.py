@@ -6,6 +6,7 @@ from odap.common.exceptions import ConfigAttributMissingException
 
 
 CONFIG_NAME = "config.yaml"
+TIMESTAMP_COLUMN = "timestamp"
 
 
 class ConfigNamespace(enum.Enum):
