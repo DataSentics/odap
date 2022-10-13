@@ -94,7 +94,9 @@ def __with_time_windows(
 
 
 def with_time_windows(df: DataFrame, timestamp: str, time_column_name: str, time_windows: List[str]) -> DataFrame:
-    return __with_time_windows(df, timestamp, time_column_name, time_windows, is_past_time_window, _time_window_column_template)
+    return __with_time_windows(
+        df, timestamp, time_column_name, time_windows, is_past_time_window, _time_window_column_template
+    )
 
 
 def windowed(col: Column, time_window: str) -> Column:
