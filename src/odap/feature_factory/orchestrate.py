@@ -1,18 +1,36 @@
-from odap.common.config import get_config_namespace, ConfigNamespace
-from odap.feature_factory.config import get_features_table, get_features_table_path, get_entity_primary_key
-from odap.feature_factory.dataframes import create_dataframes, join_dataframes
+from odap.common.config import TIMESTAMP_COLUMN, get_config_namespace, ConfigNamespace
+from odap.feature_factory.config import (
+    get_entity_primary_key,
+    get_features_table,
+    get_features_table_path,
+    get_metadata_table,
+    get_metadata_table_path
+)
+from odap.feature_factory.dataframes import create_dataframes_and_metadata, join_dataframes
 from odap.feature_factory.feature_store import write_df_to_feature_store
+from odap.feature_factory.metadata import FEATURE_METADATA_COLUMN, create_metadata_dataframe
 
 
 def orchestrate():
     config = get_config_namespace(ConfigNamespace.FEATURE_FACTORY)
     entity_primary_key = get_entity_primary_key(config)
 
-    dataframes = create_dataframes()
+    dataframes, metadata = create_dataframes_and_metadata()
 
     df = join_dataframes(dataframes, join_columns=[entity_primary_key])
+    metadata_df = create_metadata_dataframe(metadata)
 
-    table_name = get_features_table(config)
-    table_path = get_features_table_path(config)
+    write_df_to_feature_store(
+        df,
+        table_name=get_features_table(config),
+        table_path=get_features_table_path(config),
+        primary_keys=[entity_primary_key, TIMESTAMP_COLUMN],
+        partition_columns=[TIMESTAMP_COLUMN]
+    )
 
-    write_df_to_feature_store(df, table_name, table_path, primary_key=entity_primary_key)
+    write_df_to_feature_store(
+        metadata_df,
+        table_name=get_metadata_table(config),
+        table_path=get_metadata_table_path(config),
+        primary_keys=[FEATURE_METADATA_COLUMN],
+    )

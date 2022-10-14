@@ -1,36 +1,73 @@
 from typing import Dict, Any
 
-from odap.feature_factory.exceptions import (
-    EntityNotDefinedException,
-    FeaturesTableNotDefinedException,
-    FeaturesTablePathNotDefinedException,
-)
+from odap.common.exceptions import ConfigAttributeMissingException
+
+
+def get_entity(config: Dict[str, Any]) -> str:
+    entities = config.get("entities")
+
+    if not entities:
+        raise ConfigAttributeMissingException("entities not defined in config.yaml")
+
+    return next(iter(entities))
 
 
 def get_entity_primary_key(config: Dict[str, Any]) -> str:
     entities = config.get("entities")
 
     if not entities:
-        raise EntityNotDefinedException("entities not defined in config.yaml")
+        raise ConfigAttributeMissingException("entities not defined in config.yaml")
 
     primary_entity = next(iter(entities))
 
     return entities[primary_entity]["id_column"]
 
+def get_features(config: Dict[str, Any]):
+    features = config.get("features")
+
+    if not features:
+        raise ConfigAttributeMissingException("features not defined in config.yaml")
+
+    return features
+
+def get_metadata(config: Dict[str, Any]):
+    metadata = config.get("metadata")
+
+    if not metadata:
+        raise ConfigAttributeMissingException("metadata not defined in config.yaml")
+
+    return metadata
 
 def get_features_table(config: Dict[str, Any]) -> str:
-    features_table = config.get("table")
+    features_table = get_features(config).get("table")
 
     if not features_table:
-        raise FeaturesTableNotDefinedException("Features table not defined in config.yaml")
+        raise ConfigAttributeMissingException("features.table not defined in config.yaml")
 
-    return features_table
+    return features_table.format(entity=get_entity(config))
 
 
 def get_features_table_path(config: Dict[str, Any]) -> str:
-    features_table_path = config.get("path")
+    features_table_path = get_features(config).get("path")
 
     if not features_table_path:
-        raise FeaturesTablePathNotDefinedException("Features path not defined in config.yaml")
+        raise ConfigAttributeMissingException("features.path not defined in config.yaml")
 
-    return features_table_path
+    return features_table_path.format(entity=get_entity(config))
+
+def get_metadata_table(config: Dict[str, Any]) -> str:
+    metadata_table = get_metadata(config).get("table")
+
+    if not metadata_table:
+        raise ConfigAttributeMissingException("metadata.table not defined in config.yaml")
+
+    return metadata_table.format(entity=get_entity(config))
+
+
+def get_metadata_table_path(config: Dict[str, Any]) -> str:
+    metadata_table_path = get_metadata(config).get("path")
+
+    if not metadata_table_path:
+        raise ConfigAttributeMissingException("metadata.path not defined in config.yaml")
+
+    return metadata_table_path.format(entity=get_entity(config))

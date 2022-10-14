@@ -1,4 +1,4 @@
-class ConfigAttributMissingException(Exception):
+class ConfigAttributeMissingException(Exception):
     pass
 
 
