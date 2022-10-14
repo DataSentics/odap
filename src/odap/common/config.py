@@ -1,9 +1,9 @@
+from typing import Dict, Any
 import os
 import enum
 import yaml
-from typing import Dict, Any
 from odap.common.utils import get_repository_root_fs_path
-from odap.common.exceptions import ConfigAttributMissingException
+from odap.common.exceptions import ConfigAttributeMissingException
 
 
 CONFIG_NAME = "config.yaml"
@@ -25,7 +25,7 @@ def get_config_parameters() -> Dict[str, Any]:
     parameters = config.get("parameters", None)
 
     if not parameters:
-        raise ConfigAttributMissingException("'parameters' not defined in config.yaml")
+        raise ConfigAttributeMissingException("'parameters' not defined in config.yaml")
     return parameters
 
 
@@ -35,6 +35,6 @@ def get_config_namespace(namespace: ConfigNamespace) -> Dict[str, Any]:
     config = parameters.get(namespace.value, None)
 
     if not config:
-        raise ConfigAttributMissingException(f"'{namespace.value}' not defined in config.yaml")
+        raise ConfigAttributeMissingException(f"'{namespace.value}' not defined in config.yaml")
 
     return config

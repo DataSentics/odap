@@ -1,10 +1,2 @@
-class EntityNotDefinedException(Exception):
-    pass
-
-
-class FeaturesTableNotDefinedException(Exception):
-    pass
-
-
-class FeaturesTablePathNotDefinedException(Exception):
+class MissingMetadataException(Exception):
     pass
