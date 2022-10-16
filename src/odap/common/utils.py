@@ -1,6 +1,7 @@
 import os
 import sys
 import re
+import importlib
 from base64 import b64decode
 from typing import List
 from databricks_cli.workspace.api import WorkspaceApi
@@ -36,3 +37,12 @@ def split_notebok_to_cells(notebook_content):
 
 def join_python_notebook_cells(cells: List[str]) -> str:
     return PYTHON_CELL_DIVIDER.join(cells)
+
+
+def import_file(module_name: str, file_path: str):
+    module_name = f"odap_exporter_{module_name}"
+    spec = importlib.util.spec_from_file_location(module_name, file_path)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return importlib.import_module(module_name)

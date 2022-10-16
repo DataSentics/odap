@@ -1,4 +1,3 @@
-import os
 from typing import Dict, Any
 from odap.common.databricks_context import get_workspace_api, resolve_dbutils
 from pyspark.sql import DataFrame
