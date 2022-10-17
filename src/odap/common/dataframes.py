@@ -6,6 +6,7 @@ from odap.common.utils import join_python_notebook_cells
 
 PYTHON_DF_NAME = "df_final"
 
+
 def get_python_dataframe(notebook_cells: List[str]) -> DataFrame:
     globals()["spark"] = SparkSession.getActiveSession()
     globals()["dbutils"] = resolve_dbutils()
@@ -14,10 +15,12 @@ def get_python_dataframe(notebook_cells: List[str]) -> DataFrame:
     exec(notebook_content, globals())  # pylint: disable=W0122
     return eval(PYTHON_DF_NAME)  # pylint: disable=W0123
 
+
 def remove_create_widget_cells(cells: List[str]):
     for cell in cells[:]:
         if "create widget" in cell:
             cells.remove(cell)
+
 
 def get_sql_dataframe(notebook_cells: List[str]) -> DataFrame:
     spark = SparkSession.getActiveSession()

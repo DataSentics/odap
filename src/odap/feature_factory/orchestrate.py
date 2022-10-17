@@ -4,7 +4,7 @@ from odap.feature_factory.config import (
     get_features_table,
     get_features_table_path,
     get_metadata_table,
-    get_metadata_table_path
+    get_metadata_table_path,
 )
 from odap.feature_factory.dataframes import create_dataframes_and_metadata, join_dataframes
 from odap.feature_factory.feature_store import write_df_to_feature_store
@@ -25,7 +25,7 @@ def orchestrate():
         table_name=get_features_table(config),
         table_path=get_features_table_path(config),
         primary_keys=[entity_primary_key, TIMESTAMP_COLUMN],
-        partition_columns=[TIMESTAMP_COLUMN]
+        partition_columns=[TIMESTAMP_COLUMN],
     )
 
     write_df_to_feature_store(

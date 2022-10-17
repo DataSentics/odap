@@ -11,9 +11,7 @@ def get_segment_table(segment: str, config: Config) -> str:
     segment_table = config.get("table", None)
 
     if not segment_table:
-        raise ConfigAttributeMissingException(
-            f"'{ConfigNamespace.SEGMENT_FACTORY}.table' not defined in config.yaml"
-        )
+        raise ConfigAttributeMissingException(f"'{ConfigNamespace.SEGMENT_FACTORY}.table' not defined in config.yaml")
 
     if not "{segment}" in segment_table:
         raise InvalidConfigAttributException(
@@ -27,9 +25,7 @@ def get_segment_table_path(segment: str, config: Config) -> str:
     segment_path = config.get("path", None)
 
     if not segment_path:
-        raise ConfigAttributeMissingException(
-            f"'{ConfigNamespace.SEGMENT_FACTORY}.path' not defined in config.yaml"
-        )
+        raise ConfigAttributeMissingException(f"'{ConfigNamespace.SEGMENT_FACTORY}.path' not defined in config.yaml")
 
     if not "{segment}" in segment_path:
         raise InvalidConfigAttributException(
@@ -79,9 +75,12 @@ def get_segments_export(segment_name: str, export_name: str, config: Config) -> 
     segments_exports = get_segments_exports(segment_name, config)
 
     if not export_name in segments_exports:
-        raise ConfigAttributeMissingException(f"Segment '{segment_name}' does not have export {export_name} configured.")
+        raise ConfigAttributeMissingException(
+            f"Segment '{segment_name}' does not have export {export_name} configured."
+        )
 
     return export_name
+
 
 def get_exports(config: Config) -> Dict[str, Any]:
     exporters_dict = config.get("exports", None)
@@ -92,6 +91,7 @@ def get_exports(config: Config) -> Dict[str, Any]:
     return exporters_dict
 
 
+# pylint: disable=too-many-statements
 def get_export(export_name: str, config: Config) -> Dict[str, Any]:
     exports_dict = get_exports(config)
     export_dict = exports_dict.get(export_name, None)
@@ -99,13 +99,13 @@ def get_export(export_name: str, config: Config) -> Dict[str, Any]:
     if not export_dict:
         raise ConfigAttributeMissingException(f"The export '{export_name}' is not configured in config.yaml.")
 
-    if not "type" in export_dict:
+    if "type" not in export_dict:
         raise ConfigAttributeMissingException(f"The export '{export_name}' must contain field 'type'.")
 
-    if not "attributes" in export_dict:
+    if "attributes" not in export_dict:
         raise ConfigAttributeMissingException(f"The export '{export_name}' must contain field 'attributes'.")
 
-    if type(export_dict["attributes"]) != list:
+    if not isinstance(export_dict["attributes"], list):
         raise ConfigAttributeMissingException(f"Type of the field '{export_name}.attributes' must be 'list'.")
 
     return export_dict

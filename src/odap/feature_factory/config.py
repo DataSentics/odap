@@ -22,6 +22,7 @@ def get_entity_primary_key(config: Dict[str, Any]) -> str:
 
     return entities[primary_entity]["id_column"]
 
+
 def get_features(config: Dict[str, Any]):
     features = config.get("features")
 
@@ -30,6 +31,7 @@ def get_features(config: Dict[str, Any]):
 
     return features
 
+
 def get_metadata(config: Dict[str, Any]):
     metadata = config.get("metadata")
 
@@ -37,6 +39,7 @@ def get_metadata(config: Dict[str, Any]):
         raise ConfigAttributeMissingException("metadata not defined in config.yaml")
 
     return metadata
+
 
 def get_features_table(config: Dict[str, Any]) -> str:
     features_table = get_features(config).get("table")
@@ -54,6 +57,7 @@ def get_features_table_path(config: Dict[str, Any]) -> str:
         raise ConfigAttributeMissingException("features.path not defined in config.yaml")
 
     return features_table_path.format(entity=get_entity(config))
+
 
 def get_metadata_table(config: Dict[str, Any]) -> str:
     metadata_table = get_metadata(config).get("table")

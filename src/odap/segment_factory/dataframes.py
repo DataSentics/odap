@@ -21,7 +21,7 @@ def create_segment_export_dataframe(
     featurestore_df = spark.read.table(features_table_name)
 
     export_df = segment_df.join(featurestore_df, primary_key).select(
-        segment_df["*"], 
+        segment_df["*"],
         *[featurestore_df[col] for col in featurestore_df.columns if col in export_config["attributes"]]
     )
     return export_df

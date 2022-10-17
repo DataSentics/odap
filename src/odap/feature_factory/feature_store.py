@@ -20,7 +20,7 @@ def create_feature_store_table(
     table_name: str,
     table_path: str,
     primary_keys: List[str],
-    partition_columns: Union[List[str], None]
+    partition_columns: Union[List[str], None],
 ) -> None:
     spark = SparkSession.getActiveSession()  # pylint: disable=W0641
     spark.sql(f"CREATE DATABASE IF NOT EXISTS {table_name.split('.')[0]}")
@@ -44,8 +44,8 @@ def write_df_to_feature_store(
     table_name: str,
     table_path: str,
     primary_keys: List[str],
-    partition_columns: Union[List[str], None] = None
-    ) -> None:
+    partition_columns: Union[List[str], None] = None,
+) -> None:
     fs = FeatureStoreClient()
 
     create_feature_store_table(fs, df, table_name, table_path, primary_keys, partition_columns)

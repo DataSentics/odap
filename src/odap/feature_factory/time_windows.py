@@ -266,6 +266,7 @@ class WindowedDataFrame(DataFrame):
         if self.__timestamp_column not in group_keys:
             raise Exception(f"{self.__timestamp_column} missing in group keys")
 
+    # pylint: disable=too-many-statements
     def __get_agg_cols(self, agg_columns_function: Callable[[str], List[Union[WindowedColumn, Column]]]):
         do_time_windows = False
 

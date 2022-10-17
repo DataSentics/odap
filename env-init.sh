@@ -38,5 +38,5 @@ else
   CONDA_BIN_DIR="$CONDA_BASE_DIR/bin" # Linux/Mac
 fi
 
-$CONDA_BIN_DIR/pip install "penvy==$PENVY_VERSION"
-$CONDA_BIN_DIR/penvy-init "$@"
+"$CONDA_BIN_DIR"/pip install "penvy==$PENVY_VERSION"
+"$CONDA_BIN_DIR"/penvy-init "$@"
