@@ -12,12 +12,15 @@ It's build on top of the Databricks platform.
 You can try the framework right now by cloning [demo project](https://github.com/DataSentics/features-factory-demo) to your Databricks Workspace.
 
 ## Documentation
-For documentation see [ODAP Documentation](https://github.com/DataSentics/odap).
+For documentation see [ODAP Documentation](https://datasentics.notion.site/ODAP-framework-f6ed0a95140d48c69b642b568c6db85f).
 
 ## Development
 There are two main components (sub-packages)
 - `feature_factory` - responsible for features development and orchestration
 - `segment_factory` - responsible for segments creation and exports
+
+### DBR & Python
+DBR 10.4+ with python 3.8+ are supported
 
 ### Dependency management
 Use `poetry` as main dependency management tool
