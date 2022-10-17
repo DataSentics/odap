@@ -18,7 +18,6 @@ def get_metadata_schema():
             t.StructField(FEATURE_METADATA_COLUMN, t.StringType(), False),
             t.StructField("description", t.StringType(), True),
             t.StructField("tags", t.ArrayType(t.StringType()), True),
-            t.StructField("dtype", t.StringType(), True),
         ]
     )
 
