@@ -22,7 +22,7 @@ def load_exporters_map() -> ExportersMap:
 
 
 def resolve_exporter(exporter_name: str, exporters_map: ExportersMap) -> Callable[[str, DataFrame, Dict, Dict], None]:
-    if not exporter_name in exporters_map:
+    if exporter_name not in exporters_map:
         raise Exception(f"Exporter '{exporter_name}' is not implemented.")
 
     exporter_module = import_file(exporter_name, exporters_map[exporter_name])
