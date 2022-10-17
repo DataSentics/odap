@@ -13,5 +13,4 @@ def orchestrate():
         segment_df = create_segment_dataframe_by_slug(segment_slug)
         save_segment_dataframe(segment_df, segment_slug, config)
 
-
     run_exports()
