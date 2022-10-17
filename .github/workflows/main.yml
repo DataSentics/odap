@@ -1,0 +1,13 @@
+name: Build & Release pipeline
+on:
+  push:
+
+jobs:
+  build:
+    uses: pyfony/pyfony-package-ci-cd/.github/workflows/build.yml@v1
+
+  release:
+    needs: build
+    uses: pyfony/pyfony-package-ci-cd/.github/workflows/release.yml@v1
+    secrets:
+      PYPI_PUBLISH: ${{ secrets.PYPI_PUBLISH }}
