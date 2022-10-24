@@ -1,4 +1,5 @@
 from typing import Any, Dict, List
+import re
 
 import pyspark.sql.types as t
 from pyspark.sql import DataFrame
@@ -11,9 +12,25 @@ FEATURE_TEMPLATE = "feature_template"
 DESCRIPTION = "description"
 DESCRIPTION_TEMPLATE = "description_template"
 DTYPE = "dtype"
+CATEGORY = "category"
+TAGS = "tags"
 
 FeatureMetadataType = Dict[str, Any]
 FeaturesMetadataType = List[FeatureMetadataType]
+
+
+types_normalization_map = {
+    t.StringType().simpleString(): "string",
+    t.BooleanType().simpleString(): "boolean",
+    t.ByteType().simpleString(): "byte",
+    t.ShortType().simpleString(): "short",
+    t.IntegerType().simpleString(): "integer",
+    t.LongType().simpleString(): "long",
+    t.FloatType().simpleString(): "float",
+    t.DoubleType().simpleString(): "double",
+    t.TimestampType().simpleString(): "timestamp",
+    t.DateType().simpleString(): "date",
+}
 
 
 def get_metadata_schema():
@@ -24,8 +41,8 @@ def get_metadata_schema():
             t.StructField(FEATURE_TEMPLATE, t.StringType(), True),
             t.StructField(DESCRIPTION_TEMPLATE, t.StringType(), True),
             t.StructField(DTYPE, t.StringType(), True),
-            t.StructField("category", t.StringType(), True),
-            t.StructField("tags", t.ArrayType(t.StringType()), True),
+            t.StructField(CATEGORY, t.StringType(), True),
+            t.StructField(TAGS, t.ArrayType(t.StringType()), True),
         ]
     )
 
@@ -45,5 +62,13 @@ def get_feature_field(feature_df: DataFrame, feature_name: str) -> t.StructField
     )
 
 
+def normalize_dtype(dtype: str) -> str:
+    for key, val in types_normalization_map.items():
+        dtype = re.sub(f"\\b{key}\\b", val, dtype)
+
+    return dtype
+
+
 def get_feature_dtype(feature_field: t.StructField) -> str:
-    return feature_field.dataType.simpleString()
+    dtype = feature_field.dataType.simpleString()
+    return normalize_dtype(dtype)

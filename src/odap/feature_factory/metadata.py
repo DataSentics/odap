@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Union
 import re
 from pyspark.sql import DataFrame, SparkSession
 from odap.feature_factory.exceptions import (
-    MissingFeaturesInMetadataException,
+    MetadataParsingException,
     MissingMetadataException,
 )
 from odap.feature_factory.templates import resolve_metadata_template
@@ -59,12 +59,21 @@ def get_metadata_dict_from_line(line: str) -> Dict[str, Union[str, List[str]]]:
     return {attr: parse_value(attr, value)}
 
 
-def parse_feature(feature: str) -> FeatureMetadataType:
+def get_feature_name(feature_name_line: str, feature_path: str) -> str:
+    feature_name_line = feature_name_line.strip()
+
+    if not feature_name_line.startswith("`") or not feature_name_line.endswith("`"):
+        raise MetadataParsingException(f"Feature name at {feature_path} has to start and end with '`'")
+
+    return feature_name_line[1:-1]
+
+
+def parse_feature(feature: str, feature_path: str) -> FeatureMetadataType:
     parsed_feature = {}
 
     feature_lines = split_to_lines(feature)
 
-    parsed_feature[FEATURE] = feature_lines.pop(0).strip().replace("`", "")
+    parsed_feature[FEATURE] = get_feature_name(feature_lines.pop(0), feature_path)
 
     for line in feature_lines:
         parsed_feature.update(get_metadata_dict_from_line(line))
@@ -74,7 +83,7 @@ def parse_feature(feature: str) -> FeatureMetadataType:
 
 def extract_global_metadata(metadata: str, feature_path: str, global_metadata_dict: FeatureMetadataType) -> str:
     if not FEATURES_HEADER in metadata:
-        raise MissingFeaturesInMetadataException(f"Features section is missing in metadata for feature {feature_path}")
+        raise MetadataParsingException(f"## Features section is missing in metadata for feature {feature_path}")
 
     global_metadata, features_metadata_string = metadata.split(FEATURES_HEADER)
 
@@ -100,7 +109,7 @@ def parse_metadata(metadata: str, feature_path: str, feature_df: DataFrame) -> F
         if not feature:
             continue
 
-        parsed_feature_metadata = parse_feature(feature)
+        parsed_feature_metadata = parse_feature(feature, feature_path)
 
         parsed_feature_metadata.update(global_metadata)
 
@@ -115,21 +124,17 @@ def remove_metadata_header(metadata: str) -> str:
     return metadata.split(METADATA_HEADER)[1]
 
 
-def extract_metadata_from_cells(cells: List[str], feature_path: str, feature_df: DataFrame) -> FeaturesMetadataType:
-    parsed_metadata = None
-
-    for current_cell in cells:
+def extract_metadata_string_from_cells(cells: List[str], feature_path: str) -> str:
+    for current_cell in cells[:]:
         if METADATA_HEADER in current_cell:
             metadata = remove_magic_dividers(current_cell)
             metadata = remove_metadata_header(metadata)
 
-            parsed_metadata = parse_metadata(metadata, feature_path, feature_df)
-            break
+            cells.remove(current_cell)
 
-    if not parsed_metadata:
-        raise MissingMetadataException(f"Metadata not provided for feature {feature_path}")
+            return metadata
 
-    return parsed_metadata
+    raise MissingMetadataException(f"Metadata not provided for feature {feature_path}")
 
 
 def create_metadata_dataframe(metadata: Dict[str, Any]) -> DataFrame:

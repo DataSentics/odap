@@ -2,7 +2,7 @@ class MissingMetadataException(Exception):
     pass
 
 
-class MissingFeaturesInMetadataException(Exception):
+class MetadataParsingException(Exception):
     pass
 
 
