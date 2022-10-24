@@ -10,8 +10,7 @@ from odap.feature_factory.metadata import extract_metadata_from_cells
 
 
 def create_dataframes_and_metadata() -> Tuple[List[DataFrame], List[Dict[str, Any]]]:
-    dbutils = resolve_dbutils()
-    workspace_api = get_workspace_api(dbutils)
+    workspace_api = get_workspace_api(resolve_dbutils())
 
     features_paths = get_features_paths(workspace_api)
 
@@ -21,10 +20,11 @@ def create_dataframes_and_metadata() -> Tuple[List[DataFrame], List[Dict[str, An
     for feature_path in features_paths:
         notebook_cells = get_notebook_cells(feature_path, workspace_api)
 
-        metadata.extend(extract_metadata_from_cells(notebook_cells, feature_path))
+        feature_df = create_dataframe_from_notebook_cells(feature_path, notebook_cells[:])
 
-        feature_dataframe = create_dataframe_from_notebook_cells(feature_path, notebook_cells)
-        dataframes.append(feature_dataframe)
+        metadata.extend(extract_metadata_from_cells(notebook_cells, feature_path, feature_df))
+
+        dataframes.append(feature_df)
 
     return dataframes, metadata
 

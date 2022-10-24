@@ -9,7 +9,7 @@ from odap.common.config import TIMESTAMP_COLUMN
 
 
 WindowedColumn = Callable[[str], Column]
-
+TIME_WINDOW_PLACEHOLDER = "time_window"
 
 __HOUR = 60 * 60
 __DAY = 24 * __HOUR
@@ -30,7 +30,7 @@ PERIOD_NAMES = {
 }
 
 # pylint: disable=invalid-name
-_time_window_column_template = "is_time_window_{time_window}"
+_time_window_column_template = f"is_time_window_{{{TIME_WINDOW_PLACEHOLDER}}}"
 
 
 def parse_time_window(time_window: str) -> Dict[str, int]:

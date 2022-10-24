@@ -3,6 +3,7 @@ from pyspark.sql import DataFrame, SparkSession
 from odap.common.databricks_context import resolve_dbutils
 from odap.common.exceptions import InvalidNoteboookException
 from odap.common.utils import join_python_notebook_cells
+from odap.feature_factory.metadata import METADATA_HEADER
 
 PYTHON_DF_NAME = "df_final"
 
@@ -22,10 +23,17 @@ def remove_create_widget_cells(cells: List[str]):
             cells.remove(cell)
 
 
+def remove_metadata_cells(cells: List[str]):
+    for cell in cells[:]:
+        if METADATA_HEADER in cell:
+            cells.remove(cell)
+
+
 def get_sql_dataframe(notebook_cells: List[str]) -> DataFrame:
     spark = SparkSession.getActiveSession()
 
     remove_create_widget_cells(notebook_cells)
+    remove_metadata_cells(notebook_cells)
 
     df_command = notebook_cells.pop()
 
