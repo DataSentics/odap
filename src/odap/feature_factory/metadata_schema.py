@@ -18,6 +18,7 @@ NOTEBOOK_NAME = "notebook_name"
 NOTEBOOK_ABSOLUTE_PATH = "notebook_absolute_path"
 NOTEBOOK_RELATIVE_PATH = "notebook_relative_path"
 
+RawMetadataType = Dict[str, Any]
 FeatureMetadataType = Dict[str, Any]
 FeaturesMetadataType = List[FeatureMetadataType]
 
@@ -51,11 +52,6 @@ def get_metadata_schema():
             t.StructField(NOTEBOOK_RELATIVE_PATH, t.StringType(), True),
         ]
     )
-
-
-def get_array_columns() -> List[str]:
-    fields = get_metadata_schema()
-    return [field.name for field in fields if isinstance(field.dataType, t.ArrayType)]
 
 
 def get_feature_field(feature_df: DataFrame, feature_name: str) -> t.StructField:

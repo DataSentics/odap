@@ -6,7 +6,7 @@ from odap.common.databricks_context import get_workspace_api, resolve_dbutils
 from odap.common.dataframes import create_dataframe_from_notebook_cells
 from odap.common.utils import get_notebook_cells
 from odap.feature_factory.features import get_features_paths
-from odap.feature_factory.metadata import extract_metadata_string_from_cells, parse_metadata
+from odap.feature_factory.metadata import extract_raw_metadata_from_cells, resolve_metadata
 
 
 def create_dataframes_and_metadata() -> Tuple[List[DataFrame], List[Dict[str, Any]]]:
@@ -18,11 +18,11 @@ def create_dataframes_and_metadata() -> Tuple[List[DataFrame], List[Dict[str, An
     for feature_path in get_features_paths(workspace_api):
         notebook_cells = get_notebook_cells(feature_path, workspace_api)
 
-        metadata_string = extract_metadata_string_from_cells(notebook_cells, feature_path)
+        raw_metadata = extract_raw_metadata_from_cells(notebook_cells, feature_path)
 
         feature_df = create_dataframe_from_notebook_cells(feature_path, notebook_cells)
 
-        metadata.extend(parse_metadata(metadata_string, feature_path, feature_df))
+        metadata.extend(resolve_metadata(raw_metadata, feature_path, feature_df))
 
         dataframes.append(feature_df)
 

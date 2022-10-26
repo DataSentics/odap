@@ -88,5 +88,4 @@ def resolve_metadata_template(feature_df: DataFrame, feature_metadata: FeatureMe
     if not placeholders:
         return [feature_metadata]
 
-
     return resolve_placeholders_on_df_columns(feature_df.columns, feature_metadata, placeholders)
