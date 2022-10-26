@@ -14,6 +14,9 @@ DESCRIPTION_TEMPLATE = "description_template"
 DTYPE = "dtype"
 CATEGORY = "category"
 TAGS = "tags"
+NOTEBOOK_NAME = "notebook_name"
+NOTEBOOK_ABSOLUTE_PATH = "notebook_absolute_path"
+NOTEBOOK_RELATIVE_PATH = "notebook_relative_path"
 
 FeatureMetadataType = Dict[str, Any]
 FeaturesMetadataType = List[FeatureMetadataType]
@@ -43,6 +46,9 @@ def get_metadata_schema():
             t.StructField(DTYPE, t.StringType(), True),
             t.StructField(CATEGORY, t.StringType(), True),
             t.StructField(TAGS, t.ArrayType(t.StringType()), True),
+            t.StructField(NOTEBOOK_NAME, t.StringType(), True),
+            t.StructField(NOTEBOOK_ABSOLUTE_PATH, t.StringType(), True),
+            t.StructField(NOTEBOOK_RELATIVE_PATH, t.StringType(), True),
         ]
     )
 

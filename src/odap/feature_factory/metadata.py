@@ -1,7 +1,9 @@
 from typing import Any, Dict, List, Union
 
 import re
+
 from pyspark.sql import DataFrame, SparkSession
+from odap.common.utils import get_notebook_name, get_relative_path
 from odap.feature_factory.exceptions import (
     MetadataParsingException,
     MissingMetadataException,
@@ -10,6 +12,9 @@ from odap.feature_factory.templates import resolve_metadata_template
 from odap.feature_factory.metadata_schema import (
     DTYPE,
     FEATURE,
+    NOTEBOOK_NAME,
+    NOTEBOOK_ABSOLUTE_PATH,
+    NOTEBOOK_RELATIVE_PATH,
     FeatureMetadataType,
     FeaturesMetadataType,
     get_array_columns,
@@ -24,7 +29,9 @@ FEATURES_HEADER = "## Features"
 SQL_MAGIC_DIVIDER = "-- MAGIC "
 PYTHON_MAGIC_DIVIDER = "# MAGIC "
 
-METADATA_REGEX = r"\s*-\s*(.*):\s*`(.*)`"
+FEATURE_REGEX = r"^- `([a-zA-Z0-9_{}]*)`$"
+METADATA_REGEX = r"^  - (.*): `(.*)`"
+GLOBAL_METADATA_REGEX = r"^- (.*): `(.*)`"
 
 
 def remove_magic_dividers(metadata: str) -> str:
@@ -47,25 +54,29 @@ def parse_value(metadata_name: str, metadata_value: str) -> Union[str, List[str]
     return metadata_value
 
 
-def get_metadata_dict_from_line(line: str) -> Dict[str, Union[str, List[str]]]:
-    searched = re.search(METADATA_REGEX, line)
+def get_metadata_dict_from_line(line: str, feature_path: str, regex=METADATA_REGEX) -> Dict[str, Union[str, List[str]]]:
+    searched = re.search(regex, line)
 
     if not searched:
-        return {}
+        raise MetadataParsingException(f"Syntax error at '{line}'. Feature path: {feature_path}")
 
     attr = searched.group(1)
+
+    if attr not in get_metadata_schema().fieldNames():
+        raise MetadataParsingException(f"{attr} is not a supported metadata field. Feature path: {feature_path}")
+
     value = searched.group(2)
 
     return {attr: parse_value(attr, value)}
 
 
 def get_feature_name(feature_name_line: str, feature_path: str) -> str:
-    feature_name_line = feature_name_line.strip()
+    searched = re.search(FEATURE_REGEX, feature_name_line)
 
-    if not feature_name_line.startswith("`") or not feature_name_line.endswith("`"):
-        raise MetadataParsingException(f"Feature name at {feature_path} has to start and end with '`'")
+    if not searched:
+        raise MetadataParsingException(f"Syntax error at '{feature_name_line}'. Feature path: {feature_path}")
 
-    return feature_name_line[1:-1]
+    return searched.group(1)
 
 
 def parse_feature(feature: str, feature_path: str) -> FeatureMetadataType:
@@ -76,9 +87,16 @@ def parse_feature(feature: str, feature_path: str) -> FeatureMetadataType:
     parsed_feature[FEATURE] = get_feature_name(feature_lines.pop(0), feature_path)
 
     for line in feature_lines:
-        parsed_feature.update(get_metadata_dict_from_line(line))
+        if line:
+            parsed_feature.update(get_metadata_dict_from_line(line, feature_path))
 
     return parsed_feature
+
+
+def set_notebook_paths(feature_path: str, global_metadata_dict: FeatureMetadataType):
+    global_metadata_dict[NOTEBOOK_NAME] = get_notebook_name(feature_path)
+    global_metadata_dict[NOTEBOOK_ABSOLUTE_PATH] = feature_path
+    global_metadata_dict[NOTEBOOK_RELATIVE_PATH] = get_relative_path(feature_path)
 
 
 def extract_global_metadata(metadata: str, feature_path: str, global_metadata_dict: FeatureMetadataType) -> str:
@@ -88,7 +106,10 @@ def extract_global_metadata(metadata: str, feature_path: str, global_metadata_di
     global_metadata, features_metadata_string = metadata.split(FEATURES_HEADER)
 
     for line in split_to_lines(global_metadata):
-        global_metadata_dict.update(get_metadata_dict_from_line(line))
+        if line:
+            global_metadata_dict.update(get_metadata_dict_from_line(line, feature_path, regex=GLOBAL_METADATA_REGEX))
+
+    set_notebook_paths(feature_path, global_metadata_dict)
 
     return features_metadata_string
 
@@ -109,7 +130,7 @@ def parse_metadata(metadata: str, feature_path: str, feature_df: DataFrame) -> F
         if not feature:
             continue
 
-        parsed_feature_metadata = parse_feature(feature, feature_path)
+        parsed_feature_metadata = parse_feature(f"- {feature}", feature_path)
 
         parsed_feature_metadata.update(global_metadata)
 

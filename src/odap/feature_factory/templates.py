@@ -80,12 +80,13 @@ def resolve_placeholders_on_df_columns(
 
 
 def resolve_metadata_template(feature_df: DataFrame, feature_metadata: FeatureMetadataType) -> FeaturesMetadataType:
+    feature_metadata[FEATURE_TEMPLATE] = feature_metadata[FEATURE]
+    feature_metadata[DESCRIPTION_TEMPLATE] = feature_metadata.get(DESCRIPTION, "")
+
     placeholders = get_feature_placeholders(feature_metadata[FEATURE])
 
     if not placeholders:
         return [feature_metadata]
 
-    feature_metadata[FEATURE_TEMPLATE] = feature_metadata[FEATURE]
-    feature_metadata[DESCRIPTION_TEMPLATE] = feature_metadata.get(DESCRIPTION, "")
 
     return resolve_placeholders_on_df_columns(feature_df.columns, feature_metadata, placeholders)
