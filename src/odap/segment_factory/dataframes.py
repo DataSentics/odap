@@ -1,27 +1,59 @@
-from typing import Dict
+from typing import Any, Dict
 from pyspark.sql import DataFrame, SparkSession
-from odap.feature_factory.config import get_entity_primary_key, get_features_table
-from odap.segment_factory.config import get_export, get_segment_table
+from odap.feature_factory.config import (
+    get_entity_by_name,
+    get_features_table_by_entity_name,
+)
 
 
-def create_segment_export_dataframe(
-    segment_name: str,
-    export_name: str,
+DataFramesMap = Dict[str, DataFrame]
+
+
+def create_entities_dataframes(
+    export_config: Any,
     feature_factory_config: Dict,
-    segment_factory_config: Dict,
-) -> DataFrame:
+) -> DataFramesMap:
     spark = SparkSession.getActiveSession()
+    dataframes_map = {}
 
-    features_table_name = get_features_table(feature_factory_config)
-    segment_table_name = get_segment_table(segment_name, segment_factory_config)
-    export_config = get_export(export_name, segment_factory_config)
-    primary_key = get_entity_primary_key(feature_factory_config)
+    for entity_name in export_config.get("attributes").keys():
+        table = get_features_table_by_entity_name(entity_name, feature_factory_config)
+        dataframes_map[entity_name] = spark.read.table(table)
 
-    segment_df = spark.read.table(segment_table_name)
-    featurestore_df = spark.read.table(features_table_name)
+    return dataframes_map
 
-    export_df = segment_df.join(featurestore_df, primary_key).select(
-        segment_df["*"],
-        *[featurestore_df[col] for col in featurestore_df.columns if col in export_config["attributes"]]
-    )
-    return export_df
+
+def join_segment_with_entities(
+    segment_dataframe: DataFrame, entities_dataframes: DataFramesMap, feature_factory_config: Dict
+):
+    for entity_name, entity_dataframe in entities_dataframes.items():
+        id_column = get_entity_by_name(entity_name, feature_factory_config).get("id_column")
+
+        if (not id_column in segment_dataframe.columns) or (not id_column in entity_dataframe.columns):
+            raise Exception(f"'{id_column}' column is missing in the segment or entity dataframe")
+
+        segment_dataframe = segment_dataframe.join(entity_dataframe, id_column, "inner")
+
+    return segment_dataframe
+
+
+def select_attributes(dataframe: DataFrame, export_config: Any, entities_dataframes: DataFramesMap):
+    select_columns = []
+
+    for entity, attributes in export_config.get("attributes").items():
+        for attribute in attributes:
+            select_columns.append(entities_dataframes[entity][attribute])
+
+    return dataframe.select(*select_columns)
+
+
+def create_export_dataframe(
+    segment_dataframe: DataFrame, export_config: Dict, feature_factory_config: Dict
+) -> DataFrame:
+    entities_dataframes = create_entities_dataframes(export_config, feature_factory_config)
+
+    joined_dataframe = join_segment_with_entities(segment_dataframe, entities_dataframes, feature_factory_config)
+
+    selected_dataframe = select_attributes(joined_dataframe, export_config, entities_dataframes)
+
+    return selected_dataframe

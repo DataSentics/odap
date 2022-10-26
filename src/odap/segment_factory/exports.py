@@ -1,42 +1,27 @@
+from typing import Dict
 from odap.common.config import get_config_namespace, ConfigNamespace
-from odap.segment_factory.config import (
-    get_export,
-    get_flatten_segments_exports,
-    get_segment,
-    get_segments_export,
-)
-from odap.segment_factory.dataframes import create_segment_export_dataframe
-from odap.segment_factory.exporters import resolve_exporter, load_exporters_map
+from odap.segment_factory.config import get_export, get_flatten_segments_exports, get_segment
+from odap.segment_factory.dataframes import create_export_dataframe
+from odap.segment_factory.exporters import resolve_exporter
+from odap.segment_factory.segments import create_segment_dataframe_by_slug
 
 
 # pylint: disable=too-many-statements
-def run_export(segment_name: str, export_name: str):
-    config = get_config_namespace(ConfigNamespace.SEGMENT_FACTORY)
-
-    export_name = get_segments_export(segment_name, export_name, config)
-
-    feature_factory_config = get_config_namespace(ConfigNamespace.FEATURE_FACTORY)
-    segment_factory_config = get_config_namespace(ConfigNamespace.SEGMENT_FACTORY)
-
-    export_df = create_segment_export_dataframe(
-        segment_name,
-        export_name,
-        feature_factory_config,
-        segment_factory_config,
-    )
-
+def run_export(segment_name: str, export_name: str, feature_factory_config: Dict, segment_factory_config: Dict):
     segment_config = get_segment(segment_name, segment_factory_config)
     export_config = get_export(export_name, segment_factory_config)
 
-    exporters_map = load_exporters_map()
-    exporter_fce = resolve_exporter(export_config["type"], exporters_map)
+    segment_dataframe = create_segment_dataframe_by_slug(segment_name)
 
-    exporter_fce(segment_name, export_df, segment_config, export_config)
+    export_dataframe = create_export_dataframe(segment_dataframe, export_config, feature_factory_config)
+
+    exporter_fce = resolve_exporter(export_config["type"])
+    exporter_fce(segment_name, export_dataframe, segment_config, export_config)
 
 
 def run_exports():
-    config = get_config_namespace(ConfigNamespace.SEGMENT_FACTORY)
-    flatten_segments_exports = get_flatten_segments_exports(config)
+    feature_factory_config = get_config_namespace(ConfigNamespace.FEATURE_FACTORY)
+    segment_factory_config = get_config_namespace(ConfigNamespace.SEGMENT_FACTORY)
 
-    for segment_export in flatten_segments_exports:
-        run_export(*segment_export)
+    for segment_name, export_name in get_flatten_segments_exports(segment_factory_config):
+        run_export(segment_name, export_name, feature_factory_config, segment_factory_config)

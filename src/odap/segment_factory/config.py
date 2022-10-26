@@ -1,4 +1,4 @@
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Tuple
 from odap.common.config import ConfigNamespace
 from odap.common.exceptions import ConfigAttributeMissingException, InvalidConfigAttributException
 
@@ -44,9 +44,9 @@ def get_segments(config: Config) -> Dict[str, Any]:
     return segments_dict
 
 
-def get_flatten_segments_exports(config) -> List[List[str]]:
+def get_flatten_segments_exports(config) -> List[Tuple[str, str]]:
     segments = get_segments(config)
-    return [[segment, export] for segment in segments for export in segments[segment]["exports"]]
+    return [(segment, export) for segment in segments for export in segments[segment]["exports"]]
 
 
 def get_segment(segment_name: str, config: Config) -> Dict[str, Any]:
@@ -69,17 +69,6 @@ def get_segments_exports(segment_name: str, config: Config) -> Dict[str, Any]:
         )
 
     return exports
-
-
-def get_segments_export(segment_name: str, export_name: str, config: Config) -> str:
-    segments_exports = get_segments_exports(segment_name, config)
-
-    if not export_name in segments_exports:
-        raise ConfigAttributeMissingException(
-            f"Segment '{segment_name}' does not have export {export_name} configured."
-        )
-
-    return export_name
 
 
 def get_exports(config: Config) -> Dict[str, Any]:
@@ -105,7 +94,7 @@ def get_export(export_name: str, config: Config) -> Dict[str, Any]:
     if "attributes" not in export_dict:
         raise ConfigAttributeMissingException(f"The export '{export_name}' must contain field 'attributes'.")
 
-    if not isinstance(export_dict["attributes"], list):
-        raise ConfigAttributeMissingException(f"Type of the field '{export_name}.attributes' must be 'list'.")
+    if not isinstance(export_dict["attributes"], dict):
+        raise ConfigAttributeMissingException(f"'{export_name}.attributes' must be a dict.")
 
     return export_dict

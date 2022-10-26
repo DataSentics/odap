@@ -5,6 +5,7 @@ from odap.common.utils import get_absolute_path, import_file
 from odap.common.databricks_context import get_workspace_api, resolve_dbutils
 
 ExportersMap = Dict[str, str]
+ExportFn = Callable[[str, DataFrame, Dict, Dict], None]
 
 
 def load_exporters_map() -> ExportersMap:
@@ -21,7 +22,8 @@ def load_exporters_map() -> ExportersMap:
     return exporters
 
 
-def resolve_exporter(exporter_name: str, exporters_map: ExportersMap) -> Callable[[str, DataFrame, Dict, Dict], None]:
+def resolve_exporter(exporter_name: str) -> ExportFn:
+    exporters_map = load_exporters_map()
     if exporter_name not in exporters_map:
         raise Exception(f"Exporter '{exporter_name}' is not implemented.")
 
