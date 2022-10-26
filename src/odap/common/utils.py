@@ -7,7 +7,7 @@ from typing import List
 from databricks_cli.workspace.api import WorkspaceApi
 
 SQL_CELL_DIVIDER = "-- COMMAND ----------"
-PYTHON_CELL_DIVIDER = " COMMAND ----------"
+PYTHON_CELL_DIVIDER = "# COMMAND ----------"
 
 
 def get_repository_root_fs_path() -> str:
@@ -16,6 +16,14 @@ def get_repository_root_fs_path() -> str:
 
 def get_repository_root_api_path() -> str:
     return re.sub("^/Workspace", "", get_repository_root_fs_path())
+
+
+def get_relative_path(path: str):
+    return os.path.relpath(path, get_repository_root_api_path())
+
+
+def get_notebook_name(path: str):
+    return os.path.split(path)[-1]
 
 
 def get_absolute_path(*paths: str) -> str:

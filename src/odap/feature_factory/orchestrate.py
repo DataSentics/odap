@@ -8,7 +8,7 @@ from odap.feature_factory.config import (
 )
 from odap.feature_factory.dataframes import create_dataframes_and_metadata, join_dataframes
 from odap.feature_factory.feature_store import write_df_to_feature_store
-from odap.feature_factory.metadata import FEATURE_METADATA_COLUMN, create_metadata_dataframe
+from odap.feature_factory.metadata import create_metadata_dataframe
 
 
 def orchestrate():
@@ -28,9 +28,9 @@ def orchestrate():
         partition_columns=[TIMESTAMP_COLUMN],
     )
 
-    write_df_to_feature_store(
-        metadata_df,
-        table_name=get_metadata_table(config),
-        table_path=get_metadata_table_path(config),
-        primary_keys=[FEATURE_METADATA_COLUMN],
+    (
+        metadata_df.write.mode("overwrite")
+        .option("overwriteSchema", True)
+        .option("path", get_metadata_table_path(config))
+        .saveAsTable(f"{get_metadata_table(config)}")
     )
