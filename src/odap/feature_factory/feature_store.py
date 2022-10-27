@@ -2,16 +2,7 @@ from typing import List, Union
 from pyspark.sql import SparkSession, DataFrame
 from databricks.feature_store import FeatureStoreClient
 
-
-def hive_table_exists(spark: SparkSession, full_table_name: str) -> bool:
-    db_name = full_table_name.split(".")[0]
-    table_name = full_table_name.split(".")[1]
-    databases = [db.databaseName for db in spark.sql("SHOW DATABASES").collect()]
-
-    if db_name not in databases:
-        return False
-
-    return spark.sql(f'SHOW TABLES IN {db_name} LIKE "{table_name}"').collect() != []
+from odap.common.tables import hive_table_exists
 
 
 def create_feature_store_table(

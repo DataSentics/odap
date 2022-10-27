@@ -1,6 +1,9 @@
-from typing import Any, Dict, List
+from typing import Dict, List, Optional
+from datetime import datetime
 
-from pyspark.sql import DataFrame, SparkSession
+from pyspark.sql import DataFrame
+from pyspark.sql.functions import col
+from odap.common.tables import get_existing_table
 from odap.common.utils import get_notebook_name, get_relative_path
 from odap.feature_factory.exceptions import (
     MetadataParsingException,
@@ -8,17 +11,27 @@ from odap.feature_factory.exceptions import (
 )
 from odap.feature_factory.templates import resolve_metadata_template
 from odap.feature_factory.metadata_schema import (
+    BACKEND,
     DTYPE,
     FEATURE,
+    FILLNA_VALUE,
+    FILLNA_VALUE_TYPE,
+    FREQUENCY,
+    LAST_COMPUTE_DATE,
+    LOCATION,
     NOTEBOOK_NAME,
     NOTEBOOK_ABSOLUTE_PATH,
     NOTEBOOK_RELATIVE_PATH,
+    OWNER,
+    START_DATE,
+    VARIABLE_TYPE,
     FeatureMetadataType,
     FeaturesMetadataType,
     RawMetadataType,
     get_feature_dtype,
     get_feature_field,
     get_metadata_schema,
+    get_variable_type,
 )
 
 METADATA_HEADER = "metadata = {"
@@ -40,10 +53,12 @@ def set_notebook_paths(feature_path: str, global_metadata_dict: FeatureMetadataT
     global_metadata_dict[NOTEBOOK_RELATIVE_PATH] = get_relative_path(feature_path)
 
 
-def set_features_dtype(feature_df: DataFrame, parsed_features: FeaturesMetadataType):
+def set_features_types(feature_df: DataFrame, parsed_features: FeaturesMetadataType):
     for parsed_feature in parsed_features:
         feature_field = get_feature_field(feature_df, parsed_feature[FEATURE])
+
         parsed_feature[DTYPE] = get_feature_dtype(feature_field)
+        parsed_feature[VARIABLE_TYPE] = get_variable_type(parsed_feature[DTYPE])
 
 
 def get_features_from_raw_metadata(raw_metadata: RawMetadataType, feature_path: str) -> FeaturesMetadataType:
@@ -74,6 +89,34 @@ def get_global_metadata(raw_metadata: RawMetadataType, feature_path: str) -> Fea
     return raw_metadata
 
 
+def get_feature_start_date(existing_metadata_df: Optional[DataFrame], feature_name: str) -> Dict[str, datetime]:
+    start_date = None
+
+    if existing_metadata_df:
+        start_date = existing_metadata_df.select(START_DATE).filter(col(FEATURE) == feature_name).first()[START_DATE]
+
+    return {START_DATE: start_date or datetime.now()}
+
+
+def set_fs_compatible_metadata(features_metadata: FeaturesMetadataType, metadata_table: str):
+    existing_metadata_df = get_existing_table(metadata_table)
+
+    for metadata in features_metadata:
+        metadata.update(get_feature_start_date(existing_metadata_df, metadata[FEATURE]))
+
+        metadata.update(
+            {
+                OWNER: "unknown",
+                FREQUENCY: "daily",
+                LAST_COMPUTE_DATE: datetime.now(),
+                FILLNA_VALUE: "None",
+                FILLNA_VALUE_TYPE: "NoneType",
+                LOCATION: metadata_table,
+                BACKEND: "delta_table",
+            }
+        )
+
+
 def resolve_metadata(raw_metadata: RawMetadataType, feature_path: str, feature_df: DataFrame) -> FeaturesMetadataType:
     parsed_metadata = []
 
@@ -87,7 +130,7 @@ def resolve_metadata(raw_metadata: RawMetadataType, feature_path: str, feature_d
 
         parsed_metadata.extend(resolve_metadata_template(feature_df, feature_metadata))
 
-    set_features_dtype(feature_df, parsed_metadata)
+    set_features_types(feature_df, parsed_metadata)
 
     return parsed_metadata
 
@@ -112,8 +155,3 @@ def extract_raw_metadata_from_cells(cells: List[str], feature_path: str) -> RawM
             return get_metadata_dict(metadata_string, feature_path)
 
     raise MissingMetadataException(f"Metadata not provided for feature {feature_path}")
-
-
-def create_metadata_dataframe(metadata: Dict[str, Any]) -> DataFrame:
-    spark = SparkSession.getActiveSession()  # pylint: disable=W0641
-    return spark.createDataFrame(data=metadata, schema=get_metadata_schema())

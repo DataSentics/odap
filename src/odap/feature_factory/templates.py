@@ -5,6 +5,7 @@ from pyspark.sql import DataFrame
 from odap.feature_factory.metadata_schema import (
     DESCRIPTION,
     DESCRIPTION_TEMPLATE,
+    EXTRA,
     FEATURE,
     FEATURE_TEMPLATE,
     FeatureMetadataType,
@@ -57,6 +58,7 @@ def resolve_placeholders(
 
     new_metadata[FEATURE] = new_metadata[FEATURE_TEMPLATE].format(**placeholder_to_value_dict)
     new_metadata[DESCRIPTION] = resolve_description(new_metadata[DESCRIPTION_TEMPLATE], placeholder_to_value_dict)
+    new_metadata[EXTRA] = placeholder_to_value_dict
 
     return new_metadata
 

@@ -1,4 +1,4 @@
-from typing import List
+from typing import Any, Dict, List
 from pyspark.sql import DataFrame, SparkSession
 from odap.common.databricks_context import resolve_dbutils
 from odap.common.exceptions import InvalidNoteboookException
@@ -56,3 +56,8 @@ def create_dataframe_from_notebook_cells(notebook_path: str, notebook_cells: Lis
         raise InvalidNoteboookException(f"Notebook at '{notebook_path}' could not be loaded")
 
     return df
+
+
+def create_dataframe(data: Dict[str, Any], schema) -> DataFrame:
+    spark = SparkSession.getActiveSession()  # pylint: disable=W0641
+    return spark.createDataFrame(data, schema)
