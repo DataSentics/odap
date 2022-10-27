@@ -50,4 +50,4 @@ def write_df_to_feature_store(
 
     create_feature_store_table(fs, df, table_name, table_path, primary_keys, partition_columns)
 
-    fs.write_table(table_name, df=df, mode="overwrite")
+    fs.write_table(table_name, df=df, mode="merge")
