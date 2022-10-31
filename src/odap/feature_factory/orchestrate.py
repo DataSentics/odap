@@ -19,7 +19,7 @@ def orchestrate():
 
     dataframes, metadata = create_dataframes_and_metadata()
 
-    set_fs_compatible_metadata(metadata, metadata_table=get_metadata_table(config))
+    set_fs_compatible_metadata(metadata, config)
 
     df = join_dataframes(dataframes, join_columns=[entity_primary_key])
     metadata_df = create_dataframe(metadata, get_metadata_schema())

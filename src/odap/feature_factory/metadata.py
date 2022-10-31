@@ -1,10 +1,13 @@
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 from datetime import datetime
 
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import col
+from odap.common.config import TIMESTAMP_COLUMN
+from odap.common.databricks_context import get_widget_value
 from odap.common.tables import get_existing_table
 from odap.common.utils import get_notebook_name, get_relative_path
+from odap.feature_factory.config import get_features_table, get_metadata_table
 from odap.feature_factory.exceptions import (
     MetadataParsingException,
     MissingMetadataException,
@@ -89,29 +92,35 @@ def get_global_metadata(raw_metadata: RawMetadataType, feature_path: str) -> Fea
     return raw_metadata
 
 
-def get_feature_start_date(existing_metadata_df: Optional[DataFrame], feature_name: str) -> Dict[str, datetime]:
-    start_date = None
+def get_feature_dates(existing_metadata_df: Optional[DataFrame], feature_name: str) -> Dict[str, datetime]:
+    timestamp = datetime.fromisoformat(get_widget_value(TIMESTAMP_COLUMN))
+
+    start_date = timestamp
+    last_comput_date = timestamp
 
     if existing_metadata_df:
-        start_date = existing_metadata_df.select(START_DATE).filter(col(FEATURE) == feature_name).first()[START_DATE]
+        existing_dates = (
+            existing_metadata_df.select(START_DATE, LAST_COMPUTE_DATE).filter(col(FEATURE) == feature_name).first()
+        )
 
-    return {START_DATE: start_date or datetime.now()}
+        start_date = min(start_date, existing_dates[START_DATE])
+        last_comput_date = max(last_comput_date, existing_dates[LAST_COMPUTE_DATE])
+
+    return {LAST_COMPUTE_DATE: last_comput_date, START_DATE: start_date}
 
 
-def set_fs_compatible_metadata(features_metadata: FeaturesMetadataType, metadata_table: str):
-    existing_metadata_df = get_existing_table(metadata_table)
+def set_fs_compatible_metadata(features_metadata: FeaturesMetadataType, config: Dict[str, Any]):
+    existing_metadata_df = get_existing_table(get_metadata_table(config))
 
     for metadata in features_metadata:
-        metadata.update(get_feature_start_date(existing_metadata_df, metadata[FEATURE]))
-
+        metadata.update(get_feature_dates(existing_metadata_df, metadata[FEATURE]))
         metadata.update(
             {
                 OWNER: "unknown",
                 FREQUENCY: "daily",
-                LAST_COMPUTE_DATE: datetime.now(),
                 FILLNA_VALUE: "None",
                 FILLNA_VALUE_TYPE: "NoneType",
-                LOCATION: metadata_table,
+                LOCATION: get_features_table(config),
                 BACKEND: "delta_table",
             }
         )
