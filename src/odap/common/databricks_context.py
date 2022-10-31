@@ -24,3 +24,9 @@ def get_host(dbutils: DBUtils) -> str:
 
 def get_token(dbutils: DBUtils) -> str:
     return dbutils.notebook.entry_point.getDbutils().notebook().getContext().apiToken().get()
+
+
+def get_widget_value(widget_name: str):
+    dbutils = resolve_dbutils()
+
+    return dbutils.widgets.get(widget_name)

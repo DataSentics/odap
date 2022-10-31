@@ -91,6 +91,7 @@ def test_metadata_integration(mocker):
     expected_metadata = [
         {
             "feature": feature,
+            "extra": {"product": feature.split("_")[0], "time_window": feature.split("_")[-1]},
             "description": description,
             "feature_template": f_template,
             "description_template": d_template,
@@ -100,6 +101,7 @@ def test_metadata_integration(mocker):
             "notebook_name": "feature",
             "notebook_absolute_path": FEATURE_PATH,
             "notebook_relative_path": RELATIVE_PATH,
+            "variable_type": "numerical",
         }
         for feature, description, f_template, d_template in variable_metadata
     ]
