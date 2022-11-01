@@ -3,9 +3,7 @@ import re
 
 import pyspark.sql.types as t
 from pyspark.sql import DataFrame
-from odap.feature_factory.exceptions import (
-    FeatureNotPresentInDataframeException,
-)
+from odap.feature_factory.exceptions import NotebookException
 
 FEATURE = "feature"
 DESCRIPTION = "description"
@@ -85,14 +83,12 @@ def get_metadata_schema():
     )
 
 
-def get_feature_field(feature_df: DataFrame, feature_name: str) -> t.StructField:
+def get_feature_field(feature_df: DataFrame, feature_name: str, feature_path: str) -> t.StructField:
     for field in feature_df.schema.fields:
         if field.name == feature_name:
             return field
 
-    raise FeatureNotPresentInDataframeException(
-        f"Feature {feature_name} from metadata isn't present in it's DataFrame!"
-    )
+    raise NotebookException(f"Feature {feature_name} from metadata isn't present in it's DataFrame!", feature_path)
 
 
 def normalize_dtype(dtype: str) -> str:

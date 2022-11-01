@@ -1,7 +1,7 @@
 import pytest
 
 import pyspark.sql.types as t
-from odap.feature_factory.exceptions import MetadataParsingException, MissingMetadataException
+from odap.feature_factory.exceptions import NotebookException
 from odap.feature_factory.metadata import (
     check_metadata,
     extract_raw_metadata_from_cells,
@@ -23,7 +23,7 @@ FEATURE_PATH = BASE_PATH + RELATIVE_PATH
 
 
 def test_check_metadata():
-    with pytest.raises(MetadataParsingException):
+    with pytest.raises(NotebookException):
         check_metadata({"unknown_column": "value"}, FEATURE_PATH)
 
     correct_metadata = {field: "val" for field in get_metadata_schema().fieldNames()}
@@ -32,7 +32,7 @@ def test_check_metadata():
 
 def test_missing_metadata_header():
     cells = ["cell1", "# NoMetadataHere", "cell2"]
-    with pytest.raises(MissingMetadataException):
+    with pytest.raises(NotebookException):
         extract_raw_metadata_from_cells(cells, FEATURE_PATH)
 
 

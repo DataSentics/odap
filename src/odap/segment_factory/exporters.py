@@ -2,15 +2,14 @@ import re
 from typing import Callable, Dict
 from pyspark.sql import DataFrame
 from odap.common.utils import get_absolute_path, import_file
-from odap.common.databricks_context import get_workspace_api, resolve_dbutils
+from odap.common.databricks_context import get_workspace_api
 
 ExportersMap = Dict[str, str]
 ExportFn = Callable[[str, DataFrame, Dict, Dict], None]
 
 
 def load_exporters_map() -> ExportersMap:
-    dbutils = resolve_dbutils()
-    workspace_api = get_workspace_api(dbutils)
+    workspace_api = get_workspace_api()
     exporters_path = get_absolute_path("exporters")
 
     exporters = {}
