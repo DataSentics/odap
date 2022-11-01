@@ -17,7 +17,7 @@ def orchestrate():
     config = get_config_namespace(ConfigNamespace.FEATURE_FACTORY)
     entity_primary_key = get_entity_primary_key(config)
 
-    dataframes, metadata = create_dataframes_and_metadata()
+    dataframes, metadata = create_dataframes_and_metadata(entity_primary_key)
 
     set_fs_compatible_metadata(metadata, config)
 

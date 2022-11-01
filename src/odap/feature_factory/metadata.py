@@ -8,10 +8,7 @@ from odap.common.databricks_context import get_widget_value
 from odap.common.tables import get_existing_table
 from odap.common.utils import get_notebook_name, get_relative_path
 from odap.feature_factory.config import get_features_table, get_metadata_table
-from odap.feature_factory.exceptions import (
-    MetadataParsingException,
-    MissingMetadataException,
-)
+from odap.feature_factory.exceptions import NotebookException
 from odap.feature_factory.templates import resolve_metadata_template
 from odap.feature_factory.metadata_schema import (
     BACKEND,
@@ -56,9 +53,9 @@ def set_notebook_paths(feature_path: str, global_metadata_dict: FeatureMetadataT
     global_metadata_dict[NOTEBOOK_RELATIVE_PATH] = get_relative_path(feature_path)
 
 
-def set_features_types(feature_df: DataFrame, parsed_features: FeaturesMetadataType):
+def set_features_types(feature_df: DataFrame, parsed_features: FeaturesMetadataType, feature_path: str):
     for parsed_feature in parsed_features:
-        feature_field = get_feature_field(feature_df, parsed_feature[FEATURE])
+        feature_field = get_feature_field(feature_df, parsed_feature[FEATURE], feature_path)
 
         parsed_feature[DTYPE] = get_feature_dtype(feature_field)
         parsed_feature[VARIABLE_TYPE] = get_variable_type(parsed_feature[DTYPE])
@@ -68,7 +65,7 @@ def get_features_from_raw_metadata(raw_metadata: RawMetadataType, feature_path: 
     raw_features = raw_metadata.pop("features", None)
 
     if not raw_features:
-        MetadataParsingException(f"No features provided in metadata. Feature: '{feature_path}'")
+        NotebookException("No features provided in metadata.", feature_path)
 
     for feature_name, value_dict in raw_features.items():
         value_dict[FEATURE] = feature_name
@@ -79,7 +76,7 @@ def get_features_from_raw_metadata(raw_metadata: RawMetadataType, feature_path: 
 def check_metadata(metadata: FeatureMetadataType, feature_path: str):
     for field in metadata:
         if field not in get_metadata_schema().fieldNames():
-            raise MetadataParsingException(f"{field} is not a supported metadata field. Feature path: {feature_path}")
+            raise NotebookException(f"{field} is not a supported metadata field.", feature_path)
 
     return metadata
 
@@ -139,7 +136,7 @@ def resolve_metadata(raw_metadata: RawMetadataType, feature_path: str, feature_d
 
         parsed_metadata.extend(resolve_metadata_template(feature_df, feature_metadata))
 
-    set_features_types(feature_df, parsed_metadata)
+    set_features_types(feature_df, parsed_metadata, feature_path)
 
     return parsed_metadata
 
@@ -151,7 +148,7 @@ def get_metadata_dict(cell: str, feature_path: str):
     try:
         return eval("metadata")  # pylint: disable=W0123
     except NameError as e:
-        raise MissingMetadataException(f"Metadata not provided for feature {feature_path}") from e
+        raise NotebookException("Metadata not provided.", feature_path) from e
 
 
 def extract_raw_metadata_from_cells(cells: List[str], feature_path: str) -> RawMetadataType:
@@ -163,4 +160,4 @@ def extract_raw_metadata_from_cells(cells: List[str], feature_path: str) -> RawM
 
             return get_metadata_dict(metadata_string, feature_path)
 
-    raise MissingMetadataException(f"Metadata not provided for feature {feature_path}")
+    raise NotebookException("Metadata not provided.", feature_path)

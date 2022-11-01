@@ -13,7 +13,9 @@ def resolve_dbutils() -> DBUtils:
     return ipython.user_ns["dbutils"]
 
 
-def get_workspace_api(dbutils: DBUtils) -> WorkspaceApi:
+def get_workspace_api() -> WorkspaceApi:
+    dbutils = resolve_dbutils()
+
     api_client = ApiClient(host=get_host(dbutils), token=get_token(dbutils))
     return WorkspaceApi(api_client)
 

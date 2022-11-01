@@ -1,10 +1,4 @@
-class MissingMetadataException(Exception):
-    pass
-
-
-class MetadataParsingException(Exception):
-    pass
-
-
-class FeatureNotPresentInDataframeException(Exception):
-    pass
+class NotebookException(Exception):
+    def __init__(self, message, feature):
+        message = f"{message} At Feature: {feature}"
+        super().__init__(message)
