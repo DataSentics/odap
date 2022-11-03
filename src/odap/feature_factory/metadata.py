@@ -4,7 +4,7 @@ from datetime import datetime
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import col
 from odap.common.config import TIMESTAMP_COLUMN
-from odap.common.databricks_context import get_widget_value
+from odap.common.databricks import get_widget_value
 from odap.common.tables import get_existing_table
 from odap.common.utils import get_notebook_name, get_relative_path
 from odap.feature_factory.config import get_features_table, get_metadata_table

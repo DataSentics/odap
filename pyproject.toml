@@ -44,6 +44,7 @@ disable = [
     "line-too-long",
     "too-many-arguments",
     "too-few-public-methods",
+    "logging-fstring-interpolation"
 ]
 good-names = ["e", "i", "k", "n", "f", "v", "df", "sc", "fs"]
 

@@ -4,8 +4,9 @@ from pyspark.sql import DataFrame, functions as f
 from pyspark.sql.window import Window
 from databricks_cli.workspace.api import WorkspaceApi
 
+from odap.common.logger import logger
 from odap.common.config import TIMESTAMP_COLUMN
-from odap.common.databricks_context import get_workspace_api
+from odap.common.databricks import get_workspace_api
 from odap.common.dataframes import create_dataframe_from_notebook_cells
 from odap.common.utils import get_notebook_cells
 from odap.feature_factory.exceptions import NotebookException
@@ -54,7 +55,7 @@ def create_dataframes_and_metadata(
         df, feature_metadata = create_dataframe_and_metadata(feature_path, workspace_api)
         check_feature_df(df, entity_primary_key, feature_metadata, feature_path)
 
-        print(f"Feature {feature_path} successfully loaded.")
+        logger.info(f"Feature {feature_path} successfully loaded.")
 
         dataframes.append(df)
         metadata.extend(feature_metadata)
@@ -68,7 +69,7 @@ def join_dataframes(dataframes: List[DataFrame], join_columns: List[str]) -> Dat
     union_df = reduce(lambda df1, df2: df1.unionByName(df2, allowMissingColumns=True), dataframes)
     columns = [col for col in union_df.columns if col not in join_columns]
 
-    print(f"Joining {len(dataframes)} dataframes...")
+    logger.info(f"Joining {len(dataframes)} dataframes...")
     joined_df = (
         union_df.select(
             *join_columns,
@@ -77,6 +78,6 @@ def join_dataframes(dataframes: List[DataFrame], join_columns: List[str]) -> Dat
         .groupBy(join_columns)
         .agg(*[f.first(column).alias(column) for column in columns])
     )
-    print("Join successful.")
+    logger.info("Join successful.")
 
     return joined_df

@@ -1,5 +1,5 @@
 from pyspark.sql import DataFrame
-from odap.common.databricks_context import get_workspace_api
+from odap.common.databricks import get_workspace_api
 from odap.common.dataframes import create_dataframe_from_notebook_cells
 from odap.common.utils import get_absolute_path, get_notebook_cells
 from odap.segment_factory.exceptions import SegmentNotFoundException
