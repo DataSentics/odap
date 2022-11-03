@@ -1,10 +1,3 @@
-from typing import Dict
-from odap.common.config import TIMESTAMP_COLUMN
-from odap.feature_factory.metadata_schema import LAST_COMPUTE_DATE
-from odap.segment_factory.config import get_export, get_segment
-from odap.segment_factory.exporters import resolve_exporter
-from odap.segment_factory.logs import write_export_log
-from odap.segment_factory.segments import create_segment_df
 from typing import Any, Dict
 from pyspark.sql import DataFrame, SparkSession, functions as f
 from odap.feature_factory.config import (
@@ -12,6 +5,13 @@ from odap.feature_factory.config import (
     get_features_table_by_entity_name,
     get_metadata_table_by_entity_name,
 )
+from odap.common.config import TIMESTAMP_COLUMN
+from odap.feature_factory.metadata_schema import LAST_COMPUTE_DATE
+from odap.segment_factory.config import get_export, get_segment
+from odap.segment_factory.exporters import resolve_exporter
+from odap.segment_factory.logs import write_export_log
+from odap.segment_factory.segments import create_segment_df
+from odap.common.logger import logger
 
 
 def create_leatest_features_df(entity_name: str, feature_factory_config: Dict):
@@ -46,7 +46,10 @@ def select_attributes(df: DataFrame, export_config: Any):
     return df.select(*select_columns)
 
 
+# pylint: disable=too-many-statements
 def run_export(segment_name: str, export_name: str, feature_factory_config: Dict, segment_factory_config: Dict):
+    logger.info(f"Exporting '{segment_name}' segment to '{export_name}'...")
+
     segment_config = get_segment(segment_name, segment_factory_config)
     export_config = get_export(export_name, segment_factory_config)
 
@@ -58,3 +61,4 @@ def run_export(segment_name: str, export_name: str, feature_factory_config: Dict
     exporter_fce(segment_name, final_export_df, segment_config, export_config)
 
     write_export_log(segment_df, segment_name, export_name, segment_factory_config)
+    logger.info("Export successful.")

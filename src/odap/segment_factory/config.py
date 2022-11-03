@@ -1,6 +1,6 @@
 from typing import Dict, Any, List, Tuple
 from odap.common.config import ConfigNamespace
-from odap.common.exceptions import ConfigAttributeMissingException, InvalidConfigAttributException
+from odap.common.exceptions import ConfigAttributeMissingException
 
 
 SEGMENT_FACTORY = ConfigNamespace.SEGMENT_FACTORY.value

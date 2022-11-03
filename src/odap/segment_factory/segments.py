@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Dict
 from pyspark.sql import DataFrame
+from odap.common.logger import logger
 from odap.common.databricks import get_workspace_api
 from odap.common.dataframes import create_dataframe, create_dataframe_from_notebook_cells
 from odap.common.utils import get_absolute_path, get_notebook_cells
@@ -17,11 +18,13 @@ def write_segment(
     timestamp: datetime,
     segment_factory_config: Dict,
 ):
+
     extended_segment_df = create_dataframe(
         [[export_id, timestamp, export_name]], get_segment_common_fields_schema()
     ).join(df, how="full")
 
     table = get_segment_table(segment_name, segment_factory_config)
+    logger.info(f"Writing segment to table: '{table}'")
     (
         extended_segment_df.write.format("delta")
         .mode("append")

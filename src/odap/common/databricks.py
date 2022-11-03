@@ -1,18 +1,18 @@
 import IPython
 from pyspark.dbutils import DBUtils
+from pyspark.sql import SparkSession
 from databricks_cli.workspace.api import WorkspaceApi
 from databricks_cli.repos.api import ReposApi
-from pyspark.sql import SparkSession
 from databricks_cli.sdk.api_client import ApiClient
 
 
 def resolve_dbutils() -> DBUtils:
     ipython = IPython.get_ipython()
 
-    if not hasattr(ipython, "user_ns") or "dbutils" not in ipython.user_ns:
+    if not hasattr(ipython, "user_ns") or "dbutils" not in ipython.user_ns:  # type: ignore
         raise Exception("dbutils cannot be resolved")
 
-    return ipython.user_ns["dbutils"]
+    return ipython.user_ns["dbutils"]  # type: ignore
 
 
 def get_workspace_api() -> WorkspaceApi:
