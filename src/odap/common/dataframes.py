@@ -20,23 +20,18 @@ def get_python_dataframe(notebook_cells: List[str], notebook_path: str) -> DataF
         raise InvalidNoteboookException(f"{PYTHON_DF_NAME} missing in {notebook_path}") from e
 
 
-def remove_create_widget_cells(cells: List[str]):
-    for cell in cells[:]:
-        if "create widget" in cell:
-            cells.remove(cell)
+def remove_blacklisted_cells(cells: List[str]):
+    blacklist = [METADATA_HEADER, "create widget", "%run"]
 
-
-def remove_metadata_cells(cells: List[str]):
     for cell in cells[:]:
-        if METADATA_HEADER in cell:
+        if any(blacklisted_str in cell for blacklisted_str in blacklist):
             cells.remove(cell)
 
 
 def get_sql_dataframe(notebook_cells: List[str]) -> DataFrame:
     spark = SparkSession.getActiveSession()
 
-    remove_create_widget_cells(notebook_cells)
-    remove_metadata_cells(notebook_cells)
+    remove_blacklisted_cells(notebook_cells)
 
     df_command = notebook_cells.pop()
 
