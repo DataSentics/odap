@@ -1,8 +1,9 @@
 import os
 from typing import List
 
-from odap.common.config import ConfigNamespace, get_config_namespace
-from odap.common.databricks_context import get_widget_value, get_workspace_api, resolve_dbutils
+from odap.common.logger import logger
+from odap.common.config import ConfigNamespace, get_config_namespace, TIMESTAMP_COLUMN
+from odap.common.databricks import get_widget_value, get_workspace_api, resolve_dbutils
 from odap.common.dataframes import create_dataframe
 from odap.common.utils import get_absolute_path, get_notebook_name
 from odap.feature_factory.config import get_entity_primary_key
@@ -38,9 +39,9 @@ def dry_run():
     metadata_df = create_dataframe(metadata, get_metadata_schema())
 
     if len(dataframes) > 1:
-        join_dataframes(dataframes, join_columns=[entity_primary_key])
+        join_dataframes(dataframes, join_columns=[entity_primary_key, TIMESTAMP_COLUMN])
 
-    print("Success. No errors found!\nMetadata Table:")
+    logger.info("Success. No errors found!\nMetadata Table:")
 
     metadata_df.display()
 

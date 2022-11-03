@@ -1,6 +1,6 @@
 from typing import Any, Dict, List
 from pyspark.sql import DataFrame, SparkSession
-from odap.common.databricks_context import resolve_dbutils
+from odap.common.databricks import resolve_dbutils
 from odap.common.exceptions import InvalidNoteboookException
 from odap.common.utils import join_python_notebook_cells
 from odap.feature_factory.metadata import METADATA_HEADER

@@ -21,7 +21,7 @@ def orchestrate():
 
     set_fs_compatible_metadata(metadata, config)
 
-    df = join_dataframes(dataframes, join_columns=[entity_primary_key])
+    df = join_dataframes(dataframes, join_columns=[entity_primary_key, TIMESTAMP_COLUMN])
     metadata_df = create_dataframe(metadata, get_metadata_schema())
 
     write_df_to_feature_store(

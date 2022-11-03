@@ -2,7 +2,7 @@ import re
 from typing import Callable, Dict
 from pyspark.sql import DataFrame
 from odap.common.utils import get_absolute_path, import_file
-from odap.common.databricks_context import get_workspace_api
+from odap.common.databricks import get_workspace_api
 
 ExportersMap = Dict[str, str]
 ExportFn = Callable[[str, DataFrame, Dict, Dict], None]

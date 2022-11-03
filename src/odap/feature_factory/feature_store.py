@@ -2,6 +2,7 @@ from typing import List, Union
 from pyspark.sql import SparkSession, DataFrame
 from databricks.feature_store import FeatureStoreClient
 
+from odap.common.logger import logger
 from odap.common.tables import hive_table_exists
 
 
@@ -41,6 +42,6 @@ def write_df_to_feature_store(
 
     create_feature_store_table(fs, df, table_name, table_path, primary_keys, partition_columns)
 
-    print(f"Writing data to table: {table_name}...")
+    logger.info(f"Writing data to table: {table_name}...")
     fs.write_table(table_name, df=df, mode="merge")
-    print("Write successful.")
+    logger.info("Write successful.")
