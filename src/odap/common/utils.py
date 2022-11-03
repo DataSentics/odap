@@ -3,8 +3,9 @@ import sys
 import re
 import importlib
 from base64 import b64decode
-from typing import List
+from typing import Dict, List
 from databricks_cli.workspace.api import WorkspaceApi
+from databricks_cli.repos.api import ReposApi
 
 SQL_CELL_DIVIDER = "-- COMMAND ----------"
 PYTHON_CELL_DIVIDER = "# COMMAND ----------"
@@ -56,3 +57,8 @@ def import_file(module_name: str, file_path: str):
     sys.modules[spec.name] = module  # pyre-ignore[16]
     spec.loader.exec_module(module)  # pyre-ignore[16]
     return importlib.import_module(module_name)
+
+
+def get_repository_info(workspace_api: WorkspaceApi, repos_api: ReposApi) -> Dict[str, str]:
+    workspace_status = workspace_api.get_status(workspace_path=get_repository_root_api_path())
+    return repos_api.get(workspace_status.object_id)

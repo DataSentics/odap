@@ -63,6 +63,15 @@ def get_features_table_by_entity_name(entity_name: str, config: Dict[str, Any]) 
     return features_table.format(entity=entity_name)
 
 
+def get_metadata_table_by_entity_name(entity_name: str, config: Dict[str, Any]) -> str:
+    metadata_table: str = get_metadata(config).get("table")
+
+    if not metadata_table:
+        raise ConfigAttributeMissingException("metadata.table not defined in config.yaml")
+
+    return metadata_table.format(entity=entity_name)
+
+
 def get_features_table(config: Dict[str, Any]) -> str:
     features_table = get_features(config).get("table")
 

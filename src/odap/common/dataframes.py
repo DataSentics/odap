@@ -53,6 +53,6 @@ def create_dataframe_from_notebook_cells(notebook_path: str, notebook_cells: Lis
     return df
 
 
-def create_dataframe(data: Dict[str, Any], schema) -> DataFrame:
+def create_dataframe(data: List[Dict[str, Any]] | List[List[Any]], schema) -> DataFrame:
     spark = SparkSession.getActiveSession()  # pylint: disable=W0641
     return spark.createDataFrame(data, schema)
