@@ -17,7 +17,6 @@ def resolve_dbutils() -> DBUtils:
 
 def get_workspace_api() -> WorkspaceApi:
     dbutils = resolve_dbutils()
-    dbutils = resolve_dbutils()
 
     api_client = ApiClient(host=get_host(), token=get_token(dbutils))
     return WorkspaceApi(api_client)

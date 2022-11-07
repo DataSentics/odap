@@ -20,15 +20,15 @@ def write_segment(
 ):
 
     extended_segment_df = create_dataframe(
-        [[export_id, timestamp, export_name]], get_segment_common_fields_schema()
+        [[export_id, timestamp, segment_name, export_name]], get_segment_common_fields_schema()
     ).join(df, how="full")
 
-    table = get_segment_table(segment_name, segment_factory_config)
+    table = get_segment_table(segment_factory_config)
     logger.info(f"Writing segment to table: '{table}'")
     (
         extended_segment_df.write.format("delta")
         .mode("append")
-        .option("path", get_segment_table_path(segment_name, segment_factory_config))
+        .option("path", get_segment_table_path(segment_factory_config))
         .saveAsTable(table)
     )
     return table

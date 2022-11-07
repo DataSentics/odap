@@ -4,40 +4,39 @@ from odap.common.exceptions import ConfigAttributeMissingException
 
 
 SEGMENT_FACTORY = ConfigNamespace.SEGMENT_FACTORY.value
-EXPORT_LOGS_TABLE = "export_logs"
 Config = Dict[str, Any]
 
 
-def get_segment_table(segment: str, config: Config) -> str:
+def get_segment_table(config: Config) -> str:
     segment_table = config.get("segment", {}).get("table")
 
     if not segment_table:
         raise ConfigAttributeMissingException(f"'{SEGMENT_FACTORY}.segment.table' not defined in config.yaml")
-    return str(segment_table).format(segment=segment)
+    return segment_table
 
 
-def get_segment_table_path(segment: str, config: Config) -> str:
+def get_segment_table_path(config: Config) -> str:
     segment_path = config.get("segment", {}).get("path")
 
     if not segment_path:
         raise ConfigAttributeMissingException(f"'{SEGMENT_FACTORY}.segment.path' not defined in config.yaml")
-    return str(segment_path).format(segment=segment)
+    return segment_path
 
 
-def get_log_table(log: str, config: Config) -> str:
+def get_log_table(config: Config) -> str:
     log_table = config.get("log", {}).get("table")
 
     if not log_table:
         raise ConfigAttributeMissingException(f"'{SEGMENT_FACTORY}.log.table' not defined in config.yaml")
-    return str(log_table).format(log=log)
+    return log_table
 
 
-def get_log_table_path(log: str, config: Config) -> str:
+def get_log_table_path(config: Config) -> str:
     log_path = config.get("log", {}).get("path")
 
     if not log_path:
         raise ConfigAttributeMissingException(f"'{SEGMENT_FACTORY}.log_path' not defined in config.yaml")
-    return str(log_path).format(log=log)
+    return log_path
 
 
 def get_segments(config: Config) -> Dict[str, Any]:
