@@ -5,7 +5,7 @@ from odap.feature_factory.exceptions import WrongFillnaValueTypeError
 
 def is_fillna_valid(dtype: str, value, feature_name: str):
     if (
-        (is_feature_bool(dtype) and not is_value_bool(value))
+        (is_feature_bool(dtype) and not is_value_bool(value))  # pylint: disable=too-many-boolean-expressions
         or (is_feature_numeric(dtype) and not is_value_numeric(value))
         or (is_feature_string(dtype) and not is_value_string(value))
         or (is_feature_datetime(dtype) and not is_value_datetime(value))

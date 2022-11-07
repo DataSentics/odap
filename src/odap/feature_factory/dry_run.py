@@ -39,7 +39,11 @@ def dry_run():
 
     metadata_df = create_dataframe(metadata, get_metadata_schema())
 
-    join_and_display_dataframe_table(dataframes, entity_primary_key)
+    final_df = join_dataframes(dataframes, join_columns=[entity_primary_key, TIMESTAMP_COLUMN])
+
+    logger.info("Success. No errors found!")
+
+    display_dataframe_table(final_df)
     display_metadata_df(metadata_df)
 
 
@@ -48,14 +52,8 @@ def display_metadata_df(metadata_df: DataFrame):
     metadata_df.display()  # pyre-ignore[29]
 
 
-def join_and_display_dataframe_table(dataframes: List[DataFrame], entity_primary_key: str):
-    if len(dataframes) > 1:
-        final_df = join_dataframes(dataframes, join_columns=[entity_primary_key, TIMESTAMP_COLUMN])
-    else:
-        final_df = dataframes[0]
-
-    logger.info("Success. No errors found!\n\nFeatures Dataframe:")
-
+def display_dataframe_table(final_df: DataFrame):
+    print("\nFeatures Dataframe:")
     final_df.display()  # pyre-ignore[29]
 
 

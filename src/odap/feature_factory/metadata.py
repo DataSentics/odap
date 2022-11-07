@@ -9,7 +9,7 @@ from odap.common.tables import get_existing_table
 from odap.common.utils import get_notebook_name, get_relative_path
 from odap.feature_factory.config import get_features_table, get_metadata_table
 from odap.feature_factory.exceptions import NotebookException
-from odap.feature_factory.templates import resolve_metadata_template
+from odap.feature_factory.templates import resolve_metadata_templates
 from odap.feature_factory.type_checker import is_fillna_valid
 from odap.feature_factory.metadata_schema import (
     BACKEND,
@@ -55,18 +55,6 @@ def set_notebook_paths(feature_path: str, global_metadata_dict: FeatureMetadataT
     global_metadata_dict[NOTEBOOK_RELATIVE_PATH] = get_relative_path(feature_path)
 
 
-def set_metadata_that_need_template_resolved(
-    feature_df: DataFrame, parsed_features: FeaturesMetadataType, feature_path: str
-):
-    for parsed_feature in parsed_features:
-        feature_field = get_feature_field(feature_df, parsed_feature[FEATURE], feature_path)
-
-        parsed_feature[DTYPE] = get_feature_dtype(feature_field)
-        parsed_feature[VARIABLE_TYPE] = get_variable_type(parsed_feature[DTYPE])
-
-        resolve_fillna_with(parsed_feature)
-
-
 def get_features_from_raw_metadata(raw_metadata: RawMetadataType, feature_path: str) -> FeaturesMetadataType:
     raw_features = raw_metadata.pop("features", None)
 
@@ -85,11 +73,6 @@ def check_metadata(metadata: FeatureMetadataType, feature_path: str):
             raise NotebookException(f"{field} is not a supported metadata field.", feature_path)
 
     return metadata
-
-
-def check_all_metadata(features_metadata: FeaturesMetadataType, feature_path: str):
-    for metadata in features_metadata:
-        check_metadata(metadata, feature_path)
 
 
 def get_global_metadata(raw_metadata: RawMetadataType, feature_path: str) -> FeatureMetadataType:
@@ -146,19 +129,21 @@ def resolve_fillna_with(feature_metadata: FeatureMetadataType):
 
 
 def resolve_metadata(raw_metadata: RawMetadataType, feature_path: str, feature_df: DataFrame) -> FeaturesMetadataType:
-    features_metadata = []
-
     features = get_features_from_raw_metadata(raw_metadata, feature_path)
     global_metadata = get_global_metadata(raw_metadata, feature_path)
 
-    for feature_metadata in features:
-        feature_metadata.update(global_metadata)
+    features_metadata = resolve_metadata_templates(feature_df, features)
 
-        features_metadata.extend(resolve_metadata_template(feature_df, feature_metadata))
+    for metadata in features_metadata:
+        metadata.update(global_metadata)
+        feature_field = get_feature_field(feature_df, metadata[FEATURE], feature_path)
 
-    set_metadata_that_need_template_resolved(feature_df, features_metadata, feature_path)
+        metadata[DTYPE] = get_feature_dtype(feature_field)
+        metadata[VARIABLE_TYPE] = get_variable_type(metadata[DTYPE])
 
-    check_all_metadata(features_metadata, feature_path)
+        resolve_fillna_with(metadata)
+
+        check_metadata(metadata, feature_path)
 
     return features_metadata
 
