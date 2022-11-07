@@ -10,6 +10,7 @@ from odap.common.utils import get_notebook_name, get_relative_path
 from odap.feature_factory.config import get_features_table, get_metadata_table
 from odap.feature_factory.exceptions import NotebookException
 from odap.feature_factory.templates import resolve_metadata_template
+from odap.feature_factory.type_checker import is_fillna_valid
 from odap.feature_factory.metadata_schema import (
     BACKEND,
     DTYPE,
@@ -25,6 +26,7 @@ from odap.feature_factory.metadata_schema import (
     OWNER,
     START_DATE,
     VARIABLE_TYPE,
+    FILLNA_WITH,
     FeatureMetadataType,
     FeaturesMetadataType,
     RawMetadataType,
@@ -53,12 +55,16 @@ def set_notebook_paths(feature_path: str, global_metadata_dict: FeatureMetadataT
     global_metadata_dict[NOTEBOOK_RELATIVE_PATH] = get_relative_path(feature_path)
 
 
-def set_features_types(feature_df: DataFrame, parsed_features: FeaturesMetadataType, feature_path: str):
+def set_metadata_that_need_template_resolved(
+    feature_df: DataFrame, parsed_features: FeaturesMetadataType, feature_path: str
+):
     for parsed_feature in parsed_features:
         feature_field = get_feature_field(feature_df, parsed_feature[FEATURE], feature_path)
 
         parsed_feature[DTYPE] = get_feature_dtype(feature_field)
         parsed_feature[VARIABLE_TYPE] = get_variable_type(parsed_feature[DTYPE])
+
+        resolve_fillna_with(parsed_feature)
 
 
 def get_features_from_raw_metadata(raw_metadata: RawMetadataType, feature_path: str) -> FeaturesMetadataType:
@@ -79,6 +85,11 @@ def check_metadata(metadata: FeatureMetadataType, feature_path: str):
             raise NotebookException(f"{field} is not a supported metadata field.", feature_path)
 
     return metadata
+
+
+def check_all_metadata(features_metadata: FeaturesMetadataType, feature_path: str):
+    for metadata in features_metadata:
+        check_metadata(metadata, feature_path)
 
 
 def get_global_metadata(raw_metadata: RawMetadataType, feature_path: str) -> FeatureMetadataType:
@@ -115,30 +126,41 @@ def set_fs_compatible_metadata(features_metadata: FeaturesMetadataType, config: 
             {
                 OWNER: "unknown",
                 FREQUENCY: "daily",
-                FILLNA_VALUE: "None",
-                FILLNA_VALUE_TYPE: "NoneType",
                 LOCATION: get_features_table(config),
                 BACKEND: "delta_table",
             }
         )
 
 
+def resolve_fillna_with(feature_metadata: FeatureMetadataType):
+    if FILLNA_WITH in feature_metadata:
+        fillna_with = feature_metadata.pop(FILLNA_WITH)
+
+        feature_metadata[FILLNA_VALUE] = fillna_with
+        feature_metadata[FILLNA_VALUE_TYPE] = type(fillna_with).__name__
+
+        is_fillna_valid(feature_metadata[DTYPE], fillna_with, feature_metadata[FEATURE])
+    else:
+        feature_metadata[FILLNA_VALUE] = "None"
+        feature_metadata[FILLNA_VALUE_TYPE] = "NoneType"
+
+
 def resolve_metadata(raw_metadata: RawMetadataType, feature_path: str, feature_df: DataFrame) -> FeaturesMetadataType:
-    parsed_metadata = []
+    features_metadata = []
 
     features = get_features_from_raw_metadata(raw_metadata, feature_path)
     global_metadata = get_global_metadata(raw_metadata, feature_path)
 
     for feature_metadata in features:
-        check_metadata(feature_metadata, feature_path)
-
         feature_metadata.update(global_metadata)
 
-        parsed_metadata.extend(resolve_metadata_template(feature_df, feature_metadata))
+        features_metadata.extend(resolve_metadata_template(feature_df, feature_metadata))
 
-    set_features_types(feature_df, parsed_metadata, feature_path)
+    set_metadata_that_need_template_resolved(feature_df, features_metadata, feature_path)
 
-    return parsed_metadata
+    check_all_metadata(features_metadata, feature_path)
+
+    return features_metadata
 
 
 def get_metadata_dict(cell: str, feature_path: str):

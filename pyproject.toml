@@ -44,7 +44,8 @@ disable = [
     "line-too-long",
     "too-many-arguments",
     "too-few-public-methods",
-    "logging-fstring-interpolation"
+    "logging-fstring-interpolation",
+    "too-many-boolean-expressions"
 ]
 good-names = ["e", "i", "k", "n", "f", "v", "df", "sc", "fs"]
 

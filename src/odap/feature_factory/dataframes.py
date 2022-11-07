@@ -12,7 +12,7 @@ from odap.common.utils import get_notebook_cells
 from odap.feature_factory.exceptions import NotebookException
 from odap.feature_factory.features import get_features_paths
 from odap.feature_factory.metadata import extract_raw_metadata_from_cells, resolve_metadata
-from odap.feature_factory.metadata_schema import FEATURE, FeaturesMetadataType
+from odap.feature_factory.metadata_schema import FEATURE, FeaturesMetadataType, FILLNA_VALUE
 
 
 def check_feature_df(df: DataFrame, entity_primary_key: str, metadata: FeaturesMetadataType, feature_path: str):
@@ -37,6 +37,8 @@ def create_dataframe_and_metadata(feature_path: str, workspace_api: WorkspaceApi
     feature_df = create_dataframe_from_notebook_cells(feature_path, notebook_cells)
 
     metadata = resolve_metadata(raw_metadata, feature_path, feature_df)
+
+    feature_df = fill_nulls(feature_df, metadata)
 
     return feature_df, metadata
 
@@ -81,3 +83,11 @@ def join_dataframes(dataframes: List[DataFrame], join_columns: List[str]) -> Dat
     logger.info("Join successful.")
 
     return joined_df
+
+
+def fill_nulls(df: DataFrame, features_metadata: FeaturesMetadataType) -> DataFrame:
+    fill_dict = {
+        feature[FEATURE]: feature[FILLNA_VALUE] for feature in features_metadata if feature[FILLNA_VALUE] is not None
+    }
+
+    return df.fillna(fill_dict)
