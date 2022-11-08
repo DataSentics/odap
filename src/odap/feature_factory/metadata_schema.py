@@ -26,6 +26,8 @@ NOTEBOOK_RELATIVE_PATH = "notebook_relative_path"
 LOCATION = "location"
 BACKEND = "backend"
 
+FILLNA_WITH = "fillna_with"
+
 RawMetadataType = Dict[str, Any]
 FeatureMetadataType = Dict[str, Any]
 FeaturesMetadataType = List[FeatureMetadataType]

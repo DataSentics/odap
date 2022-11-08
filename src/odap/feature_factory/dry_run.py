@@ -1,5 +1,6 @@
 import os
 from typing import List
+from pyspark.sql import DataFrame
 
 from odap.common.logger import logger
 from odap.common.config import ConfigNamespace, get_config_namespace, TIMESTAMP_COLUMN
@@ -38,12 +39,22 @@ def dry_run():
 
     metadata_df = create_dataframe(metadata, get_metadata_schema())
 
-    if len(dataframes) > 1:
-        join_dataframes(dataframes, join_columns=[entity_primary_key, TIMESTAMP_COLUMN])
+    final_df = join_dataframes(dataframes, join_columns=[entity_primary_key, TIMESTAMP_COLUMN])
 
-    logger.info("Success. No errors found!\nMetadata Table:")
+    logger.info("Success. No errors found!")
 
-    metadata_df.display()
+    display_dataframe_table(final_df)
+    display_metadata_df(metadata_df)
+
+
+def display_metadata_df(metadata_df: DataFrame):
+    print("\nMetadata Dataframe:")
+    metadata_df.display()  # pyre-ignore[29]
+
+
+def display_dataframe_table(final_df: DataFrame):
+    print("\nFeatures Dataframe:")
+    final_df.display()  # pyre-ignore[29]
 
 
 def create_notebook_widget():

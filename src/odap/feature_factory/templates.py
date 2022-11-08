@@ -91,3 +91,12 @@ def resolve_metadata_template(feature_df: DataFrame, feature_metadata: FeatureMe
         return [feature_metadata]
 
     return resolve_placeholders_on_df_columns(feature_df.columns, feature_metadata, placeholders)
+
+
+def resolve_metadata_templates(feature_df: DataFrame, features_metadata: FeaturesMetadataType) -> FeaturesMetadataType:
+    resolved_metadata = []
+
+    for metadata in features_metadata:
+        resolved_metadata.extend(resolve_metadata_template(feature_df, metadata))
+
+    return resolved_metadata
