@@ -1,18 +1,31 @@
 import pyspark.sql.types as t
 
+SEGMENT = "segment"
+EXPORT_ID = "export_id"
+TIMESTAMP = "timestamp"
+EXPORT = "export"
+DESTINATION = "destination"
+SEGMENTS = "segments"
+DESTINATION_CONFIG = "destination_config"
+SEGMENT_CONFIG = "segment_config"
+DESTINATION_TYPE = "destination_type"
+BRANCH = "branch"
+HEAD_COMMIT_ID = "head_commit_id"
+
 
 def get_export_schema():
     return t.StructType(
         [
-            t.StructField("export_id", t.StringType(), False),
-            t.StructField("timestamp", t.TimestampType(), False),
-            t.StructField("segment", t.StringType(), False),
-            t.StructField("export", t.StringType(), False),
-            t.StructField("segment_config", t.StringType(), False),
-            t.StructField("export_config", t.StringType(), False),
-            t.StructField("export_type", t.StringType(), False),
-            t.StructField("branch", t.StringType(), False),
-            t.StructField("head_commit_id", t.StringType(), False),
+            t.StructField(EXPORT_ID, t.StringType(), False),
+            t.StructField(TIMESTAMP, t.TimestampType(), False),
+            t.StructField(EXPORT, t.StringType(), False),
+            t.StructField(DESTINATION, t.StringType(), False),
+            t.StructField(SEGMENTS, t.ArrayType(t.StringType()), False),
+            t.StructField(DESTINATION_CONFIG, t.StringType(), False),
+            t.StructField(SEGMENT_CONFIG, t.StringType(), False),
+            t.StructField(DESTINATION_TYPE, t.StringType(), False),
+            t.StructField(BRANCH, t.StringType(), False),
+            t.StructField(HEAD_COMMIT_ID, t.StringType(), False),
         ]
     )
 
@@ -20,9 +33,6 @@ def get_export_schema():
 def get_segment_common_fields_schema():
     return t.StructType(
         [
-            t.StructField("export_id", t.StringType(), False),
-            t.StructField("timestamp", t.TimestampType(), False),
-            t.StructField("segment", t.StringType(), False),
-            t.StructField("export", t.StringType(), False),
+            t.StructField(EXPORT_ID, t.StringType(), False),
         ]
     )

@@ -1,4 +1,4 @@
-from typing import Dict, Any, List, Tuple
+from typing import Dict, Any
 from odap.common.config import ConfigNamespace
 from odap.common.exceptions import ConfigAttributeMissingException
 
@@ -39,66 +39,38 @@ def get_log_table_path(config: Config) -> str:
     return log_path
 
 
-def get_segments(config: Config) -> Dict[str, Any]:
-    segments_dict = config.get("segments", None)
-
-    if not segments_dict:
-        raise ConfigAttributeMissingException(f"'{SEGMENT_FACTORY}.segments' not defined in config.yaml")
-
-    return segments_dict
-
-
-def get_flatten_segments_exports(config) -> List[Tuple[str, str]]:
-    segments = get_segments(config)
-    return [(segment, export) for segment in segments for export in segments[segment]["exports"]]
-
-
-def get_segment(segment_name: str, config: Config) -> Dict[str, Any]:
-    segments_dict = get_segments(config)
-    segment_dict = segments_dict.get(segment_name, None)
-
-    if not segment_dict:
-        raise ConfigAttributeMissingException(f"Segment '{segment_name}' is not configured in config.yaml.")
-
-    return segment_dict
-
-
-def get_segments_exports(segment_name: str, config: Config) -> Dict[str, Any]:
-    segment_dict = get_segment(segment_name, config)
-    exports = segment_dict.get("exports", None)
-
-    if not exports:
-        raise ConfigAttributeMissingException(
-            f"Exports of the segment '{segment_name}' are not configured in config.yaml."
-        )
-
-    return exports
-
-
 def get_exports(config: Config) -> Dict[str, Any]:
-    exporters_dict = config.get("exports", None)
+    exports_dict = config.get("exports", None)
 
-    if not exporters_dict:
+    if not exports_dict:
         raise ConfigAttributeMissingException(f"'{SEGMENT_FACTORY}.exports' not defined in config.yaml")
 
-    return exporters_dict
+    return exports_dict
 
 
-# pylint: disable=too-many-statements
 def get_export(export_name: str, config: Config) -> Dict[str, Any]:
-    exports_dict = get_exports(config)
-    export_dict = exports_dict.get(export_name, None)
+    export_dict = get_exports(config).get(export_name, None)
 
     if not export_dict:
-        raise ConfigAttributeMissingException(f"The export '{export_name}' is not configured in config.yaml.")
-
-    if "type" not in export_dict:
-        raise ConfigAttributeMissingException(f"The export '{export_name}' must contain field 'type'.")
-
-    if "attributes" not in export_dict:
-        raise ConfigAttributeMissingException(f"The export '{export_name}' must contain field 'attributes'.")
-
-    if not isinstance(export_dict["attributes"], dict):
-        raise ConfigAttributeMissingException(f"'{export_name}.attributes' must be a dict.")
+        raise ConfigAttributeMissingException(f"Export '{export_name}' not defined in config.yaml.")
 
     return export_dict
+
+
+def get_destinations(config: Config) -> Dict[str, Any]:
+    destinations_dict = config.get("destinations", None)
+
+    if not destinations_dict:
+        raise ConfigAttributeMissingException(f"'{SEGMENT_FACTORY}.destinations' not defined in config.yaml")
+    return destinations_dict
+
+
+def get_destination(destination_name: str, config: Config) -> Dict[str, Any]:
+    destination_dict = get_destinations(config).get(destination_name)
+
+    if not destination_dict:
+        raise ConfigAttributeMissingException(
+            f"'{SEGMENT_FACTORY}.destinations.{destination_name}' not defined in config.yaml."
+        )
+
+    return destination_dict
