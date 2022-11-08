@@ -8,3 +8,7 @@ class InvalidConfigAttributException(Exception):
 
 class InvalidNoteboookException(Exception):
     pass
+
+
+class InvalidNotebookLanguageException(Exception):
+    pass

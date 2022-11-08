@@ -1,7 +1,7 @@
 from typing import Any, Dict, List, Union
 from pyspark.sql import DataFrame, SparkSession
 from odap.common.databricks import resolve_dbutils
-from odap.common.exceptions import InvalidNoteboookException
+from odap.common.exceptions import InvalidNoteboookException, InvalidNotebookLanguageException
 from odap.common.utils import join_python_notebook_cells
 from odap.feature_factory.metadata import METADATA_HEADER
 
@@ -14,6 +14,7 @@ def get_python_dataframe(notebook_cells: List[str], notebook_path: str) -> DataF
 
     notebook_content = join_python_notebook_cells(notebook_cells)
     exec(notebook_content, globals())  # pylint: disable=W0122
+
     try:
         return eval(PYTHON_DF_NAME)  # pylint: disable=W0123
     except NameError as e:
@@ -41,11 +42,17 @@ def get_sql_dataframe(notebook_cells: List[str]) -> DataFrame:
     return spark.sql(df_command)
 
 
-def create_dataframe_from_notebook_cells(notebook_path: str, notebook_cells: List[str]) -> DataFrame:
-    try:
+def create_dataframe_from_notebook_cells(
+    notebook_path: str, notebook_language: str, notebook_cells: List[str]
+) -> DataFrame:
+    if notebook_language == "PYTHON":
         df = get_python_dataframe(notebook_cells, notebook_path)
-    except SyntaxError:
+
+    elif notebook_language == "SQL":
         df = get_sql_dataframe(notebook_cells)
+
+    else:
+        raise InvalidNotebookLanguageException(f"Notebook language {notebook_language} is not supported")
 
     if not df:
         raise InvalidNoteboookException(f"Notebook at '{notebook_path}' could not be loaded")
