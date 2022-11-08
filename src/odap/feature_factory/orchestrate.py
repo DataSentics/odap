@@ -1,5 +1,6 @@
 from odap.common.config import TIMESTAMP_COLUMN, get_config_namespace, ConfigNamespace
 from odap.common.dataframes import create_dataframe
+from odap.common.databricks import get_workspace_api
 from odap.feature_factory.config import (
     get_entity_primary_key,
     get_features_table,
@@ -8,6 +9,7 @@ from odap.feature_factory.config import (
     get_metadata_table_path,
 )
 from odap.feature_factory.dataframes import create_dataframes_and_metadata, join_dataframes
+from odap.feature_factory.features import get_feature_notebooks_info
 from odap.feature_factory.feature_store import write_df_to_feature_store
 from odap.feature_factory.metadata import set_fs_compatible_metadata
 from odap.feature_factory.metadata_schema import get_metadata_schema
@@ -16,8 +18,9 @@ from odap.feature_factory.metadata_schema import get_metadata_schema
 def orchestrate():
     config = get_config_namespace(ConfigNamespace.FEATURE_FACTORY)
     entity_primary_key = get_entity_primary_key(config)
+    feature_notebooks = get_feature_notebooks_info(get_workspace_api())
 
-    dataframes, metadata = create_dataframes_and_metadata(entity_primary_key)
+    dataframes, metadata = create_dataframes_and_metadata(entity_primary_key, feature_notebooks)
 
     set_fs_compatible_metadata(metadata, config)
 

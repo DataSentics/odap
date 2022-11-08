@@ -1,8 +1,9 @@
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Tuple
 from functools import reduce
 from pyspark.sql import DataFrame, functions as f
 from pyspark.sql.window import Window
 from databricks_cli.workspace.api import WorkspaceApi
+from databricks_cli.workspace.api import WorkspaceFileInfo
 
 from odap.common.logger import logger
 from odap.common.config import TIMESTAMP_COLUMN
@@ -10,7 +11,6 @@ from odap.common.databricks import get_workspace_api
 from odap.common.dataframes import create_dataframe_from_notebook_cells
 from odap.common.utils import get_notebook_cells
 from odap.feature_factory.exceptions import NotebookException
-from odap.feature_factory.features import get_features_paths
 from odap.feature_factory.metadata import extract_raw_metadata_from_cells, resolve_metadata
 from odap.feature_factory.metadata_schema import FEATURE, FeaturesMetadataType, FILLNA_VALUE
 
@@ -29,14 +29,14 @@ def check_feature_df(df: DataFrame, entity_primary_key: str, metadata: FeaturesM
             raise NotebookException(f"Column '{column}' from final_df is missing in metadata!", feature_path)
 
 
-def create_dataframe_and_metadata(feature_path: str, workspace_api: WorkspaceApi):
-    notebook_cells = get_notebook_cells(feature_path, workspace_api)
+def create_dataframe_and_metadata(feature_notebook: WorkspaceFileInfo, workspace_api: WorkspaceApi):
+    notebook_cells = get_notebook_cells(feature_notebook.path, workspace_api)
 
-    raw_metadata = extract_raw_metadata_from_cells(notebook_cells, feature_path)
+    raw_metadata = extract_raw_metadata_from_cells(notebook_cells, feature_notebook.path)
 
-    feature_df = create_dataframe_from_notebook_cells(feature_path, notebook_cells)
+    feature_df = create_dataframe_from_notebook_cells(feature_notebook.path, feature_notebook.language, notebook_cells)
 
-    metadata = resolve_metadata(raw_metadata, feature_path, feature_df)
+    metadata = resolve_metadata(raw_metadata, feature_notebook.path, feature_df)
 
     feature_df = fill_nulls(feature_df, metadata)
 
@@ -44,20 +44,18 @@ def create_dataframe_and_metadata(feature_path: str, workspace_api: WorkspaceApi
 
 
 def create_dataframes_and_metadata(
-    entity_primary_key: str, features_paths: Optional[List[str]] = None
+    entity_primary_key: str, feature_notebooks: List[WorkspaceFileInfo]
 ) -> Tuple[List[DataFrame], List[Dict[str, Any]]]:
     workspace_api = get_workspace_api()
-
-    features_paths = features_paths or get_features_paths(workspace_api)
 
     dataframes = []
     metadata = []
 
-    for feature_path in features_paths:
-        df, feature_metadata = create_dataframe_and_metadata(feature_path, workspace_api)
-        check_feature_df(df, entity_primary_key, feature_metadata, feature_path)
+    for feature_notebook in feature_notebooks:
+        df, feature_metadata = create_dataframe_and_metadata(feature_notebook, workspace_api)
+        check_feature_df(df, entity_primary_key, feature_metadata, feature_notebook.path)
 
-        logger.info(f"Feature {feature_path} successfully loaded.")
+        logger.info(f"Feature {feature_notebook.path} successfully loaded.")
 
         dataframes.append(df)
         metadata.extend(feature_metadata)

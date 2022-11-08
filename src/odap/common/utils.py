@@ -5,6 +5,7 @@ import importlib
 from base64 import b64decode
 from typing import Dict, List
 from databricks_cli.workspace.api import WorkspaceApi
+from databricks_cli.workspace.api import WorkspaceFileInfo
 from databricks_cli.repos.api import ReposApi
 
 SQL_CELL_DIVIDER = "-- COMMAND ----------"
@@ -39,6 +40,10 @@ def get_notebook_cells(notebook_path: str, workspace_api: WorkspaceApi) -> List[
     return split_notebok_to_cells(decoded_content)
 
 
+def get_notebook_language(notebook_path: str, workspace_api: WorkspaceApi) -> str:
+    return workspace_api.get_status(notebook_path).language
+
+
 def split_notebok_to_cells(notebook_content):
     if SQL_CELL_DIVIDER in notebook_content:
         return notebook_content.split(SQL_CELL_DIVIDER)
@@ -62,3 +67,26 @@ def import_file(module_name: str, file_path: str):
 def get_repository_info(workspace_api: WorkspaceApi, repos_api: ReposApi) -> Dict[str, str]:
     workspace_status = workspace_api.get_status(workspace_path=get_repository_root_api_path())
     return repos_api.get(workspace_status.object_id)
+
+
+def list_notebooks(workspace_path: str, workspace_api: WorkspaceApi) -> List[WorkspaceFileInfo]:
+    return [obj for obj in list_objects(workspace_path, workspace_api) if obj.object_type == "NOTEBOOK"]
+
+
+def list_files(workspace_path: str, workspace_api: WorkspaceApi) -> List[WorkspaceFileInfo]:
+    return [obj for obj in list_objects(workspace_path, workspace_api) if obj.object_type == "FILE"]
+
+
+def list_objects(workspace_path: str, workspace_api: WorkspaceApi) -> List[WorkspaceFileInfo]:
+    objects_to_return = []
+
+    objects = workspace_api.list_objects(workspace_path)
+
+    for obj in objects:
+        if obj.is_dir:
+            objects_to_return += list_objects(obj.path, workspace_api)
+
+        else:
+            objects_to_return += [obj]
+
+    return objects_to_return
