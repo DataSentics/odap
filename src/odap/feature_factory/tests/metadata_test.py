@@ -97,6 +97,8 @@ def test_metadata_integration(mocker):
             "description_template": d_template,
             "dtype": "double",
             "category": "general",
+            "fillna_value": "None",
+            "fillna_value_type": "NoneType",
             "tags": ["tag1", "tag2", "tag3"],
             "notebook_name": "feature",
             "notebook_absolute_path": FEATURE_PATH,
