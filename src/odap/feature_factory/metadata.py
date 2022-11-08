@@ -62,7 +62,7 @@ def get_features_from_raw_metadata(raw_metadata: RawMetadataType, feature_path: 
         NotebookException("No features provided in metadata.", feature_path)
 
     for feature_name, value_dict in raw_features.items():
-        value_dict[FEATURE] = feature_name
+        value_dict[FEATURE] = feature_name.lower()
 
     return list(raw_features.values())
 

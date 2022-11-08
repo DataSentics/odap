@@ -57,7 +57,9 @@ def create_dataframe_from_notebook_cells(
     if not df:
         raise InvalidNoteboookException(f"Notebook at '{notebook_path}' could not be loaded")
 
-    return df
+    df_with_lower_columns = df.toDF(*[column.lower() for column in df.columns])
+
+    return df_with_lower_columns
 
 
 def create_dataframe(data: Union[List[Dict[str, Any]], List[List[Any]]], schema) -> DataFrame:
