@@ -2,8 +2,7 @@ from typing import Any, Dict, List, Union
 from pyspark.sql import DataFrame, SparkSession
 from odap.common.databricks import resolve_dbutils
 from odap.common.exceptions import InvalidNoteboookException, InvalidNotebookLanguageException
-from odap.common.utils import join_python_notebook_cells
-from odap.feature_factory.metadata import METADATA_HEADER
+from odap.common.notebook import remove_blacklisted_sql_cells, join_python_notebook_cells
 
 PYTHON_DF_NAME = "df_final"
 
@@ -21,18 +20,10 @@ def get_python_dataframe(notebook_cells: List[str], notebook_path: str) -> DataF
         raise InvalidNoteboookException(f"{PYTHON_DF_NAME} missing in {notebook_path}") from e
 
 
-def remove_blacklisted_cells(cells: List[str]):
-    blacklist = [METADATA_HEADER, "create widget", "%run"]
-
-    for cell in cells[:]:
-        if any(blacklisted_str in cell for blacklisted_str in blacklist):
-            cells.remove(cell)
-
-
 def get_sql_dataframe(notebook_cells: List[str]) -> DataFrame:
     spark = SparkSession.getActiveSession()
 
-    remove_blacklisted_cells(notebook_cells)
+    remove_blacklisted_sql_cells(notebook_cells)
 
     df_command = notebook_cells.pop()
 
