@@ -3,8 +3,9 @@ from pyspark.sql import DataFrame
 
 from databricks_cli.workspace.api import WorkspaceFileInfo
 from odap.common.logger import logger
-from odap.common.config import ConfigNamespace, get_config_namespace, TIMESTAMP_COLUMN
-from odap.common.databricks import get_widget_value, get_workspace_api, resolve_dbutils
+from odap.common.config import TIMESTAMP_COLUMN, ConfigNamespace, get_config_namespace
+from odap.common.databricks import get_workspace_api, resolve_dbutils
+from odap.common.widgets import get_widget_value, FEATURE_WIDGET, ALL_FEATURES
 from odap.common.dataframes import create_dataframe
 from odap.common.utils import get_notebook_name
 from odap.feature_factory.config import get_entity_primary_key
@@ -14,15 +15,11 @@ from odap.feature_factory.metadata import set_fs_compatible_metadata
 from odap.feature_factory.metadata_schema import get_metadata_schema
 
 
-ALL = "<all>"
-FEATURE_WIDGET = "feature"
-
-
 def get_list_of_selected_feature_notebooks() -> List[WorkspaceFileInfo]:
     feature_notebook_name = get_widget_value(FEATURE_WIDGET)
     feature_notebooks = get_feature_notebooks_info(get_workspace_api())
 
-    if feature_notebook_name == ALL:
+    if feature_notebook_name == ALL_FEATURES:
         return feature_notebooks
 
     return [
@@ -65,4 +62,4 @@ def create_notebook_widget():
         get_notebook_name(notebook_info.path) for notebook_info in get_feature_notebooks_info(get_workspace_api())
     ]
 
-    dbutils.widgets.dropdown(FEATURE_WIDGET, ALL, features + [ALL])
+    dbutils.widgets.dropdown(FEATURE_WIDGET, ALL_FEATURES, features + [ALL_FEATURES])

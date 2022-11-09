@@ -5,7 +5,8 @@ from odap.common.logger import logger
 from odap.common.databricks import get_workspace_api
 from odap.common.dataframes import create_dataframe, create_dataframe_from_notebook_cells
 from odap.segment_factory.config import get_segment_table, get_segment_table_path
-from odap.common.utils import get_absolute_path, get_notebook_cells, get_notebook_language
+from odap.common.utils import get_absolute_path
+from odap.common.notebook import get_notebook_cells, get_notebook_language
 from odap.segment_factory.exceptions import SegmentNotFoundException
 from odap.segment_factory.schemas import SEGMENT, get_segment_common_fields_schema
 

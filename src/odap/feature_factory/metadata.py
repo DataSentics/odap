@@ -3,8 +3,7 @@ from datetime import datetime
 
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import col
-from odap.common.config import TIMESTAMP_COLUMN
-from odap.common.databricks import get_widget_value
+from odap.common.widgets import get_widget_value, TIMESTAMP_WIDGET
 from odap.common.tables import get_existing_table
 from odap.common.utils import get_notebook_name, get_relative_path
 from odap.feature_factory.config import get_features_table, get_metadata_table
@@ -84,7 +83,7 @@ def get_global_metadata(raw_metadata: RawMetadataType, feature_path: str) -> Fea
 
 
 def get_feature_dates(existing_metadata_df: Optional[DataFrame], feature_name: str) -> Dict[str, datetime]:
-    timestamp = datetime.fromisoformat(get_widget_value(TIMESTAMP_COLUMN))
+    timestamp = datetime.fromisoformat(get_widget_value(TIMESTAMP_WIDGET))
 
     start_date = timestamp
     last_comput_date = timestamp
@@ -93,9 +92,9 @@ def get_feature_dates(existing_metadata_df: Optional[DataFrame], feature_name: s
         existing_dates = (
             existing_metadata_df.select(START_DATE, LAST_COMPUTE_DATE).filter(col(FEATURE) == feature_name).first()
         )
-
-        start_date = min(start_date, existing_dates[START_DATE])
-        last_comput_date = max(last_comput_date, existing_dates[LAST_COMPUTE_DATE])
+        if existing_dates:
+            start_date = min(start_date, existing_dates[START_DATE])
+            last_comput_date = max(last_comput_date, existing_dates[LAST_COMPUTE_DATE])
 
     return {LAST_COMPUTE_DATE: last_comput_date, START_DATE: start_date}
 
