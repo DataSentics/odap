@@ -90,6 +90,14 @@ def get_features_table_path(config: Dict[str, Any]) -> str:
     return features_table_path.format(entity=get_entity(config))
 
 
+def get_latest_features_table(config: Dict[str, Any]) -> str:
+    return f"{get_features_table(config)}_latest"
+
+
+def get_latest_features_table_path(config: Dict[str, Any]) -> str:
+    return f"{get_features_table_path(config)}.latest"
+
+
 def get_metadata_table(config: Dict[str, Any]) -> str:
     metadata_table = get_metadata(config).get("table")
 

@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Tuple
 from functools import reduce
-from pyspark.sql import DataFrame, functions as f
+from pyspark.sql import SparkSession, DataFrame, functions as f
 from pyspark.sql.window import Window
 from databricks_cli.workspace.api import WorkspaceApi
 from databricks_cli.workspace.api import WorkspaceFileInfo
@@ -10,9 +10,10 @@ from odap.common.config import TIMESTAMP_COLUMN
 from odap.common.databricks import get_workspace_api
 from odap.common.dataframes import create_dataframe_from_notebook_cells
 from odap.common.utils import get_notebook_cells
+from odap.feature_factory.config import get_features_table_by_entity_name, get_metadata_table_by_entity_name
 from odap.feature_factory.exceptions import NotebookException
 from odap.feature_factory.metadata import extract_raw_metadata_from_cells, resolve_metadata
-from odap.feature_factory.metadata_schema import FEATURE, FeaturesMetadataType, FILLNA_VALUE
+from odap.feature_factory.metadata_schema import FEATURE, FeaturesMetadataType, FILLNA_VALUE, LAST_COMPUTE_DATE
 
 
 def check_feature_df(df: DataFrame, entity_primary_key: str, metadata: FeaturesMetadataType, feature_path: str):
@@ -27,6 +28,16 @@ def check_feature_df(df: DataFrame, entity_primary_key: str, metadata: FeaturesM
     for column in set(df.columns) - required_columns:
         if column not in metadata_features:
             raise NotebookException(f"Column '{column}' from final_df is missing in metadata!", feature_path)
+
+
+def get_latest_features(entity_name: str, feature_factory_config: Dict) -> DataFrame:
+    spark = SparkSession.getActiveSession()
+    features_table = get_features_table_by_entity_name(entity_name, feature_factory_config)
+    metadata_table = get_metadata_table_by_entity_name(entity_name, feature_factory_config)
+
+    last_compute_date = spark.read.table(metadata_table).select(f.max(LAST_COMPUTE_DATE)).collect()[0][0]
+
+    return spark.read.table(features_table).filter(f.col(TIMESTAMP_COLUMN) == last_compute_date)
 
 
 def create_dataframe_and_metadata(feature_notebook: WorkspaceFileInfo, workspace_api: WorkspaceApi):
