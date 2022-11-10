@@ -7,12 +7,24 @@ from databricks_cli.sdk.api_client import ApiClient
 
 
 def resolve_dbutils() -> DBUtils:
+    return resolve_databricks_service("dbutils")
+
+
+def resolve_display():
+    return resolve_databricks_service("display")
+
+
+def resolve_display_html():
+    return resolve_databricks_service("displayHTML")
+
+
+def resolve_databricks_service(name: str):
     ipython = IPython.get_ipython()
 
-    if not hasattr(ipython, "user_ns") or "dbutils" not in ipython.user_ns:  # type: ignore
-        raise Exception("dbutils cannot be resolved")
+    if not hasattr(ipython, "user_ns") or name not in ipython.user_ns:  # type: ignore
+        raise Exception(f"{name} cannot be resolved")
 
-    return ipython.user_ns["dbutils"]  # type: ignore
+    return ipython.user_ns[name]  # type: ignore
 
 
 def get_workspace_api() -> WorkspaceApi:
