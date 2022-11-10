@@ -5,7 +5,14 @@ from databricks_cli.workspace.api import WorkspaceFileInfo
 from odap.common.logger import logger
 from odap.common.config import TIMESTAMP_COLUMN, ConfigNamespace, get_config_namespace
 from odap.common.databricks import get_workspace_api, resolve_dbutils
-from odap.common.widgets import get_widget_value, FEATURE_WIDGET, ALL_FEATURES
+from odap.common.widgets import (
+    DISPLAY_FEATURES,
+    DISPLAY_METADATA,
+    DISPLAY_WIDGET,
+    get_widget_value,
+    FEATURE_WIDGET,
+    ALL_FEATURES,
+)
 from odap.common.dataframes import create_dataframe
 from odap.common.utils import get_notebook_name
 from odap.feature_factory.config import get_entity_primary_key
@@ -37,25 +44,34 @@ def dry_run():
 
     metadata_df = create_dataframe(metadata, get_metadata_schema())
 
-    final_df = join_dataframes(dataframes, join_columns=[entity_primary_key, TIMESTAMP_COLUMN])
+    features_df = join_dataframes(dataframes, join_columns=[entity_primary_key, TIMESTAMP_COLUMN])
 
     logger.info("Success. No errors found!")
 
-    display_dataframe_table(final_df)
-    display_metadata_df(metadata_df)
+    display_dataframes(features_df, metadata_df)
+
+
+def display_dataframes(features_df: DataFrame, metadata_df: DataFrame):
+    display_widget_value = get_widget_value(DISPLAY_WIDGET)
+
+    if DISPLAY_FEATURES in display_widget_value:
+        display_features_df(features_df)
+
+    if DISPLAY_METADATA in display_widget_value:
+        display_metadata_df(metadata_df)
 
 
 def display_metadata_df(metadata_df: DataFrame):
-    print("\nMetadata Dataframe:")
+    print("\nMetadata DataFrame:")
     metadata_df.display()  # pyre-ignore[29]
 
 
-def display_dataframe_table(final_df: DataFrame):
-    print("\nFeatures Dataframe:")
+def display_features_df(final_df: DataFrame):
+    print("\nFeatures DataFrame:")
     final_df.display()  # pyre-ignore[29]
 
 
-def create_notebook_widget():
+def create_dry_run_widgets():
     dbutils = resolve_dbutils()
 
     features = [
@@ -63,3 +79,4 @@ def create_notebook_widget():
     ]
 
     dbutils.widgets.dropdown(FEATURE_WIDGET, ALL_FEATURES, features + [ALL_FEATURES])
+    dbutils.widgets.multiselect(DISPLAY_WIDGET, DISPLAY_METADATA, choices=[DISPLAY_METADATA, DISPLAY_FEATURES])
