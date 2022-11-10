@@ -6,7 +6,7 @@ from odap.common.databricks import get_workspace_api
 from odap.common.dataframes import create_dataframe, create_dataframe_from_notebook_cells
 from odap.segment_factory.config import get_segment_table, get_segment_table_path
 from odap.common.utils import get_absolute_path
-from odap.common.notebook import get_notebook_cells, get_notebook_language
+from odap.common.notebook import get_notebook_cells, get_notebook_info
 from odap.segment_factory.exceptions import SegmentNotFoundException
 from odap.segment_factory.schemas import SEGMENT, get_segment_common_fields_schema
 
@@ -34,10 +34,10 @@ def create_segment_df(segment_name: str) -> DataFrame:
     workspace_api = get_workspace_api()
 
     segment_path = get_absolute_path("segments", segment_name)
+    notebook = get_notebook_info(segment_path, workspace_api)
 
-    notebook_cells = get_notebook_cells(segment_path, workspace_api)
-    notebook_language = get_notebook_language(segment_path, workspace_api)
-    segment_df = create_dataframe_from_notebook_cells(segment_path, notebook_language, notebook_cells)
+    notebook_cells = get_notebook_cells(notebook, workspace_api)
+    segment_df = create_dataframe_from_notebook_cells(notebook, notebook_cells)
 
     if not segment_df:
         raise SegmentNotFoundException(f"Segment '{segment_name}' could not be loaded")

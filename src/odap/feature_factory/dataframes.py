@@ -11,7 +11,7 @@ from odap.common.notebook import get_notebook_cells
 from odap.common.databricks import get_workspace_api
 from odap.common.dataframes import create_dataframe_from_notebook_cells
 
-from odap.feature_factory.no_target import replace_no_target
+from odap.feature_factory.no_target_optimizer import replace_no_target
 from odap.feature_factory.exceptions import NotebookException
 from odap.feature_factory.metadata import extract_raw_metadata_from_cells, resolve_metadata
 from odap.feature_factory.config import get_features_table_by_entity_name, get_metadata_table_by_entity_name
@@ -43,12 +43,12 @@ def get_latest_features(entity_name: str, feature_factory_config: Dict) -> DataF
 
 
 def create_dataframe_and_metadata(feature_notebook: WorkspaceFileInfo, workspace_api: WorkspaceApi):
-    notebook_cells = get_notebook_cells(feature_notebook.path, workspace_api)
+    notebook_cells = get_notebook_cells(feature_notebook, workspace_api)
     replace_no_target(feature_notebook.language, notebook_cells)
 
     raw_metadata = extract_raw_metadata_from_cells(notebook_cells, feature_notebook.path)
 
-    feature_df = create_dataframe_from_notebook_cells(feature_notebook.path, feature_notebook.language, notebook_cells)
+    feature_df = create_dataframe_from_notebook_cells(feature_notebook, notebook_cells)
 
     metadata = resolve_metadata(raw_metadata, feature_notebook.path, feature_df)
 
