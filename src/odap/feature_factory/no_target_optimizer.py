@@ -13,13 +13,12 @@ PYTHON_TIMESTAMP_LIT = '.withColumn("timestamp", f.lit(dbutils.widgets.get("time
 
 def replace_sql_target_join(cell: str) -> str:
     found_join = re.search(SQL_TARGET_STORE_JOIN_REGEX, cell)
+    found_select_start = re.search(SQL_SELECT_REGEX, cell)
 
-    if found_join:
+    if found_join and found_select_start:
         cell = cell.replace(found_join.group(0), "")
-        found_select_start = re.search(SQL_SELECT_REGEX, cell)
-        if found_select_start:
-            start = found_select_start.start(1)
-            cell = cell[:start] + SQL_TIMESTAMP_LIT + cell[start:]
+        start = found_select_start.start(1)
+        cell = cell[:start] + SQL_TIMESTAMP_LIT + cell[start:]
 
     return cell
 

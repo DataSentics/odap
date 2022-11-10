@@ -1,5 +1,7 @@
 from typing import Any, Dict, List, Union
 from pyspark.sql import DataFrame, SparkSession
+from databricks_cli.workspace.api import WorkspaceFileInfo
+
 from odap.common.databricks import resolve_dbutils
 from odap.common.exceptions import InvalidNoteboookException, InvalidNotebookLanguageException
 from odap.common.notebook import remove_blacklisted_sql_cells, join_python_notebook_cells
@@ -33,20 +35,18 @@ def get_sql_dataframe(notebook_cells: List[str]) -> DataFrame:
     return spark.sql(df_command)
 
 
-def create_dataframe_from_notebook_cells(
-    notebook_path: str, notebook_language: str, notebook_cells: List[str]
-) -> DataFrame:
-    if notebook_language == "PYTHON":
-        df = get_python_dataframe(notebook_cells, notebook_path)
+def create_dataframe_from_notebook_cells(notebook: WorkspaceFileInfo, notebook_cells: List[str]) -> DataFrame:
+    if notebook.language == "PYTHON":
+        df = get_python_dataframe(notebook_cells, notebook.path)
 
-    elif notebook_language == "SQL":
+    elif notebook.language == "SQL":
         df = get_sql_dataframe(notebook_cells)
 
     else:
-        raise InvalidNotebookLanguageException(f"Notebook language {notebook_language} is not supported")
+        raise InvalidNotebookLanguageException(f"Notebook language {notebook.language} is not supported")
 
     if not df:
-        raise InvalidNoteboookException(f"Notebook at '{notebook_path}' could not be loaded")
+        raise InvalidNoteboookException(f"Notebook at '{notebook.path}' could not be loaded")
 
     df_with_lower_columns = df.toDF(*[column.lower() for column in df.columns])
 
