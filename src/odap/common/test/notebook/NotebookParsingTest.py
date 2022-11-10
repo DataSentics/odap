@@ -15,6 +15,8 @@ class WorkspaceFileInfo:
 
 class NotebookParsingTest(PySparkTestCase):
     @patch("odap.common.dataframes.resolve_dbutils", return_value=MagicMock())
+    @patch("odap.common.dataframes.resolve_display", return_value=MagicMock())
+    @patch("odap.common.dataframes.resolve_display_html", return_value=MagicMock())
     def test_python_notebook(self, *_):
         with open(os.path.join(os.path.dirname(__file__), "python_notebook.txt"), mode="r", encoding="utf-8") as f:
             notebook_content = f.read()
@@ -44,6 +46,8 @@ class NotebookParsingTest(PySparkTestCase):
         self.compare_dataframes(df_final, expected_df, ["customer_id"])
 
     @patch("odap.common.dataframes.resolve_dbutils", return_value=MagicMock())
+    @patch("odap.common.dataframes.resolve_display", return_value=MagicMock())
+    @patch("odap.common.dataframes.resolve_display_html", return_value=MagicMock())
     def test_sql_notebook(self, *_):
         with open(os.path.join(os.path.dirname(__file__), "sql_notebook.txt"), mode="r", encoding="utf-8") as f:
             notebook_content = f.read()

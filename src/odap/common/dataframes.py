@@ -1,20 +1,25 @@
+import copy
 from typing import Any, Dict, List, Union
 from pyspark.sql import DataFrame, SparkSession
 from databricks_cli.workspace.api import WorkspaceFileInfo
 
-from odap.common.databricks import resolve_dbutils
+from odap.common.databricks import resolve_dbutils, resolve_display, resolve_display_html
 from odap.common.exceptions import NotebookException, InvalidNotebookLanguageException
 from odap.common.notebook import remove_blacklisted_cells, join_python_notebook_cells, sql_cell_is_runable
 
 PYTHON_DF_NAME = "df_final"
 
 
+# pylint: disable=too-many-statements
 def get_python_dataframe(notebook_cells: List[str], notebook_path: str) -> DataFrame:
-    globals()["spark"] = SparkSession.getActiveSession()
-    globals()["dbutils"] = resolve_dbutils()
+    enhanced_globals = copy.deepcopy(globals)
+    enhanced_globals()["spark"] = SparkSession.getActiveSession()
+    enhanced_globals()["dbutils"] = resolve_dbutils()
+    enhanced_globals()["display"] = resolve_display()
+    enhanced_globals()["displayHTML"] = resolve_display_html()
 
     notebook_content = join_python_notebook_cells(notebook_cells)
-    exec(notebook_content, globals())  # pylint: disable=W0122
+    exec(notebook_content, enhanced_globals())  # pylint: disable=W0122
 
     try:
         return eval(PYTHON_DF_NAME)  # pylint: disable=W0123
