@@ -8,6 +8,7 @@ from odap.common.exceptions import ConfigAttributeMissingException
 
 CONFIG_NAME = "config.yaml"
 TIMESTAMP_COLUMN = "timestamp"
+Config = Dict[str, Any]
 
 
 class ConfigNamespace(enum.Enum):
@@ -15,7 +16,7 @@ class ConfigNamespace(enum.Enum):
     SEGMENT_FACTORY = "segmentfactory"
 
 
-def get_config_parameters() -> Dict[str, Any]:
+def get_config_parameters() -> Config:
     base_path = get_repository_root_fs_path()
     config_path = os.path.join(base_path, CONFIG_NAME)
 
@@ -29,7 +30,7 @@ def get_config_parameters() -> Dict[str, Any]:
     return parameters
 
 
-def get_config_namespace(namespace: ConfigNamespace) -> Dict[str, Any]:
+def get_config_namespace(namespace: ConfigNamespace) -> Config:
     parameters = get_config_parameters()
 
     config = parameters.get(namespace.value, None)

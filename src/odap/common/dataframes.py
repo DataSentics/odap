@@ -3,8 +3,8 @@ from pyspark.sql import DataFrame, SparkSession
 from databricks_cli.workspace.api import WorkspaceFileInfo
 
 from odap.common.databricks import resolve_dbutils
-from odap.common.exceptions import InvalidNoteboookException, InvalidNotebookLanguageException
-from odap.common.notebook import remove_blacklisted_sql_cells, join_python_notebook_cells
+from odap.common.exceptions import NotebookException, InvalidNotebookLanguageException
+from odap.common.notebook import remove_blacklisted_cells, join_python_notebook_cells
 
 PYTHON_DF_NAME = "df_final"
 
@@ -19,13 +19,11 @@ def get_python_dataframe(notebook_cells: List[str], notebook_path: str) -> DataF
     try:
         return eval(PYTHON_DF_NAME)  # pylint: disable=W0123
     except NameError as e:
-        raise InvalidNoteboookException(f"{PYTHON_DF_NAME} missing in {notebook_path}") from e
+        raise NotebookException(f"{PYTHON_DF_NAME} missing", path=notebook_path) from e
 
 
 def get_sql_dataframe(notebook_cells: List[str]) -> DataFrame:
     spark = SparkSession.getActiveSession()
-
-    remove_blacklisted_sql_cells(notebook_cells)
 
     df_command = notebook_cells.pop()
 
@@ -35,7 +33,10 @@ def get_sql_dataframe(notebook_cells: List[str]) -> DataFrame:
     return spark.sql(df_command)
 
 
+# pylint: disable=too-many-statements
 def create_dataframe_from_notebook_cells(notebook: WorkspaceFileInfo, notebook_cells: List[str]) -> DataFrame:
+    remove_blacklisted_cells(notebook_cells)
+
     if notebook.language == "PYTHON":
         df = get_python_dataframe(notebook_cells, notebook.path)
 
@@ -46,7 +47,7 @@ def create_dataframe_from_notebook_cells(notebook: WorkspaceFileInfo, notebook_c
         raise InvalidNotebookLanguageException(f"Notebook language {notebook.language} is not supported")
 
     if not df:
-        raise InvalidNoteboookException(f"Notebook at '{notebook.path}' could not be loaded")
+        raise NotebookException("Notebook could not be loaded", path=notebook.path)
 
     df_with_lower_columns = df.toDF(*[column.lower() for column in df.columns])
 

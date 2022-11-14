@@ -42,7 +42,7 @@ def get_repository_info(workspace_api: WorkspaceApi, repos_api: ReposApi) -> Dic
     return repos_api.get(workspace_status.object_id)
 
 
-def list_notebooks(workspace_path: str, workspace_api: WorkspaceApi) -> List[WorkspaceFileInfo]:
+def list_notebooks_info(workspace_path: str, workspace_api: WorkspaceApi) -> List[WorkspaceFileInfo]:
     return [obj for obj in list_objects(workspace_path, workspace_api) if obj.object_type == "NOTEBOOK"]
 
 
@@ -63,3 +63,11 @@ def list_objects(workspace_path: str, workspace_api: WorkspaceApi) -> List[Works
             objects_to_return += [obj]
 
     return objects_to_return
+
+
+def string_contains_any_pattern(string: str, patterns: List[str]):
+    for pattern in patterns:
+        if re.search(pattern, string):
+            return True
+
+    return False
