@@ -34,10 +34,10 @@ def create_segment_df(segment_name: str) -> DataFrame:
     workspace_api = get_workspace_api()
 
     segment_path = get_absolute_path("segments", segment_name)
-    notebook = get_notebook_info(segment_path, workspace_api)
+    notebook_info = get_notebook_info(segment_path, workspace_api)
 
-    notebook_cells = get_notebook_cells(notebook, workspace_api)
-    segment_df = create_dataframe_from_notebook_cells(notebook, notebook_cells)
+    notebook_cells = get_notebook_cells(notebook_info, workspace_api)
+    segment_df = create_dataframe_from_notebook_cells(notebook_info, notebook_cells)
 
     if not segment_df:
         raise SegmentNotFoundException(f"Segment '{segment_name}' could not be loaded")

@@ -2,16 +2,10 @@ import re
 from copy import deepcopy
 from typing import Any, Dict, List
 from pyspark.sql import DataFrame
-from odap.feature_factory.metadata_schema import (
-    DESCRIPTION,
-    DESCRIPTION_TEMPLATE,
-    EXTRA,
-    FEATURE,
-    FEATURE_TEMPLATE,
-    FeatureMetadataType,
-    FeaturesMetadataType,
-)
 
+from odap.feature_factory import const
+
+from odap.feature_factory.metadata_schema import FeatureMetadataType, FeaturesMetadataType
 from odap.feature_factory.time_windows import TIME_WINDOW_PLACEHOLDER, parse_time_window
 
 
@@ -56,9 +50,11 @@ def resolve_placeholders(
 ) -> FeatureMetadataType:
     new_metadata = deepcopy(feature_metadata)
 
-    new_metadata[FEATURE] = new_metadata[FEATURE_TEMPLATE].format(**placeholder_to_value_dict)
-    new_metadata[DESCRIPTION] = resolve_description(new_metadata[DESCRIPTION_TEMPLATE], placeholder_to_value_dict)
-    new_metadata[EXTRA] = placeholder_to_value_dict
+    new_metadata[const.FEATURE] = new_metadata[const.FEATURE_TEMPLATE].format(**placeholder_to_value_dict)
+    new_metadata[const.DESCRIPTION] = resolve_description(
+        new_metadata[const.DESCRIPTION_TEMPLATE], placeholder_to_value_dict
+    )
+    new_metadata[const.EXTRA] = placeholder_to_value_dict
 
     return new_metadata
 
@@ -68,7 +64,7 @@ def resolve_placeholders_on_df_columns(
 ) -> FeaturesMetadataType:
     resolved_metadata = []
 
-    feature_name_pattern = get_feature_name_pattern(feature_metadata[FEATURE_TEMPLATE], placeholders)
+    feature_name_pattern = get_feature_name_pattern(feature_metadata[const.FEATURE_TEMPLATE], placeholders)
 
     for column_name in df_columns:
         placeholder_to_value_dict = get_placeholder_to_value_dict(feature_name_pattern, placeholders, column_name)
@@ -82,10 +78,10 @@ def resolve_placeholders_on_df_columns(
 
 
 def resolve_metadata_template(feature_df: DataFrame, feature_metadata: FeatureMetadataType) -> FeaturesMetadataType:
-    feature_metadata[FEATURE_TEMPLATE] = feature_metadata[FEATURE]
-    feature_metadata[DESCRIPTION_TEMPLATE] = feature_metadata.get(DESCRIPTION, "")
+    feature_metadata[const.FEATURE_TEMPLATE] = feature_metadata[const.FEATURE]
+    feature_metadata[const.DESCRIPTION_TEMPLATE] = feature_metadata.get(const.DESCRIPTION, "")
 
-    placeholders = get_feature_placeholders(feature_metadata[FEATURE])
+    placeholders = get_feature_placeholders(feature_metadata[const.FEATURE])
 
     if not placeholders:
         return [feature_metadata]

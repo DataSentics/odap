@@ -1,7 +1,7 @@
 from typing import Any, Dict
 from pyspark.sql import DataFrame
 from odap.feature_factory.config import get_entity_by_name
-from odap.feature_factory.dataframes import get_latest_features
+from odap.feature_factory.dataframes.dataframe_creator import get_latest_features
 from odap.segment_factory.config import get_destination, get_export
 from odap.segment_factory.exporters import resolve_exporter
 from odap.segment_factory.logs import write_export_log

@@ -1,7 +1,8 @@
 import pytest
 
 import pyspark.sql.types as t
-from odap.feature_factory.exceptions import NotebookException
+from odap.common.exceptions import NotebookException
+from odap.common.notebook import remove_magic_prefixes
 from odap.feature_factory.metadata import (
     check_metadata,
     extract_raw_metadata_from_cells,
@@ -84,7 +85,7 @@ def test_metadata_integration(mocker):
 
     df = DataFrameMock([0, 0, 0, 0, 0, 0], columns, df_schema)
 
-    raw_metadata = extract_raw_metadata_from_cells(["", metadata_cell, ""], FEATURE_PATH)
+    metadata_cell = remove_magic_prefixes(metadata_cell)
 
     variable_metadata = [generate_variable_metadata(column) for column in columns]
 
@@ -108,4 +109,4 @@ def test_metadata_integration(mocker):
         for feature, description, f_template, d_template in variable_metadata
     ]
 
-    assert resolve_metadata(raw_metadata, FEATURE_PATH, df) == expected_metadata
+    assert resolve_metadata(["", metadata_cell, ""], FEATURE_PATH, df) == expected_metadata
