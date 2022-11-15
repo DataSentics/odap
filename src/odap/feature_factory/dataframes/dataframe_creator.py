@@ -9,6 +9,7 @@ from odap.common.config import TIMESTAMP_COLUMN
 
 from odap.feature_factory import const
 from odap.feature_factory.config import get_features_table_by_entity_name, get_metadata_table_by_entity_name
+from odap.feature_factory.dq_checks import execute_soda_checks_from_feature_notebooks
 from odap.feature_factory.feature_notebook import FeatureNotebooks
 from odap.feature_factory.metadata_schema import get_metadata_schema
 
@@ -52,6 +53,10 @@ def create_metadata_df(feature_notebooks: FeatureNotebooks):
 
 
 def create_features_df(feature_notebooks: FeatureNotebooks, entity_primary_key: str):
-    return join_dataframes(
+    joined_df = join_dataframes(
         dataframes=[notebook.df for notebook in feature_notebooks], join_columns=[entity_primary_key, TIMESTAMP_COLUMN]
     )
+
+    execute_soda_checks_from_feature_notebooks(df=joined_df, feature_notebooks=feature_notebooks)
+
+    return joined_df
