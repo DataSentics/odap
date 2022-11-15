@@ -1,5 +1,5 @@
 from typing import List
-import secrets
+import uuid
 import yaml
 
 from pyspark.sql import SparkSession, DataFrame
@@ -32,15 +32,9 @@ def get_soda_scan():
 
 
 def create_temporary_view(df: DataFrame) -> str:
-    _id = secrets.token_hex(8)
+    _id = "id" + uuid.uuid4().hex  # id has to start with letter
     df.createOrReplaceTempView(_id)
     return _id
-
-
-def create_yaml_checks(df: DataFrame, checks_list: List[str]) -> str:
-    table_id = create_temporary_view(df)
-    checks = {f"checks for {table_id}": checks_list}
-    return yaml.dump(checks)
 
 
 def execute_soda_checks_from_feature_notebooks(df: DataFrame, feature_notebooks: FeatureNotebooks):
@@ -57,11 +51,24 @@ def execute_soda_checks(df: DataFrame, checks_list: List[str]):
     if not soda_is_installed():
         return
 
-    yaml_checks = create_yaml_checks(df, checks_list)
+    table_id = create_temporary_view(df)
+    yaml_checks = yaml.dump({f"checks for {table_id}": checks_list})
 
     scan = get_soda_scan()
     scan.add_sodacl_yaml_str(yaml_checks)
 
+    logger.info("Starting soda data quality checks:\n")
+
     scan.execute()
 
+    resolve_scan(scan, table_id)
+
+
+def resolve_scan(scan, table_id: str):
     print(scan.get_logs_text())
+
+    SparkSession.getActiveSession().catalog.dropTempView(table_id)
+
+    if scan.has_check_fails():
+        logger.error("Soda data quality checks failed!")
+        scan.assert_no_checks_fail()

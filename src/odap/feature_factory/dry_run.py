@@ -11,7 +11,6 @@ from odap.common.widgets import get_widget_value
 from odap.common.utils import get_notebook_name
 from odap.feature_factory.config import get_entity_primary_key
 from odap.feature_factory.dataframes.dataframe_creator import create_features_df, create_metadata_df
-from odap.feature_factory.dq_checks import execute_soda_checks_from_feature_notebooks
 from odap.feature_factory.feature_notebook import get_feature_notebooks_info, load_feature_notebooks
 
 
@@ -37,8 +36,6 @@ def dry_run():
     metadata_df = create_metadata_df(feature_notebooks)
 
     logger.info("Success. No errors found!")
-
-    execute_soda_checks_from_feature_notebooks(df=features_df, feature_notebooks=feature_notebooks)
 
     display_dataframes(features_df, metadata_df)
 
