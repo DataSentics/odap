@@ -1,29 +1,15 @@
-from typing import List
 from pyspark.sql import DataFrame
-from databricks_cli.workspace.api import WorkspaceFileInfo
 
-from odap.feature_factory import const
-
-from odap.common.logger import logger
 from odap.common.config import ConfigNamespace, get_config_namespace
 from odap.common.databricks import get_workspace_api, resolve_dbutils
-from odap.common.widgets import get_widget_value
+from odap.common.logger import logger
 from odap.common.utils import get_notebook_name
+from odap.common.widgets import get_widget_value
+from odap.feature_factory import const
 from odap.feature_factory.config import get_entity_primary_key
 from odap.feature_factory.dataframes.dataframe_creator import create_features_df, create_metadata_df
 from odap.feature_factory.feature_notebook import get_feature_notebooks_info, load_feature_notebooks
-
-
-def get_list_of_selected_feature_notebooks() -> List[WorkspaceFileInfo]:
-    feature_notebook_name = get_widget_value(const.FEATURE_WIDGET)
-    feature_notebooks = get_feature_notebooks_info(get_workspace_api())
-
-    if feature_notebook_name == const.ALL_FEATURES:
-        return feature_notebooks
-
-    return [
-        feature_notebook for feature_notebook in feature_notebooks if feature_notebook.basename == feature_notebook_name
-    ]
+from odap.feature_factory.feature_notebooks_selection import get_list_of_selected_feature_notebooks
 
 
 def dry_run():
