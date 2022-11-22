@@ -1,8 +1,8 @@
-# ODAP Framework
+# ODAP Use Case Builder Framework
 
 ## Overview
 
-ODAP is a lightweight framework for writing features, creating and exporting
+ODAP is a lightweight framework for creating use cases, writing features and exporting
 segments to various destinations (e.g. Facebook, Salesforce, etc.)
 
 Both SQL and Pyspark syntax is supported.
