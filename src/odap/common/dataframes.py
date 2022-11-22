@@ -4,7 +4,7 @@ from databricks_cli.workspace.api import WorkspaceFileInfo
 
 from odap.common.databricks import resolve_dbutils
 from odap.common.exceptions import NotebookException, InvalidNotebookLanguageException
-from odap.common.notebook import remove_blacklisted_cells, join_python_notebook_cells
+from odap.common.notebook import remove_blacklisted_cells, join_python_notebook_cells, sql_cell_is_runable
 
 PYTHON_DF_NAME = "df_final"
 
@@ -28,7 +28,8 @@ def get_sql_dataframe(notebook_cells: List[str]) -> DataFrame:
     df_command = notebook_cells.pop()
 
     for cell in notebook_cells:
-        spark.sql(cell)
+        if sql_cell_is_runable(cell):
+            spark.sql(cell)
 
     return spark.sql(df_command)
 

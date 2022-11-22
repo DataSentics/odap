@@ -11,8 +11,11 @@ from odap.common.utils import string_contains_any_pattern
 
 SQL_CELL_DIVIDER = "-- COMMAND ----------"
 PYTHON_CELL_DIVIDER = "# COMMAND ----------"
+
 SQL_MAGIC_PREFIX = "-- MAGIC "
 PYTHON_MAGIC_PREFIX = "# MAGIC "
+
+COMPILED_SQL_COMMENT_REGEX = re.compile("^--.*$", re.MULTILINE)
 
 
 def get_notebook_cells(notebook_info: WorkspaceFileInfo, workspace_api: WorkspaceApi) -> List[str]:
@@ -28,8 +31,6 @@ def get_notebook_info(notebook_path: str, workspace_api: WorkspaceApi) -> Worksp
 
 
 def split_notebok_to_cells(notebook_content: str, notebook_info: WorkspaceFileInfo) -> List[str]:
-    notebook_content = remove_magic_prefixes(notebook_content)
-
     if notebook_info.language == "SQL":
         return notebook_content.split(SQL_CELL_DIVIDER)
 
@@ -60,7 +61,13 @@ def remove_magic_prefixes(content: str) -> str:
     return content.replace(PYTHON_MAGIC_PREFIX, "")
 
 
+def sql_cell_is_runable(content: str) -> bool:
+    return COMPILED_SQL_COMMENT_REGEX.sub("", content).strip() != ""
+
+
 def eval_cell(cell: str, variable_name: str, feature_path: str):
+    cell = remove_magic_prefixes(cell)
+
     exec(cell)  # pylint: disable=W0122
 
     try:
