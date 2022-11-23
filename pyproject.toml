@@ -38,6 +38,8 @@ soda-core-spark-df = "^3.0.12"
 [tool.black]
 line-length = 120
 
+[tool.pylint.basic]
+module-rgx = "(([a-z_][a-z0-9_]*)|([A-Z][a-zA-Z0-9]+))$"
 
 [tool.pylint.messages_control]
 disable = [
@@ -48,6 +50,9 @@ disable = [
     "logging-fstring-interpolation"
 ]
 good-names = ["e", "i", "k", "n", "f", "v", "df", "sc", "fs"]
+
+[tool.pytest.ini_options]
+python_files = "*_test.py *Test.py"
 
 [tool.poe.tasks]
 black = "black src"
