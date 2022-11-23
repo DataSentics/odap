@@ -4,7 +4,7 @@ version = "0.0.7"
 description = "ODAP framework"
 readme = "README.md"
 
-license = "MIT"
+license = "Proprietary"
 
 authors = [
     "Jiri Koutny <jiri.koutny@datasentics.com>",
