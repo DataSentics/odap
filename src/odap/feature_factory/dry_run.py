@@ -1,14 +1,12 @@
 from pyspark.sql import DataFrame
 
 from odap.common.config import ConfigNamespace, get_config_namespace
-from odap.common.databricks import get_workspace_api, resolve_dbutils
 from odap.common.logger import logger
-from odap.common.utils import get_notebook_name
 from odap.common.widgets import get_widget_value
 from odap.feature_factory import const
 from odap.feature_factory.config import get_entity_primary_key
 from odap.feature_factory.dataframes.dataframe_creator import create_features_df, create_metadata_df
-from odap.feature_factory.feature_notebook import get_feature_notebooks_info, load_feature_notebooks
+from odap.feature_factory.feature_notebook import load_feature_notebooks
 from odap.feature_factory.feature_notebooks_selection import get_list_of_selected_feature_notebooks
 
 
@@ -44,16 +42,3 @@ def display_metadata_df(metadata_df: DataFrame):
 def display_features_df(final_df: DataFrame):
     print("\nFeatures DataFrame:")
     final_df.display()  # pyre-ignore[29]
-
-
-def create_dry_run_widgets():
-    dbutils = resolve_dbutils()
-
-    features = [
-        get_notebook_name(notebook_info.path) for notebook_info in get_feature_notebooks_info(get_workspace_api())
-    ]
-
-    dbutils.widgets.dropdown(const.FEATURE_WIDGET, const.ALL_FEATURES, features + [const.ALL_FEATURES])
-    dbutils.widgets.multiselect(
-        const.DISPLAY_WIDGET, const.DISPLAY_METADATA, choices=[const.DISPLAY_METADATA, const.DISPLAY_FEATURES]
-    )
