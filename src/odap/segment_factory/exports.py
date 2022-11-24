@@ -31,13 +31,19 @@ def select_attributes(df: DataFrame, destination_config: Any):
 
 
 # pylint: disable=too-many-statements
-def run_export(export_name: str, feature_factory_config: Dict, segment_factory_config: Dict):
+def run_export(
+    export_name: str,
+    use_case_name: str,
+    use_case_config: Dict,
+    feature_factory_config: Dict,
+    segment_factory_config: Dict,
+):
     logger.info(f"Running export '{export_name}'...")
 
-    export_config = get_export(export_name, segment_factory_config)
+    export_config = get_export(export_name, use_case_config)
     destination_config = get_destination(export_config["destination"], segment_factory_config)
 
-    united_segments_df = create_segments_union_df(export_config["segments"])
+    united_segments_df = create_segments_union_df(export_config["segments"], use_case_name)
     joined_segment_featurestores_df = join_segment_with_entities(
         united_segments_df, destination_config, feature_factory_config
     )
@@ -46,6 +52,12 @@ def run_export(export_name: str, feature_factory_config: Dict, segment_factory_c
     exporter_fce = resolve_exporter(destination_config["type"])
     exporter_fce(export_name, final_export_df, export_config, destination_config)
 
-    write_export_log(united_segments_df, export_name, segment_factory_config)
+    write_export_log(
+        united_segments_df,
+        export_name,
+        use_case_name,
+        export_config,
+        segment_factory_config,
+    )
 
     logger.info("Export successful.")
