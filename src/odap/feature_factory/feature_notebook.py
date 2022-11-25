@@ -62,7 +62,7 @@ FeatureNotebooks = List[FeatureNotebook]
 def get_feature_notebooks_info(workspace_api: WorkspaceApi) -> List[WorkspaceFileInfo]:
     features_path = get_absolute_api_path("features")
 
-    return list_notebooks_info(features_path, workspace_api, True)
+    return list_notebooks_info(features_path, workspace_api, recurse=True)
 
 
 def load_feature_notebooks(config: Config, notebooks_info: List[WorkspaceFileInfo]) -> FeatureNotebooks:

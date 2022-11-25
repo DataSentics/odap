@@ -57,7 +57,7 @@ def list_files(workspace_path: str, workspace_api: WorkspaceApi, recurse: bool =
 
 
 def list_folders(workspace_path: str, workspace_api: WorkspaceApi) -> List[WorkspaceFileInfo]:
-    return [obj for obj in list_objects(workspace_path, workspace_api, False) if obj.object_type == "DIRECTORY"]
+    return [obj for obj in list_objects(workspace_path, workspace_api, recurse=False) if obj.object_type == "DIRECTORY"]
 
 
 def list_objects(workspace_path: str, workspace_api: WorkspaceApi, recurse: bool = False) -> List[WorkspaceFileInfo]:
