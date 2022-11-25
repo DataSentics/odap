@@ -6,13 +6,13 @@ from pyspark.sql.functions import col
 
 from odap.feature_factory import const
 from odap.common.notebook import eval_cell_with_header
-from odap.common.widgets import get_widget_value
 from odap.common.tables import get_existing_table
 from odap.common.utils import get_notebook_name, get_relative_path
 from odap.common.exceptions import NotebookException
 from odap.feature_factory.config import get_features_table, get_metadata_table
 from odap.feature_factory.templates import resolve_metadata_templates
 from odap.feature_factory.type_checker import is_fillna_valid
+from odap.feature_factory.no_target_optimizer import get_no_target_timestamp
 from odap.feature_factory.metadata_schema import (
     FeatureMetadataType,
     FeaturesMetadataType,
@@ -58,11 +58,11 @@ def get_global_metadata(raw_metadata: RawMetadataType, feature_path: str) -> Fea
     return raw_metadata
 
 
-def get_feature_dates(existing_metadata_df: Optional[DataFrame], feature_name: str) -> Dict[str, datetime]:
-    timestamp = datetime.fromisoformat(get_widget_value(const.TIMESTAMP_WIDGET))
-
+def get_feature_dates(
+    existing_metadata_df: Optional[DataFrame], feature_name: str, timestamp: datetime
+) -> Dict[str, datetime]:
     start_date = timestamp
-    last_comput_date = timestamp
+    last_compute_date = timestamp
 
     if existing_metadata_df:
         existing_dates = (
@@ -72,16 +72,17 @@ def get_feature_dates(existing_metadata_df: Optional[DataFrame], feature_name: s
         )
         if existing_dates:
             start_date = min(start_date, existing_dates[const.START_DATE])
-            last_comput_date = max(last_comput_date, existing_dates[const.LAST_COMPUTE_DATE])
+            last_compute_date = max(last_compute_date, existing_dates[const.LAST_COMPUTE_DATE])
 
-    return {const.LAST_COMPUTE_DATE: last_comput_date, const.START_DATE: start_date}
+    return {const.LAST_COMPUTE_DATE: last_compute_date, const.START_DATE: start_date}
 
 
 def set_fs_compatible_metadata(features_metadata: FeaturesMetadataType, config: Dict[str, Any]):
     existing_metadata_df = get_existing_table(get_metadata_table(config))
+    no_target_timestamp = get_no_target_timestamp()
 
     for metadata in features_metadata:
-        metadata.update(get_feature_dates(existing_metadata_df, metadata[const.FEATURE]))
+        metadata.update(get_feature_dates(existing_metadata_df, metadata[const.FEATURE], no_target_timestamp))
         metadata.update(
             {
                 const.OWNER: "unknown",

@@ -49,5 +49,7 @@ FILLNA_WITH = "fillna_with"
 METADATA = "metadata"
 DQ_CHECKS = "dq_checks"
 
-SQL_TIMESTAMP_LIT = ' timestamp(getargument("timestamp")) as timestamp,'
-PYTHON_TIMESTAMP_LIT = '.withColumn("timestamp", f.lit(dbutils.widgets.get("timestamp")).cast("timestamp")).'
+TARGET_STORE = "target_store"
+
+SQL_TIMESTAMP_LIT = ' timestamp("{timestamp}") as timestamp,'
+PYTHON_TIMESTAMP_LIT = '.withColumn("timestamp", f.lit("{timestamp}").cast("timestamp")).'
