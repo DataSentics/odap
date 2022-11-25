@@ -14,12 +14,19 @@ from odap.common.utils import list_notebooks_info
 from odap.feature_factory.config import get_entity_primary_key
 from odap.feature_factory.dataframes.dataframe_checker import check_feature_df
 from odap.feature_factory.metadata import resolve_metadata, set_fs_compatible_metadata
-from odap.feature_factory.no_target_optimizer import replace_no_target
+from odap.feature_factory.no_target_optimizer import replace_no_target, get_no_target_timestamp
 
 
 class FeatureNotebook:
-    def __init__(self, notebook_info: WorkspaceFileInfo, config: Dict[str, Any], workspace_api: WorkspaceApi):
+    def __init__(
+        self,
+        notebook_info: WorkspaceFileInfo,
+        config: Dict[str, Any],
+        workspace_api: WorkspaceApi,
+        no_target_timestamp: str,
+    ):
         self.info = notebook_info
+        self.no_target_timestamp = no_target_timestamp
         self.cells = self.get_feature_notebook_cells(notebook_info, workspace_api)
         self.df = create_dataframe_from_notebook_cells(self.info, self.cells[:])
         self.metadata = resolve_metadata(self.cells, self.info.path, self.df)
@@ -47,7 +54,7 @@ class FeatureNotebook:
 
     def get_feature_notebook_cells(self, info: WorkspaceFileInfo, workspace_api: WorkspaceApi):
         notebook_cells = get_notebook_cells(info, workspace_api)
-        replace_no_target(info.language, notebook_cells)
+        replace_no_target(info.language, notebook_cells, self.no_target_timestamp)
         return notebook_cells
 
     def get_dq_checks_list(self) -> List[str]:
@@ -70,7 +77,9 @@ def load_feature_notebooks(config: Config, notebooks_info: List[WorkspaceFileInf
 
     feature_notebooks = []
 
+    no_target_timestamp = get_no_target_timestamp()
+
     for info in notebooks_info:
-        feature_notebooks.append(FeatureNotebook(info, config, workspace_api))
+        feature_notebooks.append(FeatureNotebook(info, config, workspace_api, no_target_timestamp))
 
     return feature_notebooks
