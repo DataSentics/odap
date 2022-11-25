@@ -29,7 +29,8 @@ def write_export_log(
 
     write_segment(segment_df, export_id, segment_factory_config)
 
-    logger.info(f"Writing export log '{export_id}'")
+    log_table = get_log_table(segment_factory_config)
+    logger.info(f"Writing export log {export_id} to hive table {log_table}")
     (
         spark.createDataFrame(
             [
@@ -51,5 +52,5 @@ def write_export_log(
         )
         .write.mode("append")
         .option("path", get_log_table_path(segment_factory_config))
-        .saveAsTable(get_log_table(segment_factory_config))
+        .saveAsTable(log_table)
     )

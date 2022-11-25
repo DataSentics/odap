@@ -38,7 +38,7 @@ def run_export(
     feature_factory_config: Dict,
     segment_factory_config: Dict,
 ):
-    logger.info(f"Running export '{export_name}'...")
+    logger.info(f"Running export {export_name}")
 
     export_config = get_export(export_name, use_case_config)
     destination_config = get_destination(export_config["destination"], segment_factory_config)
@@ -60,4 +60,4 @@ def run_export(
         segment_factory_config,
     )
 
-    logger.info("Export successful.")
+    logger.info(f"Export {export_name} done")

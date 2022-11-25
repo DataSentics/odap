@@ -20,7 +20,7 @@ def write_segment(
     extended_segment_df = create_dataframe([[export_id]], get_segment_common_fields_schema()).join(df, how="full")
 
     table = get_segment_table(segment_factory_config)
-    logger.info(f"Writing segment to table: '{table}'")
+    logger.info(f"Writing segments to hive table {table}")
     (
         extended_segment_df.write.format("delta")
         .mode("append")
