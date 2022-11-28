@@ -1,7 +1,7 @@
 import re
 from typing import Callable, Dict
 from pyspark.sql import DataFrame
-from odap.common.utils import get_absolute_path, import_file
+from odap.common.utils import get_absolute_api_path, import_file
 from odap.common.databricks import get_workspace_api
 
 ExportersMap = Dict[str, str]
@@ -10,7 +10,7 @@ ExportFn = Callable[[str, DataFrame, Dict, Dict], None]
 
 def load_exporters_map() -> ExportersMap:
     workspace_api = get_workspace_api()
-    exporters_path = get_absolute_path("exporters")
+    exporters_path = get_absolute_api_path("exporters")
 
     exporters = {}
     for exporter in workspace_api.list_objects(exporters_path):

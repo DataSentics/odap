@@ -1,8 +1,11 @@
 from typing import Dict, Any
 from odap.common.config import ConfigNamespace
+from odap.common.utils import get_absolute_api_path, list_folders
 from odap.common.exceptions import ConfigAttributeMissingException
+from odap.common.databricks import get_workspace_api
 
-
+USE_CASES_FOLDER = "use_cases"
+SEGMENTS_FOLDER = "segments"
 SEGMENT_FACTORY = ConfigNamespace.SEGMENT_FACTORY.value
 Config = Dict[str, Any]
 
@@ -43,7 +46,7 @@ def get_exports(config: Config) -> Dict[str, Any]:
     exports_dict = config.get("exports", None)
 
     if not exports_dict:
-        raise ConfigAttributeMissingException(f"'{SEGMENT_FACTORY}.exports' not defined in config.yaml")
+        raise ConfigAttributeMissingException("'exports' not defined in config.yaml")
 
     return exports_dict
 
@@ -74,3 +77,12 @@ def get_destination(destination_name: str, config: Config) -> Dict[str, Any]:
         )
 
     return destination_dict
+
+
+def get_use_cases():
+    worskpace_api = get_workspace_api()
+
+    use_cases_path = get_absolute_api_path(USE_CASES_FOLDER)
+    use_cases_folders = list_folders(use_cases_path, worskpace_api)
+
+    return [use_case_folder.basename for use_case_folder in use_cases_folders]

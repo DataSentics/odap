@@ -24,8 +24,12 @@ def get_notebook_name(path: str):
     return os.path.split(path)[-1]
 
 
-def get_absolute_path(*paths: str) -> str:
+def get_absolute_api_path(*paths: str) -> str:
     return os.path.join(get_repository_root_api_path(), *paths)
+
+
+def get_absolute_fs_path(*paths: str) -> str:
+    return os.path.join(get_repository_root_fs_path(), *paths)
 
 
 def import_file(module_name: str, file_path: str):
@@ -42,22 +46,30 @@ def get_repository_info(workspace_api: WorkspaceApi, repos_api: ReposApi) -> Dic
     return repos_api.get(workspace_status.object_id)
 
 
-def list_notebooks_info(workspace_path: str, workspace_api: WorkspaceApi) -> List[WorkspaceFileInfo]:
-    return [obj for obj in list_objects(workspace_path, workspace_api) if obj.object_type == "NOTEBOOK"]
+def list_notebooks_info(
+    workspace_path: str, workspace_api: WorkspaceApi, recurse: bool = False
+) -> List[WorkspaceFileInfo]:
+    return [obj for obj in list_objects(workspace_path, workspace_api, recurse) if obj.object_type == "NOTEBOOK"]
 
 
-def list_files(workspace_path: str, workspace_api: WorkspaceApi) -> List[WorkspaceFileInfo]:
-    return [obj for obj in list_objects(workspace_path, workspace_api) if obj.object_type == "FILE"]
+def list_files(workspace_path: str, workspace_api: WorkspaceApi, recurse: bool = False) -> List[WorkspaceFileInfo]:
+    return [obj for obj in list_objects(workspace_path, workspace_api, recurse) if obj.object_type == "FILE"]
 
 
-def list_objects(workspace_path: str, workspace_api: WorkspaceApi) -> List[WorkspaceFileInfo]:
-    objects_to_return = []
+def list_folders(workspace_path: str, workspace_api: WorkspaceApi) -> List[WorkspaceFileInfo]:
+    return [obj for obj in list_objects(workspace_path, workspace_api, recurse=False) if obj.object_type == "DIRECTORY"]
 
+
+def list_objects(workspace_path: str, workspace_api: WorkspaceApi, recurse: bool = False) -> List[WorkspaceFileInfo]:
     objects = workspace_api.list_objects(workspace_path)
 
+    if not recurse:
+        return objects
+
+    objects_to_return = []
     for obj in objects:
         if obj.is_dir:
-            objects_to_return += list_objects(obj.path, workspace_api)
+            objects_to_return += list_objects(obj.path, workspace_api, recurse)
 
         else:
             objects_to_return += [obj]

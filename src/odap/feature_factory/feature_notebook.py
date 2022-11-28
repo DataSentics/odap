@@ -9,7 +9,7 @@ from odap.common.databricks import get_workspace_api
 from odap.common.dataframes import create_dataframe_from_notebook_cells
 from odap.common.notebook import eval_cell_with_header, get_notebook_cells
 
-from odap.common.utils import get_absolute_path
+from odap.common.utils import get_absolute_api_path
 from odap.common.utils import list_notebooks_info
 from odap.feature_factory.config import get_entity_primary_key
 from odap.feature_factory.dataframes.dataframe_checker import check_feature_df
@@ -67,9 +67,9 @@ FeatureNotebooks = List[FeatureNotebook]
 
 
 def get_feature_notebooks_info(workspace_api: WorkspaceApi) -> List[WorkspaceFileInfo]:
-    features_path = get_absolute_path("features")
+    features_path = get_absolute_api_path("features")
 
-    return list_notebooks_info(features_path, workspace_api)
+    return list_notebooks_info(features_path, workspace_api, recurse=True)
 
 
 def load_feature_notebooks(config: Config, notebooks_info: List[WorkspaceFileInfo]) -> FeatureNotebooks:

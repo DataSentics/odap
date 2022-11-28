@@ -3,6 +3,7 @@ import pyspark.sql.types as t
 SEGMENT = "segment"
 EXPORT_ID = "export_id"
 TIMESTAMP = "timestamp"
+USE_CASE = "use_case"
 EXPORT = "export"
 DESTINATION = "destination"
 SEGMENTS = "segments"
@@ -18,6 +19,7 @@ def get_export_schema():
         [
             t.StructField(EXPORT_ID, t.StringType(), False),
             t.StructField(TIMESTAMP, t.TimestampType(), False),
+            t.StructField(USE_CASE, t.StringType(), False),
             t.StructField(EXPORT, t.StringType(), False),
             t.StructField(DESTINATION, t.StringType(), False),
             t.StructField(SEGMENTS, t.ArrayType(t.StringType()), False),
