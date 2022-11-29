@@ -11,7 +11,7 @@ def create_notebooks_widget():
         get_notebook_name(notebook_info.path) for notebook_info in get_feature_notebooks_info(get_workspace_api())
     ]
 
-    dbutils.widgets.dropdown(const.FEATURE_WIDGET, const.ALL_FEATURES, [const.ALL_FEATURES] + features)
+    dbutils.widgets.multiselect(const.FEATURE_WIDGET, const.ALL_FEATURES, [const.ALL_FEATURES] + features)
 
 
 def create_dry_run_widgets():
