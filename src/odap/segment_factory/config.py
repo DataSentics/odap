@@ -1,5 +1,5 @@
-from typing import Dict, Any
-from odap.common.config import ConfigNamespace
+from typing import Dict, Any, List
+from odap.common.config import get_config_on_rel_path, ConfigNamespace, CONFIG_NAME
 from odap.common.utils import get_absolute_api_path, list_folders
 from odap.common.exceptions import ConfigAttributeMissingException
 from odap.common.databricks import get_workspace_api
@@ -79,10 +79,14 @@ def get_destination(destination_name: str, config: Config) -> Dict[str, Any]:
     return destination_dict
 
 
-def get_use_cases():
+def get_use_cases() -> List[str]:
     worskpace_api = get_workspace_api()
 
     use_cases_path = get_absolute_api_path(USE_CASES_FOLDER)
     use_cases_folders = list_folders(use_cases_path, worskpace_api)
 
     return [use_case_folder.basename for use_case_folder in use_cases_folders]
+
+
+def get_use_case_config(use_case_name: str) -> Dict[str, Any]:
+    return get_config_on_rel_path(USE_CASES_FOLDER, use_case_name, CONFIG_NAME)
