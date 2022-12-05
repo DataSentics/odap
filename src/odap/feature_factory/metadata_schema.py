@@ -89,4 +89,7 @@ def get_variable_type(dtype: str) -> Optional[str]:
     if dtype.startswith("decimal"):
         return "numerical"
 
+    if dtype.startswith("array"):
+        return "array"
+
     return variable_types_map.get(dtype)
