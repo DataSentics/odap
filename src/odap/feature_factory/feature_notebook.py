@@ -1,4 +1,5 @@
 from typing import Any, List, Dict
+from pyspark.sql import functions as f
 from databricks_cli.workspace.api import WorkspaceFileInfo, WorkspaceApi
 
 from odap.feature_factory import const
@@ -44,13 +45,24 @@ class FeatureNotebook:
         logger.info(f"Feature {self.info.path} successfully loaded.")
 
     def fill_nulls(self):
+        df = self.df
+
         fill_dict = {
             feature[const.FEATURE]: feature[const.FILLNA_VALUE]
             for feature in self.metadata
-            if feature[const.FILLNA_VALUE] is not None
+            if feature[const.FILLNA_VALUE] is not None and not feature[const.DTYPE].startswith("array")
         }
 
-        return self.df.fillna(fill_dict)
+        for feature in self.metadata:
+            if feature[const.DTYPE].startswith("array") and feature[const.FILLNA_VALUE] is not None:
+                df = df.withColumn(
+                    feature[const.FEATURE],
+                    f.when(
+                        f.col(feature[const.FEATURE]).isNull(), f.array(*map(f.lit, feature[const.FILLNA_VALUE]))
+                    ).otherwise(f.col(feature[const.FEATURE])),
+                )
+
+        return df.fillna(fill_dict)
 
     def get_feature_notebook_cells(self, info: WorkspaceFileInfo, workspace_api: WorkspaceApi):
         notebook_cells = get_notebook_cells(info, workspace_api)
