@@ -11,7 +11,7 @@ from odap.common.utils import get_notebook_name, get_relative_path
 from odap.common.exceptions import NotebookException
 from odap.feature_factory.config import get_features_table, get_metadata_table
 from odap.feature_factory.templates import resolve_metadata_templates
-from odap.feature_factory.type_checker import is_fillna_valid
+from odap.feature_factory.type_checker import check_fillna_valid
 from odap.feature_factory.no_target_optimizer import get_no_target_timestamp
 from odap.feature_factory.metadata_schema import (
     FeatureMetadataType,
@@ -94,16 +94,12 @@ def set_fs_compatible_metadata(features_metadata: FeaturesMetadataType, config: 
 
 
 def resolve_fillna_with(feature_metadata: FeatureMetadataType):
-    if const.FILLNA_WITH in feature_metadata:
-        fillna_with = feature_metadata.pop(const.FILLNA_WITH)
+    fillna_with = feature_metadata.pop(const.FILLNA_WITH, None)
 
-        feature_metadata[const.FILLNA_VALUE] = fillna_with
-        feature_metadata[const.FILLNA_VALUE_TYPE] = type(fillna_with).__name__
+    feature_metadata[const.FILLNA_VALUE] = str(fillna_with)
+    feature_metadata[const.FILLNA_VALUE_TYPE] = type(fillna_with).__name__
 
-        is_fillna_valid(feature_metadata[const.DTYPE], fillna_with, feature_metadata[const.FEATURE])
-    else:
-        feature_metadata[const.FILLNA_VALUE] = "None"
-        feature_metadata[const.FILLNA_VALUE_TYPE] = "NoneType"
+    check_fillna_valid(feature_metadata[const.DTYPE], fillna_with, feature_metadata[const.FEATURE])
 
 
 def add_additional_metadata(metadata: FeatureMetadataType, feature_df: DataFrame, feature_path: str):
