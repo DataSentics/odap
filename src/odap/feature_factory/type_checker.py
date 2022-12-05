@@ -3,7 +3,10 @@ from datetime import datetime
 from odap.feature_factory.exceptions import WrongFillnaValueTypeError
 
 
-def is_fillna_valid(dtype: str, value, feature_name: str):
+def check_fillna_valid(dtype: str, value, feature_name: str):
+    if value is None:
+        return
+
     if (
         (is_feature_bool(dtype) and not is_value_bool(value))  # pylint: disable=too-many-boolean-expressions
         or (is_feature_numeric(dtype) and not is_value_numeric(value))
