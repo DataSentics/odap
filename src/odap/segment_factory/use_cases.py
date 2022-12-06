@@ -1,6 +1,6 @@
 from typing import Dict, List
 from odap.segment_factory.config import get_exports, get_use_cases, get_use_case_config
-from odap.segment_factory.exports import run_export
+from odap.segment_factory.Export import Export
 from odap.common.logger import logger
 from odap.segment_factory.widgets import ALL, UC_EXPORT_SEPARATOR
 
@@ -30,19 +30,10 @@ def create_use_case_export_map(use_case_exports_list: List[str]) -> Dict[str, Li
 
 
 def orchestrate_use_case(
-    use_case: str,
+    use_case_name: str,
     selected_exports: List[str],
-    feature_factory_config: Dict,
-    segment_factory_config: Dict,
 ):
-    logger.info(f"Running {use_case} use case")
+    logger.info(f"Running {use_case_name} use case")
 
-    use_case_config = get_use_case_config(use_case)
-    for export in selected_exports:
-        run_export(
-            export,
-            use_case,
-            use_case_config,
-            feature_factory_config,
-            segment_factory_config,
-        )
+    for export_name in selected_exports:
+        Export(use_case_name, export_name).run()
