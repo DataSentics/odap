@@ -44,8 +44,8 @@ def write_export_log(
                     json.dumps(export_config),
                     json.dumps(destination_config),
                     destination_config["type"],
-                    repository["branch"],
-                    repository["head_commit_id"],
+                    repository.get("branch", ""),
+                    repository.get("head_commit_id", ""),
                 ]
             ],
             get_export_schema(),
