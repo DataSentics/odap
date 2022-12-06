@@ -35,6 +35,9 @@ pytest = "^7.1.3"
 pytest-mock = "^3.10.0"
 soda-core-spark-df = "^3.0.12"
 
+[tool.poetry.scripts]
+check-destinations = "odap.segment_factory.config_checker:check_destinations_exist"
+
 [tool.black]
 line-length = 120
 
