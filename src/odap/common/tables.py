@@ -1,5 +1,7 @@
 from typing import Optional
 from pyspark.sql import SparkSession, DataFrame
+from pyspark.sql.types import StructType
+from delta import DeltaTable
 
 
 def hive_table_exists(spark: SparkSession, full_table_name: str) -> bool:
@@ -20,3 +22,9 @@ def get_existing_table(table_name: str) -> Optional[DataFrame]:
         return spark.read.table(table_name)
 
     return None
+
+
+def create_table_if_not_exists(table_name: str, path: str, schema: StructType):
+    spark = SparkSession.getActiveSession()
+
+    DeltaTable.createIfNotExists(spark).tableName(table_name).location(path).addColumns(schema).execute()

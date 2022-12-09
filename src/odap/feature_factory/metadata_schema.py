@@ -38,31 +38,36 @@ variable_types_map = {
 }
 
 
-def get_metadata_schema():
-    return t.StructType(
-        [
-            t.StructField(const.FEATURE, t.StringType(), False),
-            t.StructField(const.DESCRIPTION, t.StringType(), True),
-            t.StructField(const.EXTRA, t.MapType(t.StringType(), t.StringType()), True),
-            t.StructField(const.FEATURE_TEMPLATE, t.StringType(), True),
-            t.StructField(const.DESCRIPTION_TEMPLATE, t.StringType(), True),
-            t.StructField(const.CATEGORY, t.StringType(), True),
-            t.StructField(const.OWNER, t.StringType(), True),
-            t.StructField(const.TAGS, t.ArrayType(t.StringType()), True),
-            t.StructField(const.START_DATE, t.TimestampType(), True),
-            t.StructField(const.FREQUENCY, t.StringType(), True),
-            t.StructField(const.LAST_COMPUTE_DATE, t.TimestampType(), True),
-            t.StructField(const.DTYPE, t.StringType(), True),
-            t.StructField(const.VARIABLE_TYPE, t.StringType(), True),
-            t.StructField(const.FILLNA_VALUE, t.StringType(), True),
-            t.StructField(const.FILLNA_VALUE_TYPE, t.StringType(), True),
-            t.StructField(const.NOTEBOOK_NAME, t.StringType(), True),
-            t.StructField(const.NOTEBOOK_ABSOLUTE_PATH, t.StringType(), True),
-            t.StructField(const.NOTEBOOK_RELATIVE_PATH, t.StringType(), True),
-            t.StructField(const.LOCATION, t.StringType(), True),
-            t.StructField(const.BACKEND, t.StringType(), True),
-        ]
-    )
+def get_metadata_pk_columns() -> List[t.StructField]:
+    return [t.StructField(const.FEATURE, t.StringType(), False)]
+
+
+def get_metadata_columns() -> List[t.StructField]:
+    return [
+        t.StructField(const.DESCRIPTION, t.StringType(), True),
+        t.StructField(const.EXTRA, t.MapType(t.StringType(), t.StringType()), True),
+        t.StructField(const.FEATURE_TEMPLATE, t.StringType(), True),
+        t.StructField(const.DESCRIPTION_TEMPLATE, t.StringType(), True),
+        t.StructField(const.CATEGORY, t.StringType(), True),
+        t.StructField(const.OWNER, t.StringType(), True),
+        t.StructField(const.TAGS, t.ArrayType(t.StringType()), True),
+        t.StructField(const.START_DATE, t.TimestampType(), True),
+        t.StructField(const.FREQUENCY, t.StringType(), True),
+        t.StructField(const.LAST_COMPUTE_DATE, t.TimestampType(), True),
+        t.StructField(const.DTYPE, t.StringType(), True),
+        t.StructField(const.VARIABLE_TYPE, t.StringType(), True),
+        t.StructField(const.FILLNA_VALUE, t.StringType(), True),
+        t.StructField(const.FILLNA_VALUE_TYPE, t.StringType(), True),
+        t.StructField(const.NOTEBOOK_NAME, t.StringType(), True),
+        t.StructField(const.NOTEBOOK_ABSOLUTE_PATH, t.StringType(), True),
+        t.StructField(const.NOTEBOOK_RELATIVE_PATH, t.StringType(), True),
+        t.StructField(const.LOCATION, t.StringType(), True),
+        t.StructField(const.BACKEND, t.StringType(), True),
+    ]
+
+
+def get_metadata_schema() -> t.StructType:
+    return t.StructType(get_metadata_pk_columns() + get_metadata_columns())
 
 
 def get_feature_field(feature_df: DataFrame, feature_name: str, feature_path: str) -> t.StructField:
