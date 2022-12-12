@@ -70,8 +70,11 @@ def get_feature_dates(
             .filter(col(const.FEATURE) == feature_name)
             .first()
         )
-        if existing_dates:
+
+        if getattr(existing_dates, const.START_DATE, None):
             start_date = min(start_date, existing_dates[const.START_DATE])
+
+        if getattr(existing_dates, const.LAST_COMPUTE_DATE, None):
             last_compute_date = max(last_compute_date, existing_dates[const.LAST_COMPUTE_DATE])
 
     return {const.LAST_COMPUTE_DATE: last_compute_date, const.START_DATE: start_date}
