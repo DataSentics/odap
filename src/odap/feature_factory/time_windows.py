@@ -29,6 +29,24 @@ PERIOD_NAMES = {
     "w": "WEEKS",
 }
 
+
+def is_time_window(time_column: Union[str, Column], num_days: int, unit: str = "day") -> Column:
+    time_column = f.col(time_column) if isinstance(time_column, str) else time_column
+
+    return time_column.between(f.col("timestamp") - f.lit(num_days).cast(f"interval {unit}"), f.col("timestamp"))
+
+
+def time_windowed(column: Column, time_column: Union[str, Column], num_days: int, unit: str = "day") -> Column:
+    return f.when(is_time_window(time_column, num_days, unit), column).otherwise(None)
+
+
+def get_time_windowed_for_time_column(time_column: Union[str, Column]) -> Callable[[Column, int], Column]:
+    def time_windowed_for_time_column(column: Column, num_days: int) -> Column:
+        return time_windowed(column, time_column, num_days)
+
+    return time_windowed_for_time_column
+
+
 # pylint: disable=invalid-name
 _time_window_column_template = f"is_time_window_{{{TIME_WINDOW_PLACEHOLDER}}}"
 
