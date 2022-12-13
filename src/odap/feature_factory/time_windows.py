@@ -1,5 +1,5 @@
 from functools import partial
-from typing import List, Callable, Union, Tuple, Dict
+from typing import List, Callable, Union, Tuple, Dict, Optional
 
 from pyspark.sql import Column
 from pyspark.sql import DataFrame
@@ -30,14 +30,19 @@ PERIOD_NAMES = {
 }
 
 
-def is_time_window(time_column: Union[str, Column], num_days: int, unit: str = "day") -> Column:
+def is_time_window(time_column: Union[str, Column], window_size: int, unit: Optional[str] = None) -> Column:
+    unit = unit if unit is not None else "day"
     time_column = f.col(time_column) if isinstance(time_column, str) else time_column
 
-    return time_column.between(f.col("timestamp") - f.lit(num_days).cast(f"interval {unit}"), f.col("timestamp"))
+    return time_column.between(f.col("timestamp") - f.lit(window_size).cast(f"interval {unit}"), f.col("timestamp"))
 
 
-def time_windowed(column: Column, time_column: Union[str, Column], num_days: int, unit: str = "day") -> Column:
-    return f.when(is_time_window(time_column, num_days, unit), column).otherwise(None)
+def time_windowed(
+    column: Column, time_column: Union[str, Column], window_size: int, unit: Optional[str] = None
+) -> Column:
+    unit = unit if unit is not None else "day"
+
+    return f.when(is_time_window(time_column, window_size, unit), column).otherwise(None)
 
 
 def get_time_windowed_for_time_column(time_column: Union[str, Column]) -> Callable[[Column, int], Column]:
