@@ -46,8 +46,8 @@ def time_windowed(
 
 
 def get_time_windowed_for_time_column(time_column: Union[str, Column]) -> Callable[[Column, int], Column]:
-    def time_windowed_for_time_column(column: Column, num_days: int) -> Column:
-        return time_windowed(column, time_column, num_days)
+    def time_windowed_for_time_column(column: Column, num_days: int, unit: Optional[str] = None) -> Column:
+        return time_windowed(column, time_column, num_days, unit)
 
     return time_windowed_for_time_column
 
