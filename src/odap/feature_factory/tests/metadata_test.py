@@ -49,6 +49,7 @@ def generate_variable_metadata(column: str):
     return [column, description, feature_template, description_template]
 
 
+# pylint: disable=too-many-statements
 def test_metadata_integration(mocker):
     metadata_cell = """
 # MAGIC %python
@@ -69,6 +70,10 @@ def test_metadata_integration(mocker):
 # MAGIC }
 """
     mocker.patch("odap.common.utils.get_repository_root_api_path", return_value=BASE_PATH)
+    mocker.patch(
+        "odap.common.config.get_config_on_rel_path",
+        return_value={"featurefactory": {"entities": {"customer": {"id_column": "customer_id"}}}},
+    )
 
     columns = [
         "product1_feature_14d",
@@ -89,24 +94,30 @@ def test_metadata_integration(mocker):
 
     variable_metadata = [generate_variable_metadata(column) for column in columns]
 
-    expected_metadata = [
-        {
-            "feature": feature,
-            "extra": {"product": feature.split("_")[0], "time_window": feature.split("_")[-1]},
-            "description": description,
-            "feature_template": f_template,
-            "description_template": d_template,
-            "dtype": "double",
-            "category": "general",
-            "fillna_value": "None",
-            "fillna_value_type": "NoneType",
-            "tags": ["tag1", "tag2", "tag3"],
-            "notebook_name": "feature",
-            "notebook_absolute_path": FEATURE_PATH,
-            "notebook_relative_path": RELATIVE_PATH,
-            "variable_type": "numerical",
-        }
-        for feature, description, f_template, d_template in variable_metadata
-    ]
+    expected_metadata = sorted(
+        [
+            {
+                "description": description,
+                "dtype": "double",
+                "tags": ["tag1", "tag2", "tag3"],
+                "feature": feature,
+                "feature_template": f_template,
+                "description_template": d_template,
+                "extra": {"product": feature.split("_")[0], "time_window": feature.split("_")[-1]},
+                "category": "general",
+                "notebook_name": "feature",
+                "notebook_absolute_path": FEATURE_PATH,
+                "notebook_relative_path": RELATIVE_PATH,
+                "variable_type": "numerical",
+                "fillna_value": "None",
+                "fillna_value_type": "NoneType",
+            }
+            for feature, description, f_template, d_template in variable_metadata
+        ],
+        key=lambda x: x["feature"],
+    )
 
-    assert resolve_metadata(["", metadata_cell, ""], FEATURE_PATH, df) == expected_metadata
+    assert (
+        sorted(resolve_metadata(["", metadata_cell, ""], FEATURE_PATH, df), key=lambda x: x["feature"])
+        == expected_metadata
+    )

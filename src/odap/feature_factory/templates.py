@@ -1,9 +1,11 @@
 import re
 from copy import deepcopy
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Set
 from pyspark.sql import DataFrame
+from odap.common.config import TIMESTAMP_COLUMN, ConfigNamespace, get_config_namespace
 
 from odap.feature_factory import const
+from odap.feature_factory.config import get_entity_primary_key
 
 from odap.feature_factory.metadata_schema import FeatureMetadataType, FeaturesMetadataType
 from odap.feature_factory.time_windows import TIME_WINDOW_PLACEHOLDER, parse_time_window
@@ -60,7 +62,7 @@ def resolve_placeholders(
 
 
 def resolve_placeholders_on_df_columns(
-    df_columns: List[str], feature_metadata: FeatureMetadataType, placeholders: List[str]
+    df_columns: Set[str], feature_metadata: FeatureMetadataType, placeholders: List[str]
 ) -> FeaturesMetadataType:
     resolved_metadata = []
 
@@ -86,7 +88,11 @@ def resolve_metadata_template(feature_df: DataFrame, feature_metadata: FeatureMe
     if not placeholders:
         return [feature_metadata]
 
-    return resolve_placeholders_on_df_columns(feature_df.columns, feature_metadata, placeholders)
+    config = get_config_namespace(ConfigNamespace.FEATURE_FACTORY)
+
+    resolvable_columns = set(feature_df.columns) - {get_entity_primary_key(config), TIMESTAMP_COLUMN}
+
+    return resolve_placeholders_on_df_columns(resolvable_columns, feature_metadata, placeholders)
 
 
 def resolve_metadata_templates(feature_df: DataFrame, features_metadata: FeaturesMetadataType) -> FeaturesMetadataType:
