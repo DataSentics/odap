@@ -1,7 +1,7 @@
 name: ReleaseNotice
 on:
   release:
-    types: [created]
+    types: [released, published]
   workflow_dispatch:
 jobs:
   build:
