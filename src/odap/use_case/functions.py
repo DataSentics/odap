@@ -2,7 +2,7 @@ from typing import List
 from odap.use_case.notebooks import get_sdm_data, get_segment_attributes
 
 
-def get_export_data(config: dict, value: str) -> List[str]:
+def get_export_data(config: dict, value: str):
     data = []
     config = config["exports"] if "exports" in config else {}
     for export in config:
