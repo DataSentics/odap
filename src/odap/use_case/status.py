@@ -13,6 +13,6 @@ def get_branch() -> str:
 def get_status(use_case_config: dict) -> str:
     if "status" in use_case_config:
         return "concept"
-    if use_case_config["status"] != "master":
+    if get_branch() != "master":
         return "dev"
     return "production"
