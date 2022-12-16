@@ -1,4 +1,4 @@
-from pyspark.sql import DataFrame, SparkSession
+from pyspark.sql import SparkSession
 from odap.common.config import get_config_namespace, ConfigNamespace
 from odap.use_case.schemas import get_use_case_schema
 from odap.use_case.usecases import generate_usecases
@@ -6,13 +6,13 @@ from odap.use_case.usecases import generate_usecases
 
 def generate_table():
     spark = SparkSession.getActiveSession()
-    PATH = get_config_namespace(ConfigNamespace.USECASE_FACTORY)["path"]
-    DATA = spark.createDataFrame(data=generate_usecases(), schema=get_use_case_schema())
-    if not spark.catalog.tableExists(PATH):
-        DATA.write.saveAsTable(PATH)
+    path = get_config_namespace(ConfigNamespace.USECASE_FACTORY)["path"]
+    data = spark.createDataFrame(data=generate_usecases(), schema=get_use_case_schema())
+    if not spark.catalog.tableExists(path):
+        data.write.saveAsTable(path)
     else:
-        df_table = spark.sql(f"select * from {PATH}")
-        DATA.join(
+        df_table = spark.sql(f"select * from {path}")
+        data.join(
             df_table,
             [
                 "name",
@@ -29,4 +29,4 @@ def generate_table():
                 "data_sources",
             ],
             "left_outer",
-        ).write.mode("overwrite").saveAsTable(PATH)
+        ).write.mode("overwrite").saveAsTable(path)
