@@ -8,6 +8,8 @@ def generate_table():
     spark = SparkSession.getActiveSession()
     path = get_config_namespace(ConfigNamespace.USECASE_FACTORY)["path"]
     data = spark.createDataFrame(data=generate_usecases(), schema=get_use_case_schema())
+
+    # pylint: disable=E1101
     if not spark.catalog.tableExists(path):
         data.write.saveAsTable(path)
     else:
