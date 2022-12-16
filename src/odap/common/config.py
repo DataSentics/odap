@@ -14,6 +14,7 @@ Config = Dict[str, Any]
 class ConfigNamespace(enum.Enum):
     FEATURE_FACTORY = "featurefactory"
     SEGMENT_FACTORY = "segmentfactory"
+    USECASE_FACTORY = "usecasefactory"
 
 
 def get_config_on_rel_path(*rel_path: str) -> Config:
