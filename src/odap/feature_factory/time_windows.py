@@ -1,3 +1,4 @@
+import re
 from functools import partial
 from typing import List, Callable, Union, Tuple, Dict, Optional
 
@@ -54,6 +55,10 @@ def get_time_windowed_for_time_column(time_column: Union[str, Column]) -> Callab
 
 # pylint: disable=invalid-name
 _time_window_column_template = f"is_time_window_{{{TIME_WINDOW_PLACEHOLDER}}}"
+
+
+def is_time_window_parsable(time_window: str) -> bool:
+    return re.match(f"([0-9]+)({'|'.join(PERIOD_NAMES.keys())})", time_window) is not None
 
 
 def parse_time_window(time_window: str) -> Dict[str, int]:

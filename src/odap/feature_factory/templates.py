@@ -8,7 +8,7 @@ from odap.feature_factory import const
 from odap.feature_factory.config import get_entity_primary_key
 
 from odap.feature_factory.metadata_schema import FeatureMetadataType, FeaturesMetadataType
-from odap.feature_factory.time_windows import TIME_WINDOW_PLACEHOLDER, parse_time_window
+from odap.feature_factory.time_windows import TIME_WINDOW_PLACEHOLDER, parse_time_window, is_time_window_parsable
 
 
 def get_feature_placeholders(feature_name_template: str) -> List[str]:
@@ -35,7 +35,9 @@ def get_placeholder_to_value_dict(
 def resolve_description(metadata_value: str, placeholder_to_value_dict: Dict[str, str]) -> str:
     copied_placehoder_to_value_dict = placeholder_to_value_dict.copy()
 
-    if TIME_WINDOW_PLACEHOLDER in placeholder_to_value_dict:
+    if TIME_WINDOW_PLACEHOLDER in placeholder_to_value_dict and is_time_window_parsable(
+        copied_placehoder_to_value_dict[TIME_WINDOW_PLACEHOLDER]
+    ):
         description_time_window_dict = parse_time_window(copied_placehoder_to_value_dict[TIME_WINDOW_PLACEHOLDER])
 
         period, amount = next(iter(description_time_window_dict.items()))
