@@ -3,6 +3,7 @@ from typing import List
 import re
 
 from pyspark.sql import SparkSession
+from odap.common.exceptions import WidgetValueException
 
 from odap.feature_factory import const
 from odap.common.widgets import get_widget_value
@@ -39,4 +40,9 @@ def replace_no_target(notebook_language: str, notebook_cells: List[str], timesta
 def get_no_target_timestamp():
     spark = SparkSession.getActiveSession()
 
-    return spark.read.table(const.TARGET_STORE).limit(1).select(TIMESTAMP_COLUMN).collect()[0][0]
+    timestamp = spark.read.table(const.TARGET_STORE).limit(1).select(TIMESTAMP_COLUMN).collect()[0][0]
+
+    if timestamp is None:
+        raise WidgetValueException("Invalid timestamp value!")
+
+    return timestamp

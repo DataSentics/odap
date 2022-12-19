@@ -6,6 +6,10 @@ class InvalidConfigAttributException(Exception):
     pass
 
 
+class WidgetValueException(Exception):
+    pass
+
+
 class NotebookException(Exception):
     def __init__(self, message, path):
         message = f"{message} At: {path}"
