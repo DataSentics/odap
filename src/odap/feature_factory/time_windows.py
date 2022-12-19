@@ -38,7 +38,7 @@ def is_time_window(time_column: Union[str, Column], window_size: int, unit: Opti
 
 
 def time_windowed(
-    column: Column, time_column: Union[str, Column], window_size: int, unit: Optional[str] = None
+    column: Union[str, Column], time_column: Union[str, Column], window_size: int, unit: Optional[str] = None
 ) -> Column:
     unit = unit if unit is not None else "day"
 
