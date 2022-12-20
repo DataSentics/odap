@@ -93,6 +93,10 @@ def get_features_table(table_name: str, config: Config) -> str:
     return concat_db_table(database, table_name)
 
 
+def get_features_table_path(table_name: str, config: Config) -> str:
+    return f"{get_features_table_dir_path(config)}/{table_name}"
+
+
 def get_latest_features_table_for_entity(entity_name: str, config: Config) -> str:
     table_name = get_features(config).get("latest_table")
 

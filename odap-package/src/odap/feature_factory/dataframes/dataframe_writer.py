@@ -7,7 +7,7 @@ from odap.common.tables import create_table_if_not_exists
 from odap.feature_factory.config import (
     get_entity_primary_key,
     get_features_table,
-    get_features_table_dir_path,
+    get_features_table_path,
     get_latest_features_table,
     get_latest_features_table_path,
     get_metadata_table,
@@ -55,7 +55,7 @@ def write_features_df(notebook_table_mapping: Dict[str, FeatureNotebookList], co
         write_df_to_feature_store(
             df,
             table_name=get_features_table(table_name, config),
-            table_path=f"{get_features_table_dir_path(config)}/{table_name}",
+            table_path=get_features_table_path(table_name, config),
             primary_keys=[entity_primary_key],
             timestamp_keys=[TIMESTAMP_COLUMN],
         )

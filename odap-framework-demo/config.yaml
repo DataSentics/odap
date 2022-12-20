@@ -1,16 +1,16 @@
 parameters:
   usecasefactory:
-    table: "odap_use_cases.use_cases"
+    table: "{write_env}_odap_use_cases.use_cases"
     
   featurefactory:
     database: "{write_env}_odap_features_{entity}"
     features:
       latest_table: "features_latest"
-      dir_path: "dbfs:/{write_env}/odap_features/{entity}/features"
+      dir_path: "dbfs:/{write_env}_odap_features/{entity}/features"
 
     metadata:
       table: "metadata"
-      path: "dbfs:/odap_features/{entity}/metadata"
+      path: "dbfs:/{write_env}_odap_features/{entity}/metadata"
 
     entities:
       customer:
@@ -26,12 +26,12 @@ parameters:
 
   segmentfactory:
     log:
-      table: "odap_segments.export_logs"
-      path: "dbfs:/odap_segments/export_logs.delta"
+      table: "{write_env}_odap_segments.export_logs"
+      path: "dbfs:/{write_env}_odap_segments/export_logs.delta"
 
     segment:
-      table: "odap_segments.segments"
-      path: "dbfs:/odap_segments/segments.delta"
+      table: "{write_env}_odap_segments.segments"
+      path: "dbfs:/{write_env}_odap_segments/segments.delta"
 
     destinations:
       email_currency_csv_dbfs_export:
