@@ -8,7 +8,6 @@ from odap.use_case.usecases import generate_usecases
 def table_name():
     spark = SparkSession.getActiveSession()
     path = get_config_namespace(ConfigNamespace.USECASE_FACTORY)["path"]
-    data = spark.createDataFrame(
-        data=generate_usecases(), schema=get_use_case_schema())
+    data = spark.createDataFrame(data=generate_usecases(), schema=get_use_case_schema())
 
     data.write.mode("overwrite").saveAsTable(path)
