@@ -19,9 +19,9 @@ def get_segment_attributes(segment: str) -> List[str]:
         "SELECT (.*)FROM",
         get_segment_data(segment).replace("\n", ""),
     )
-    if segments:
-        return segments.group(1).replace(" ", "").split(",")
-    return []
+    if not segments:
+        return []
+    return segments.group(1).replace(" ", "").split(",")
 
 
 def get_sdm_data(segment: str) -> List[str]:
