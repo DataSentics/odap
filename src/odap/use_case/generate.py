@@ -1,5 +1,4 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.utils import AnalysisException
 from odap.common.config import get_config_namespace, ConfigNamespace
 from odap.use_case.schemas import get_use_case_schema
 from odap.use_case.usecases import generate_usecases
