@@ -45,3 +45,14 @@ def write_df_to_feature_store(
     logger.info(f"Writing data to table: {table_name}...")
     fs.write_table(table_name, df=df, mode="merge")
     logger.info("Write successful.")
+
+
+def write_latest_table(latest_features_df: DataFrame, latest_table_name: str, latest_table_path: str):
+    logger.info(f"Writing latest data to table: '{latest_table_name}'")
+    (
+        latest_features_df.write.mode("overwrite")
+        .option("overwriteSchema", True)
+        .option("path", latest_table_path)
+        .saveAsTable(latest_table_name)
+    )
+    logger.info("Write successful.")

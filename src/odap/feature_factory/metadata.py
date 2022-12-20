@@ -9,7 +9,7 @@ from odap.common.notebook import eval_cell_with_header
 from odap.common.tables import get_existing_table
 from odap.common.utils import get_notebook_name, get_relative_path
 from odap.common.exceptions import NotebookException
-from odap.feature_factory.config import get_features_table, get_metadata_table
+from odap.feature_factory.config import get_metadata_table
 from odap.feature_factory.templates import resolve_metadata_templates
 from odap.feature_factory.type_checker import check_fillna_valid
 from odap.feature_factory.no_target_optimizer import get_no_target_timestamp
@@ -45,7 +45,10 @@ def get_features_from_raw_metadata(raw_metadata: RawMetadataType, feature_path: 
 def check_metadata(metadata: FeatureMetadataType, feature_path: str):
     for field in metadata:
         if field not in get_metadata_schema().fieldNames():
-            raise NotebookException(f"{field} is not a supported metadata field.", path=feature_path)
+            raise NotebookException(f"'{field}' is not a supported metadata field.", path=feature_path)
+
+    if "table" not in metadata:
+        raise Exception(f"Notebook at '{feature_path}' does not define 'table' in metadata.")
 
     return metadata
 
@@ -90,7 +93,6 @@ def set_fs_compatible_metadata(features_metadata: FeaturesMetadataType, config: 
             {
                 const.OWNER: "unknown",
                 const.FREQUENCY: "daily",
-                const.LOCATION: get_features_table(config),
                 const.BACKEND: "delta_table",
             }
         )
