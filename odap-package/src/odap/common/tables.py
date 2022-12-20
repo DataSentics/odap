@@ -1,10 +1,14 @@
 from typing import Optional
 from pyspark.sql import SparkSession, DataFrame
+from pyspark.sql import functions as f
 from pyspark.sql.types import StructType
 from delta import DeltaTable
+from databricks.feature_store import FeatureStoreClient
 
 
-def hive_table_exists(spark: SparkSession, full_table_name: str) -> bool:
+def hive_table_exists(full_table_name: str) -> bool:
+    spark = SparkSession.getActiveSession()
+
     db_name = full_table_name.split(".")[0]
     table_name = full_table_name.split(".")[1]
     databases = [db.databaseName for db in spark.sql("SHOW DATABASES").collect()]
@@ -12,16 +16,40 @@ def hive_table_exists(spark: SparkSession, full_table_name: str) -> bool:
     if db_name not in databases:
         return False
 
+    # pylint: disable=use-implicit-booleaness-not-comparison
     return spark.sql(f'SHOW TABLES IN {db_name} LIKE "{table_name}"').collect() != []
 
 
-def get_existing_table(table_name: str) -> Optional[DataFrame]:
-    spark = SparkSession.getActiveSession()  # pylint: disable=W0641
+def feature_store_table_exists(full_table_name: str) -> bool:
+    feature_store_client = FeatureStoreClient()
 
-    if hive_table_exists(spark, table_name):
+    try:
+        feature_store_client.get_table(full_table_name)
+        return True
+
+    except Exception:  # noqa pylint: disable=broad-except
+        return False
+
+
+def get_existing_table(table_name: str) -> Optional[DataFrame]:
+    spark = SparkSession.getActiveSession()
+
+    if hive_table_exists(table_name):
         return spark.read.table(table_name)
 
     return None
+
+
+def table_path_exists(path: str) -> bool:
+    spark = SparkSession.getActiveSession()
+
+    return DeltaTable.isDeltaTable(spark, path)
+
+
+def get_table_path(full_table_name: str) -> str:
+    spark = SparkSession.getActiveSession()
+
+    return spark.sql(f"DESCRIBE FORMATTED {full_table_name}").filter(f.col("col_name") == "Location").collect()[0][1]
 
 
 def create_table_if_not_exists(table_name: str, path: str, schema: StructType):

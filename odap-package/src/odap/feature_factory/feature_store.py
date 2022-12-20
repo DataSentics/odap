@@ -17,7 +17,7 @@ def create_feature_store_table(
     spark = SparkSession.getActiveSession()  # pylint: disable=W0641
     spark.sql(f"CREATE DATABASE IF NOT EXISTS {table_name.split('.')[0]}")
 
-    if hive_table_exists(spark, table_name):
+    if hive_table_exists(table_name):
         return
 
     fs.create_table(
