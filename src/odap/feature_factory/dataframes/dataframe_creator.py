@@ -62,7 +62,7 @@ def get_latest_features(entity_name: str, table_name: str, feature_factory_confi
     )
 
 
-def create_metadata_df(feature_notebooks: FeatureNotebookList):
+def create_metadata_df(feature_notebooks: FeatureNotebookList) -> DataFrame:
     features_metadata = []
     for notebook in feature_notebooks:
         features_metadata.extend(notebook.metadata)
@@ -70,11 +70,53 @@ def create_metadata_df(feature_notebooks: FeatureNotebookList):
     return create_dataframe(features_metadata, get_metadata_schema())
 
 
-def create_features_df(feature_notebooks: FeatureNotebookList, entity_primary_key: str):
+def fill_nulls_in_notebook(notebook: List[Dict]) -> Dict:
+    fill_dict = {}
+
+    for feature in notebook:
+        if feature[const.FILLNA_VALUE_TYPE] == "NoneType":
+            continue
+        if feature[const.DTYPE].startswith("array"):
+            continue
+
+        fill_dict[feature[const.FEATURE]] = feature[const.FILLNA_VALUE]
+    return fill_dict
+
+
+def fill_array_nulls(df: DataFrame, notebook: List[Dict]) -> DataFrame:
+    for feature in notebook:
+        if feature[const.DTYPE].startswith("array") and feature[const.FILLNA_VALUE] is not None:
+            df = df.withColumn(
+                feature[const.FEATURE],
+                f.when(
+                    f.col(feature[const.FEATURE]).isNull(), f.array(*map(f.lit, feature[const.FILLNA_VALUE]))
+                ).otherwise(f.col(feature[const.FEATURE])),
+            )
+    return df
+
+
+def fill_nulls(df: DataFrame, metadata: List[List[Dict]]) -> DataFrame:
+    fill_dict = {}
+
+    for notebook in metadata:
+        notebook_dict = fill_nulls_in_notebook(notebook)
+        fill_dict.update(notebook_dict)
+
+    for notebook in metadata:
+        df = fill_array_nulls(df, notebook)
+
+    return df.fillna(fill_dict)
+
+
+def create_features_df(feature_notebooks: FeatureNotebookList, entity_primary_key: str) -> DataFrame:
+    feature_metadata = [notebook.metadata for notebook in feature_notebooks]
+
     joined_df = join_dataframes(
         dataframes=[notebook.df for notebook in feature_notebooks], join_columns=[entity_primary_key, TIMESTAMP_COLUMN]
     )
 
-    execute_soda_checks_from_feature_notebooks(df=joined_df, feature_notebooks=feature_notebooks)
+    filled_df = fill_nulls(joined_df, feature_metadata)
 
-    return joined_df
+    execute_soda_checks_from_feature_notebooks(df=filled_df, feature_notebooks=feature_notebooks)
+
+    return filled_df
