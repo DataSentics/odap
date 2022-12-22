@@ -1,6 +1,8 @@
 from odap.common.config import Config
 
 from odap.common.exceptions import ConfigAttributeMissingException
+from odap.common.widgets import get_widget_value
+from odap.feature_factory import const
 
 
 def get_entities(config: Config) -> Config:
@@ -125,3 +127,7 @@ def get_metadata_table_path(config: Config) -> str:
         raise ConfigAttributeMissingException("metadata.path not defined in config.yaml")
 
     return metadata_table_path.format(entity=get_entity(config))
+
+
+def is_no_target_mode() -> bool:
+    return get_widget_value(const.TARGET_WIDGET).strip() == const.NO_TARGET

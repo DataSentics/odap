@@ -1,4 +1,5 @@
 from odap.common.config import get_config_namespace, ConfigNamespace
+from odap.feature_factory.config import is_no_target_mode
 from odap.feature_factory.dataframes.dataframe_writer import (
     write_features_df,
     write_latest_features,
@@ -17,4 +18,5 @@ def orchestrate():
     write_metadata_df(feature_notebooks, config)
     write_features_df(notebook_table_mapping, config)
 
-    write_latest_features(config)
+    if is_no_target_mode():
+        write_latest_features(config)
