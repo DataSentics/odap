@@ -56,8 +56,8 @@ def write_features_df(notebook_table_mapping: Dict[str, FeatureNotebookList], co
             df,
             table_name=get_features_table(table_name, config),
             table_path=f"{get_features_table_dir_path(config)}/{table_name}",
-            primary_keys=[entity_primary_key, TIMESTAMP_COLUMN],
-            partition_columns=[TIMESTAMP_COLUMN],
+            primary_keys=[entity_primary_key],
+            timestamp_keys=[TIMESTAMP_COLUMN],
         )
 
 
