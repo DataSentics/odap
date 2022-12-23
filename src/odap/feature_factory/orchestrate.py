@@ -19,4 +19,4 @@ def orchestrate():
     write_features_df(notebook_table_mapping, config)
 
     if is_no_target_mode():
-        write_latest_features(config)
+        write_latest_features(feature_notebooks, config)

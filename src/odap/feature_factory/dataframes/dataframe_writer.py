@@ -20,6 +20,7 @@ from odap.feature_factory.dataframes.dataframe_creator import (
     get_latest_features,
     join_dataframes,
     get_all_feature_tables,
+    fill_nulls,
 )
 from odap.feature_factory.feature_store import write_df_to_feature_store, write_latest_table
 from odap.feature_factory.metadata_schema import get_metadata_pk_columns, get_metadata_columns, get_metadata_schema
@@ -61,8 +62,7 @@ def write_features_df(notebook_table_mapping: Dict[str, FeatureNotebookList], co
         )
 
 
-def write_latest_features(config: Config):
-    entity_primary_key = get_entity_primary_key(config)
+def write_latest_features(feature_notebooks: FeatureNotebookList, config: Config):
     entity_name = get_entity(config)
 
     latest_feature_store_dataframes = []
@@ -70,8 +70,10 @@ def write_latest_features(config: Config):
         latest_features = get_latest_features(entity_name, table_name, config)
         latest_feature_store_dataframes.append(latest_features)
 
-    latest_features_all = join_dataframes(latest_feature_store_dataframes, [entity_primary_key])
+    latest_features_all = join_dataframes(latest_feature_store_dataframes, [get_entity_primary_key(config)])
+    latest_features_filled = fill_nulls(latest_features_all, feature_notebooks)
+
     latest_table_path = get_latest_features_table_path(config)
     latest_table_name = get_latest_features_table(config)
 
-    write_latest_table(latest_features_all, latest_table_name, latest_table_path)
+    write_latest_table(latest_features_filled, latest_table_name, latest_table_path)
