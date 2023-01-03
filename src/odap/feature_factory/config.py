@@ -81,7 +81,7 @@ def get_features_table(table_name: str, config: Config) -> str:
 
 
 def get_features_database(config: Config) -> str:
-    features_database = get_features(config).get("database")
+    features_database = config.get("database")
 
     if not features_database:
         raise ConfigAttributeMissingException("features.database not defined in config.yaml")
@@ -90,12 +90,13 @@ def get_features_database(config: Config) -> str:
 
 
 def get_latest_features_table(config: Config) -> str:
-    features_table = get_features(config).get("latest_table")
+    table_name = get_features(config).get("latest_table")
 
-    if not features_table:
+    if not table_name:
         raise ConfigAttributeMissingException("features.latest_table not defined in config.yaml")
 
-    return features_table.format(entity=get_entity(config))
+    table_name = table_name.format(entity=get_entity(config))
+    return get_features_table(table_name, config)
 
 
 def get_features_table_dir_path(config: Config) -> str:
@@ -117,7 +118,8 @@ def get_metadata_table(config: Config) -> str:
     if not metadata_table:
         raise ConfigAttributeMissingException("metadata.table not defined in config.yaml")
 
-    return metadata_table.format(entity=get_entity(config))
+    metadata_table = metadata_table.format(entity=get_entity(config))
+    return get_features_table(metadata_table, config)
 
 
 def get_metadata_table_path(config: Config) -> str:
