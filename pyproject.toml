@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "odap"
-version = "0.0.16"
+version = "0.1.0"
 description = "ODAP framework"
 readme = "README.md"
 
