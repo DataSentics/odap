@@ -5,7 +5,6 @@ from delta import DeltaTable
 from odap.common.config import TIMESTAMP_COLUMN, Config
 from odap.common.tables import create_table_if_not_exists
 from odap.feature_factory.config import (
-    get_entity,
     get_entity_primary_key,
     get_features_table,
     get_features_table_dir_path,
@@ -63,11 +62,9 @@ def write_features_df(notebook_table_mapping: Dict[str, FeatureNotebookList], co
 
 
 def write_latest_features(feature_notebooks: FeatureNotebookList, config: Config):
-    entity_name = get_entity(config)
-
     latest_feature_store_dataframes = []
-    for table_name in get_all_feature_tables(entity_name, config):
-        latest_features = get_latest_features(entity_name, table_name, config)
+    for table_name in get_all_feature_tables(config):
+        latest_features = get_latest_features(table_name, config)
         latest_feature_store_dataframes.append(latest_features)
 
     latest_features_all = join_dataframes(latest_feature_store_dataframes, [get_entity_primary_key(config)])

@@ -9,7 +9,7 @@ from odap.common.config import TIMESTAMP_COLUMN
 
 from odap.feature_factory import const
 from odap.feature_factory.config import (
-    get_metadata_table_by_entity_name,
+    get_metadata_table,
     get_features_table,
 )
 from odap.feature_factory.dq_checks import execute_soda_checks_from_feature_notebooks
@@ -37,15 +37,15 @@ def join_dataframes(dataframes: List[DataFrame], join_columns: List[str]) -> Dat
     return joined_df
 
 
-def get_all_feature_tables(entity_name: str, config: Dict) -> Iterable[str]:
+def get_all_feature_tables(config: Dict) -> Iterable[str]:
     spark = SparkSession.getActiveSession()
-    metadata_table = get_metadata_table_by_entity_name(entity_name, config)
+    metadata_table = get_metadata_table(config)
     return {row.table for row in spark.table(metadata_table).select(const.TABLE).collect()}
 
 
-def get_latest_features(entity_name: str, table_name: str, feature_factory_config: Dict) -> DataFrame:
+def get_latest_features(table_name: str, feature_factory_config: Dict) -> DataFrame:
     spark = SparkSession.getActiveSession()
-    metadata_table = get_metadata_table_by_entity_name(entity_name, feature_factory_config)
+    metadata_table = get_metadata_table(feature_factory_config)
 
     last_compute_date = (
         spark.read.table(metadata_table)
