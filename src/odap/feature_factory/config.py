@@ -56,37 +56,19 @@ def get_metadata(config: Config):
     return metadata
 
 
-def get_features_table_by_entity_name(entity_name: str, config: Config) -> str:
-    features_table: str = get_features(config).get("table")
-
-    if not features_table:
-        raise ConfigAttributeMissingException("features.table not defined in config.yaml")
-
-    return features_table.format(entity=entity_name)
-
-
-def get_metadata_table_by_entity_name(entity_name: str, config: Config) -> str:
-    metadata_table: str = get_metadata(config).get("table")
-
-    if not metadata_table:
-        raise ConfigAttributeMissingException("metadata.table not defined in config.yaml")
-
-    return metadata_table.format(entity=entity_name)
-
-
-def get_features_table(table_name: str, config: Config) -> str:
-    features_database = get_features_database(config)
-
-    return f"{features_database}.{table_name}"
-
-
-def get_features_database(config: Config) -> str:
+def get_database(config: Config) -> str:
     features_database = config.get("database")
 
     if not features_database:
         raise ConfigAttributeMissingException("features.database not defined in config.yaml")
 
     return features_database.format(entity=get_entity(config))
+
+
+def get_features_table(table_name: str, config: Config) -> str:
+    features_database = get_database(config)
+
+    return f"{features_database}.{table_name}"
 
 
 def get_latest_features_table(config: Config) -> str:
