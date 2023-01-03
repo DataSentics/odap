@@ -40,7 +40,7 @@ def join_dataframes(dataframes: List[DataFrame], join_columns: List[str]) -> Dat
 def get_all_feature_tables(entity_name: str, config: Dict) -> Iterable[str]:
     spark = SparkSession.getActiveSession()
     metadata_table = get_metadata_table_by_entity_name(entity_name, config)
-    return set(row.table for row in spark.table(metadata_table).select(const.TABLE).collect())
+    return {row.table for row in spark.table(metadata_table).select(const.TABLE).collect()}
 
 
 def get_latest_features(entity_name: str, table_name: str, feature_factory_config: Dict) -> DataFrame:

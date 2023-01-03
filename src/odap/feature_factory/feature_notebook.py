@@ -85,12 +85,12 @@ def create_notebook_table_mapping(feature_notebooks: FeatureNotebookList) -> Dic
     mapping = {}
 
     for feature_notebook in feature_notebooks:
-        location = feature_notebook.metadata[0].get("table", None)
+        table = feature_notebook.metadata[0].get("table", None)
 
-        if location not in mapping:
-            mapping[location] = []
+        if table not in mapping:
+            mapping[table] = []
 
-        mapping[location].append(feature_notebook)
+        mapping[table].append(feature_notebook)
     return mapping
 
 

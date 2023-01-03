@@ -83,8 +83,8 @@ def get_feature_dates(
 def set_fs_compatible_metadata(features_metadata: FeaturesMetadataType, config: Dict[str, Any]):
     existing_metadata_df = get_existing_table(get_metadata_table(config))
 
-    start_date = get_no_target_timestamp() if is_no_target_mode() else datetime.today()
-    last_compute_date = get_no_target_timestamp() if is_no_target_mode() else datetime(1, 1, 1)
+    start_date = get_no_target_timestamp() if is_no_target_mode() else datetime.max
+    last_compute_date = get_no_target_timestamp() if is_no_target_mode() else datetime.min
 
     for metadata in features_metadata:
         metadata.update(get_feature_dates(existing_metadata_df, metadata[const.FEATURE], start_date, last_compute_date))
