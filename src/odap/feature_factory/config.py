@@ -1,6 +1,8 @@
 from odap.common.config import Config
 
 from odap.common.exceptions import ConfigAttributeMissingException
+from odap.common.widgets import get_widget_value
+from odap.feature_factory import const
 
 
 def get_entities(config: Config) -> Config:
@@ -72,30 +74,42 @@ def get_metadata_table_by_entity_name(entity_name: str, config: Config) -> str:
     return metadata_table.format(entity=entity_name)
 
 
-def get_features_table(config: Config) -> str:
-    features_table = get_features(config).get("table")
+def get_features_table(table_name: str, config: Config) -> str:
+    features_database = get_features_database(config)
 
-    if not features_table:
-        raise ConfigAttributeMissingException("features.table not defined in config.yaml")
-
-    return features_table.format(entity=get_entity(config))
+    return f"{features_database}.{table_name}"
 
 
-def get_features_table_path(config: Config) -> str:
-    features_table_path = get_features(config).get("path")
+def get_features_database(config: Config) -> str:
+    features_database = config.get("database")
+
+    if not features_database:
+        raise ConfigAttributeMissingException("features.database not defined in config.yaml")
+
+    return features_database.format(entity=get_entity(config))
+
+
+def get_latest_features_table(config: Config) -> str:
+    table_name = get_features(config).get("latest_table")
+
+    if not table_name:
+        raise ConfigAttributeMissingException("features.latest_table not defined in config.yaml")
+
+    table_name = table_name.format(entity=get_entity(config))
+    return get_features_table(table_name, config)
+
+
+def get_features_table_dir_path(config: Config) -> str:
+    features_table_path = get_features(config).get("dir_path")
 
     if not features_table_path:
-        raise ConfigAttributeMissingException("features.path not defined in config.yaml")
+        raise ConfigAttributeMissingException("features.dir_path not defined in config.yaml")
 
     return features_table_path.format(entity=get_entity(config))
 
 
-def get_latest_features_table(config: Config) -> str:
-    return f"{get_features_table(config)}_latest"
-
-
 def get_latest_features_table_path(config: Config) -> str:
-    return f"{get_features_table_path(config)}.latest"
+    return f"{get_features_table_dir_path(config)}/latest"
 
 
 def get_metadata_table(config: Config) -> str:
@@ -104,7 +118,8 @@ def get_metadata_table(config: Config) -> str:
     if not metadata_table:
         raise ConfigAttributeMissingException("metadata.table not defined in config.yaml")
 
-    return metadata_table.format(entity=get_entity(config))
+    metadata_table = metadata_table.format(entity=get_entity(config))
+    return get_features_table(metadata_table, config)
 
 
 def get_metadata_table_path(config: Config) -> str:
@@ -114,3 +129,7 @@ def get_metadata_table_path(config: Config) -> str:
         raise ConfigAttributeMissingException("metadata.path not defined in config.yaml")
 
     return metadata_table_path.format(entity=get_entity(config))
+
+
+def is_no_target_mode() -> bool:
+    return get_widget_value(const.TARGET_WIDGET).strip() == const.NO_TARGET

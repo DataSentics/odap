@@ -9,7 +9,7 @@ from odap.common.notebook import eval_cell_with_header
 from odap.common.tables import get_existing_table
 from odap.common.utils import get_notebook_name, get_relative_path
 from odap.common.exceptions import NotebookException
-from odap.feature_factory.config import get_features_table, get_metadata_table
+from odap.feature_factory.config import get_metadata_table, is_no_target_mode
 from odap.feature_factory.templates import resolve_metadata_templates
 from odap.feature_factory.type_checker import check_fillna_valid
 from odap.feature_factory.no_target_optimizer import get_no_target_timestamp
@@ -45,7 +45,10 @@ def get_features_from_raw_metadata(raw_metadata: RawMetadataType, feature_path: 
 def check_metadata(metadata: FeatureMetadataType, feature_path: str):
     for field in metadata:
         if field not in get_metadata_schema().fieldNames():
-            raise NotebookException(f"{field} is not a supported metadata field.", path=feature_path)
+            raise NotebookException(f"'{field}' is not a supported metadata field.", path=feature_path)
+
+    if "table" not in metadata:
+        raise Exception(f"Notebook at '{feature_path}' does not define 'table' in metadata.")
 
     return metadata
 
@@ -59,11 +62,8 @@ def get_global_metadata(raw_metadata: RawMetadataType, feature_path: str) -> Fea
 
 
 def get_feature_dates(
-    existing_metadata_df: Optional[DataFrame], feature_name: str, timestamp: datetime
+    existing_metadata_df: Optional[DataFrame], feature_name: str, start_date: datetime, last_compute_date: datetime
 ) -> Dict[str, datetime]:
-    start_date = timestamp
-    last_compute_date = timestamp
-
     if existing_metadata_df:
         existing_dates = (
             existing_metadata_df.select(const.START_DATE, const.LAST_COMPUTE_DATE)
@@ -82,15 +82,16 @@ def get_feature_dates(
 
 def set_fs_compatible_metadata(features_metadata: FeaturesMetadataType, config: Dict[str, Any]):
     existing_metadata_df = get_existing_table(get_metadata_table(config))
-    no_target_timestamp = get_no_target_timestamp()
+
+    start_date = get_no_target_timestamp() if is_no_target_mode() else datetime.max
+    last_compute_date = get_no_target_timestamp() if is_no_target_mode() else datetime.min
 
     for metadata in features_metadata:
-        metadata.update(get_feature_dates(existing_metadata_df, metadata[const.FEATURE], no_target_timestamp))
+        metadata.update(get_feature_dates(existing_metadata_df, metadata[const.FEATURE], start_date, last_compute_date))
         metadata.update(
             {
                 const.OWNER: "unknown",
                 const.FREQUENCY: "daily",
-                const.LOCATION: get_features_table(config),
                 const.BACKEND: "delta_table",
             }
         )

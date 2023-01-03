@@ -55,6 +55,7 @@ def test_metadata_integration(mocker):
 # MAGIC %python
 # MAGIC metadata = {
 # MAGIC     "category": "general",
+# MAGIC     "table": "general_features",
 # MAGIC     "features": {
 # MAGIC         "{product}_feature_{time_window}": {
 # MAGIC             "description": "{product} feature in {time_window}",
@@ -105,6 +106,7 @@ def test_metadata_integration(mocker):
                 "description_template": d_template,
                 "extra": {"product": feature.split("_")[0], "time_window": feature.split("_")[-1]},
                 "category": "general",
+                "table": "general_features",
                 "notebook_name": "feature",
                 "notebook_absolute_path": FEATURE_PATH,
                 "notebook_relative_path": RELATIVE_PATH,

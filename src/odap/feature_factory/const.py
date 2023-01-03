@@ -39,7 +39,7 @@ FILLNA_VALUE_TYPE = "fillna_value_type"
 NOTEBOOK_NAME = "notebook_name"
 NOTEBOOK_ABSOLUTE_PATH = "notebook_absolute_path"
 NOTEBOOK_RELATIVE_PATH = "notebook_relative_path"
-LOCATION = "location"
+TABLE = "table"
 BACKEND = "backend"
 
 # Other

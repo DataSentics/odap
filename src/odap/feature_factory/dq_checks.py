@@ -4,7 +4,7 @@ import yaml
 
 from pyspark.sql import SparkSession, DataFrame
 
-from odap.feature_factory.feature_notebook import FeatureNotebooks
+from odap.feature_factory.feature_notebook import FeatureNotebookList
 from odap.common.logger import logger
 
 
@@ -37,11 +37,11 @@ def create_temporary_view(df: DataFrame) -> str:
     return _id
 
 
-def execute_soda_checks_from_feature_notebooks(df: DataFrame, feature_notebooks: FeatureNotebooks):
+def execute_soda_checks_from_feature_notebooks(df: DataFrame, feature_notebooks: FeatureNotebookList):
     checks_list = []
 
     for notebook in feature_notebooks:
-        checks_list += notebook.get_dq_checks_list()
+        checks_list += notebook.df_checks
 
     if checks_list:
         execute_soda_checks(df, checks_list)
