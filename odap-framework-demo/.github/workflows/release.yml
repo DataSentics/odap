@@ -1,0 +1,45 @@
+name: Release pipeline
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+
+jobs:
+  pipeline:
+
+    runs-on: ubuntu-latest
+
+    env:
+      DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+      DATABRICKS_TOKEN:  ${{ secrets.DATABRICKS_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements-dev.txt
+
+      - name: Deploy all jobs
+        run: |
+          dbx deploy --deployment-file deployment.yaml
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: |
+            Release for version ${{ github.ref }}.
+          draft: false
+          prerelease: false

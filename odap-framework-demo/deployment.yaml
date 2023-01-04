@@ -1,0 +1,106 @@
+build:
+   no_build: true
+
+clusters:
+  basic-cluster-props: &basic-cluster-props
+    spark_version: "11.3.x-cpu-ml-scala2.12"
+
+  basic-static-cluster: &basic-static-cluster
+    new_cluster:
+      <<: *basic-cluster-props
+      num_workers: 1
+      node_type_id: "Standard_DS3_v2"
+
+git:
+  odap-git-source: &odap-git-source
+    git_url: "https://github.com/DataSentics/odap.git"
+    git_provider: "github"
+    git_branch: "main"
+
+environments:
+  default:
+    workflows:
+      - name: "odap-features"
+        git_source: *odap-git-source
+        job_clusters:
+          - job_cluster_key: "default"
+            <<: *basic-static-cluster
+        schedule:
+          quartz_cron_expression: "0 0 2 * * ?"
+          timezone_id: "Europe/Belgrade"
+          pause_status: "UNPAUSED"
+        tasks:
+          - &odap-features-task
+            task_key: "odap-features"
+            deployment_config:
+              no_package: true
+            job_cluster_key: "default"
+            notebook_task:
+              notebook_path: "odap-framework-demo/orchestration/features_orchestrator"
+              base_parameters:
+                target: "no target"
+                timestamp: "2020-12-12"
+
+      - name: "upsell-uc-investment-interest-export"
+        git_source: *odap-git-source
+        job_clusters:
+          - job_cluster_key: "default"
+            <<: *basic-static-cluster
+        schedule:
+          quartz_cron_expression: "34 38 18 * * ?"
+          timezone_id: "Europe/Belgrade"
+          pause_status: "UNPAUSED"
+        tasks:
+          - &upsell-uc-investment-interest-export-task
+            task_key: "upsell-uc-investment-interest-export"
+            deployment_config:
+              no_package: true
+            job_cluster_key: "default"
+            notebook_task:
+              notebook_path: "odap-framework-demo/orchestration/segments_orchestrator"
+              base_parameters:
+                export: "upsell_uc: upsell_uc_investment_interest"
+
+      - name: "upsell-uc-loan-interest-export"
+        git_source: *odap-git-source
+        job_clusters:
+          - job_cluster_key: "default"
+            <<: *basic-static-cluster
+        schedule:
+          quartz_cron_expression: "34 38 18 * * ?"
+          timezone_id: "Europe/Belgrade"
+          pause_status: "UNPAUSED"
+        tasks:
+          - &upsell-uc-loan-interest-export-task
+            task_key: "upsell-uc-loan-interest-export"
+            deployment_config:
+              no_package: true
+            job_cluster_key: "default"
+            notebook_task:
+              notebook_path: "odap-framework-demo/orchestration/segments_orchestrator"
+              base_parameters:
+                export: "upsell_uc: upsell_uc_loan_interest"
+
+      - name: "integration-test"
+        git_source:
+          <<: *odap-git-source
+          git_branch: "{{env['GITHUB_HEAD_REF']}}"
+        job_clusters:
+          - job_cluster_key: "default"
+            <<: *basic-static-cluster
+        tasks:
+          - task_key: "init"
+            deployment_config:
+              no_package: true
+            job_cluster_key: "default"
+            notebook_task:
+              notebook_path: "odap-framework-demo/_demo/_setup/init"
+          - <<: *odap-features-task
+            depends_on:
+              - task_key: "init"
+          - <<: *upsell-uc-investment-interest-export-task
+            depends_on:
+              - task_key: "odap-features"
+          - <<: *upsell-uc-loan-interest-export-task
+            depends_on:
+              - task_key: "upsell-uc-investment-interest-export"

@@ -1,0 +1,131 @@
+name: Build & Release pipeline
+
+on:
+  push:
+
+jobs:
+  build:
+    name: Build package
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./odap-package
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Install Miniforge
+        uses: conda-incubator/setup-miniconda@v2.1.1
+        with:
+          miniforge-version: 4.10.3-6
+
+      - name: cache venv
+        id: cache-venv
+        uses: actions/cache@v2
+        with:
+          path: |
+            .venv
+            ~/.poetry/env
+          key: ${{ runner.os }}-env-${{ hashFiles('**/poetry.lock') }}
+
+      - name: setup
+        run: |
+          export SHELL=$SHELL # for python to be able to access the bash version
+          chmod +x env-init.sh
+          ./env-init.sh -y --verbose
+      - name: linting
+        run: |
+          eval "$(conda shell.bash hook)"
+          conda activate $PWD/.venv
+          source ~/.poetry/env
+          poe black-check
+          poe pylint
+          sed -i "s,/app/,,g" .pyre_configuration
+          pyre check
+      - name: crlf
+        run: |
+          eval "$(conda shell.bash hook)"
+          conda activate $PWD/.venv
+          bash check-crlf.sh
+      - name: tests
+        run: |
+          eval "$(conda shell.bash hook)"
+          conda activate $PWD/.venv
+          export SPARK_HOME=$(python -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])')/pyspark
+          export PYSPARK_PYTHON=$PWD/.venv/bin/python
+          export PYSPARK_DRIVER_PYTHON=$PWD/.venv/bin/python
+          chmod +x .venv/ -R
+          bash run_tests.sh
+
+  release:
+    name: Release package
+    runs-on: ubuntu-latest
+    if: "startsWith(github.event.head_commit.message, 'bump version to')"
+    defaults:
+      run:
+        working-directory: ./odap-package
+    steps:
+      - name: Extract version
+        id: extract_version
+        uses: frabert/replace-string-action@v1.1
+        with:
+          pattern: '^bump version to ([^\n]+).*$'
+          string: ${{ github.event.head_commit.message }}
+          replace-with: '$1'
+          flags: 's'
+      - name: Extract prerelease
+        id: extract_prerelease
+        uses: frabert/replace-string-action@v1.1
+        with:
+          pattern: '^[\d.]+(\.dev[\d]+|a[\d]+|b[\d]+|rc[\d]+)?$'
+          string: ${{ steps.extract_version.outputs.replaced }}
+          replace-with: '$1'
+      - name: Show extracted version
+        run: echo "${{ steps.extract_version.outputs.replaced }}"
+      - name: Show extracted prerelease
+        run: echo "${{ steps.extract_prerelease.outputs.replaced }}"
+      - name: Install Poetry
+        uses: snok/install-poetry@v1.3.3
+        with:
+          version: 1.1.8
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Install Miniforge
+        uses: conda-incubator/setup-miniconda@v2.1.1
+        with:
+          miniforge-version: 4.10.3-6
+      - name: Build package
+        run: |
+          conda env create -f environment.yml -p .venv
+          eval "$(conda shell.bash hook)"
+          conda activate $PWD/.venv
+          poetry build -f wheel
+      - name: Resolve wheel name
+        run: |
+          echo "WHEEL_NAME=$(ls -1 dist/ | grep -e "\.whl$" | sort -r | head -n 1)" >> $GITHUB_ENV
+      - name: Create GitHub release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: 'v${{ steps.extract_version.outputs.replaced }}'
+          name: 'Release ${{ steps.extract_version.outputs.replaced }}'
+          generate_release_notes: true
+          draft: false
+          prerelease: ${{ steps.extract_prerelease.outputs.replaced != '' }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload Release Asset
+        id: upload_release_asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: dist/${{ env.WHEEL_NAME }}
+          asset_name: ${{ env.WHEEL_NAME }}
+          asset_content_type: application/zip
+      - name: Publish package to pypi.org
+        run: |
+          eval "$(conda shell.bash hook)"
+          conda activate $PWD/.venv
+          poetry publish -u __token__ -p ${{ secrets.PYPI_PUBLISH }}
