@@ -2,22 +2,29 @@ import os
 import sys
 import re
 import importlib
+from pathlib import Path
 from typing import Dict, List
 from databricks_cli.workspace.api import WorkspaceApi
 from databricks_cli.workspace.api import WorkspaceFileInfo
 from databricks_cli.repos.api import ReposApi
 
 
-def get_repository_root_fs_path() -> str:
-    return min((path for path in sys.path if path.startswith("/Workspace/Repos")), key=len)
+def get_project_root_fs_path() -> str:
+    dirs_to_search = [Path.cwd()] + list(Path.cwd().parents)
+
+    for path in dirs_to_search:
+        if path.joinpath("features").is_dir() and path.joinpath("config.yaml").is_file():
+            return str(path)
+
+    raise Exception("Cannot resolve project root path")
 
 
-def get_repository_root_api_path() -> str:
-    return re.sub("^/Workspace", "", get_repository_root_fs_path())
+def get_project_root_api_path() -> str:
+    return re.sub("^/Workspace", "", get_project_root_fs_path())
 
 
 def get_relative_path(path: str):
-    return os.path.relpath(path, get_repository_root_api_path())
+    return os.path.relpath(path, get_project_root_api_path())
 
 
 def get_notebook_name(path: str):
@@ -25,11 +32,11 @@ def get_notebook_name(path: str):
 
 
 def get_absolute_api_path(*paths: str) -> str:
-    return os.path.join(get_repository_root_api_path(), *paths)
+    return os.path.join(get_project_root_api_path(), *paths)
 
 
 def get_absolute_fs_path(*paths: str) -> str:
-    return os.path.join(get_repository_root_fs_path(), *paths)
+    return os.path.join(get_project_root_fs_path(), *paths)
 
 
 def import_file(module_name: str, file_path: str):
@@ -42,7 +49,7 @@ def import_file(module_name: str, file_path: str):
 
 
 def get_repository_info(workspace_api: WorkspaceApi, repos_api: ReposApi) -> Dict[str, str]:
-    workspace_status = workspace_api.get_status(workspace_path=get_repository_root_api_path())
+    workspace_status = workspace_api.get_status(workspace_path=get_project_root_api_path())
     return repos_api.get(workspace_status.object_id)
 
 

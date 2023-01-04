@@ -70,7 +70,7 @@ def test_metadata_integration(mocker):
 # MAGIC     },
 # MAGIC }
 """
-    mocker.patch("odap.common.utils.get_repository_root_api_path", return_value=BASE_PATH)
+    mocker.patch("odap.common.utils.get_project_root_api_path", return_value=BASE_PATH)
     mocker.patch(
         "odap.common.config.get_config_on_rel_path",
         return_value={"featurefactory": {"entities": {"customer": {"id_column": "customer_id"}}}},

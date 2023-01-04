@@ -2,7 +2,7 @@ from typing import Dict, Any
 import os
 import enum
 import yaml
-from odap.common.utils import get_repository_root_fs_path
+from odap.common.utils import get_project_root_fs_path
 from odap.common.exceptions import ConfigAttributeMissingException
 
 
@@ -17,7 +17,7 @@ class ConfigNamespace(enum.Enum):
 
 
 def get_config_on_rel_path(*rel_path: str) -> Config:
-    base_path = get_repository_root_fs_path()
+    base_path = get_project_root_fs_path()
     config_path = os.path.join(base_path, *rel_path)
 
     with open(config_path, "r", encoding="utf-8") as stream:
