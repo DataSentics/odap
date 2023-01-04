@@ -35,7 +35,7 @@ def get_entity_primary_key(config: Config) -> str:
 
     primary_entity = next(iter(entities))
 
-    return entities[primary_entity]["id_column"]
+    return entities[primary_entity]["id_column"].lower()
 
 
 def get_features(config: Config):
