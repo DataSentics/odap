@@ -6,6 +6,10 @@ class InvalidConfigAttributException(Exception):
     pass
 
 
+class WriteEnvNotSetException(Exception):
+    pass
+
+
 class WidgetValueException(Exception):
     pass
 
