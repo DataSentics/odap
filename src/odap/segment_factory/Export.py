@@ -1,7 +1,7 @@
 from pyspark.sql import DataFrame, SparkSession
 
 from odap.common.config import get_config_namespace, ConfigNamespace
-from odap.feature_factory.config import get_entity_by_name, get_latest_features_table
+from odap.feature_factory.config import get_entity_by_name, get_latest_features_table_for_entity
 from odap.segment_factory.config import get_destination, get_export, get_use_case_config
 from odap.segment_factory.exporters import resolve_exporter
 from odap.segment_factory.logs import write_export_log
@@ -32,10 +32,18 @@ class Export:
         for entity_name in self._destination_config.get("attributes"):
             id_column = get_entity_by_name(entity_name, feature_factory_config).get("id_column")
 
-            latest_features_df = spark.read.table(get_latest_features_table(feature_factory_config))
+            latest_features_df = spark.read.table(
+                get_latest_features_table_for_entity(entity_name, feature_factory_config)
+            )
 
-            if (id_column not in segment_df.columns) or (id_column not in latest_features_df.columns):
-                raise Exception(f"'{id_column}' column is missing in the segment or entity dataframe")
+            if id_column not in segment_df.columns:
+                raise Exception(f"'{id_column}' column is missing in the segment dataframe")
+
+            if id_column not in latest_features_df.columns:
+                raise Exception(
+                    f"'{id_column}' column is missing in the latest features dataframe for entity '{entity_name}'"
+                )
+
             segment_df = segment_df.join(latest_features_df, id_column, "inner")
 
         return segment_df
