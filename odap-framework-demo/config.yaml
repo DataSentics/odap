@@ -1,0 +1,79 @@
+parameters:
+  featurefactory:
+    database: "odap_features_{entity}"
+    features:
+      latest_table: "features_{entity}_latest"
+      dir_path: "dbfs:/odap_features/{entity}/features"
+
+    metadata:
+      table: "metadata"
+      path: "dbfs:/odap_features/{entity}/metadata"
+
+    entities:
+      customer:
+        id_column: "customer_id"
+        id_column_type: "long"
+      account:
+        id_column: "account_id"
+        id_column_type: "long"
+
+  p360_export:
+    config:
+      dbutils_secrets_scope: "unit-kv"
+
+  segmentfactory:
+    log:
+      table: "odap_segments.export_logs"
+      path: "dbfs:/odap_segments/export_logs.delta"
+
+    segment:
+      table: "odap_segments.segments"
+      path: "dbfs:/odap_segments/segments.delta"
+
+    destinations:
+      email_currency_csv_dbfs_export:
+        type: "csv_dbfs"
+        path: "use_cases"
+        attributes:
+          customer:
+            - "customer_email"
+          account:
+            - currency
+
+      email_csv_dbfs_export:
+        type: "csv_dbfs"
+        path: "use_cases"
+        attributes:
+          customer:
+            - "customer_email"
+
+      sfmc_export:
+        type: "p360_export"
+        p360_destination: "sfmc"
+        mapping:
+          subscriber_key: "customer_email"
+        credentials:
+          client_id: "efkwk3u07xl83ftdsuu0mo1m"
+          client_secret_key: "jv-sfmc-client-secret"
+          ftp_username: "510003196_5"
+          ftp_password_key: "jv-sfmc-ftp-password"
+          tenant_url: "mcvgt52qhm-lj19fv4nfmrv6pdn1"
+          account_id: "510003196"
+          file_location: "jv-demo"
+        attributes:
+          customer:
+            - "customer_email"
+          account:
+            - currency
+
+      fb_export:
+        type: "p360_export"
+        p360_destination: "facebook"
+        mapping:
+          email: "customer_email"
+        credentials:
+          access_token_key: "jv-fb-access-token"
+          ad_account_id: "act_383271040067293"
+        attributes:
+          customer:
+            - "customer_email"

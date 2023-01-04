@@ -1,0 +1,89 @@
+# Databricks notebook source
+# MAGIC %md
+# MAGIC # Product web visits
+# MAGIC mortgages, loans, investments
+
+# COMMAND ----------
+
+# MAGIC %run ../init/odap
+
+# COMMAND ----------
+
+import datetime as dt
+from typing import List
+from pyspark.sql import functions as f
+from odap.feature_factory import time_windows as tw
+
+# COMMAND ----------
+
+dbutils.widgets.text("timestamp", "")
+dbutils.widgets.text("target", "")
+
+# COMMAND ----------
+
+# MAGIC %run ../init/target_store
+
+# COMMAND ----------
+
+products = ["investice", "pujcky", "hypoteky"]
+
+# COMMAND ----------
+
+time_windows = ["14d", "30d", "90d"]
+
+# COMMAND ----------
+
+web_visits = spark.createDataFrame(
+    [
+        [1, dt.datetime(2020, 12, 12), "https://acme.com"]
+    ],
+    ["customer_id", "visit_timestamp", "url"]
+)
+
+# COMMAND ----------
+
+target_store = spark.createDataFrame(
+    [
+        [1, dt.datetime(2020, 12, 12)]
+    ],
+    ["customer_id", "timestamp"]
+)
+
+# COMMAND ----------
+
+wdf_orig = tw.WindowedDataFrame(
+    df=web_visits,
+    time_column="visit_timestamp",
+    time_windows=time_windows,
+)
+
+# COMMAND ----------
+
+wdf = wdf_orig.join(target_store, on="customer_id").filter(f.col("visit_timestamp") <= f.col("timestamp"))
+
+# COMMAND ----------
+
+def product_agg_features(time_window: str) -> List[tw.WindowedColumn]:
+    return [
+        tw.sum_windowed(
+            f"{product}_web_visits_count_in_last_{time_window}",
+            f.lower("url").contains(product).cast("integer"),
+        )
+        for product in products
+    ]
+
+# COMMAND ----------
+
+# MAGIC %python
+# MAGIC metadata = {
+# MAGIC     "category": "web_visits",
+# MAGIC     "features": {
+# MAGIC         "{product}_web_visits_count_in_last_{time_window}": {
+# MAGIC             "description": "Number of {product} web visits in last {time_window}",
+# MAGIC         }
+# MAGIC     }
+# MAGIC }
+
+# COMMAND ----------
+
+df_final = wdf.time_windowed(group_keys=["customer_id", "timestamp"], agg_columns_function=product_agg_features)

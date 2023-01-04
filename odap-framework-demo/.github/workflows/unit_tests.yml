@@ -1,0 +1,32 @@
+name: Unit tests pipeline
+
+on:
+  push:
+
+jobs:
+  pipeline:
+    runs-on: ubuntu-latest
+
+    env:
+      DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+      DATABRICKS_TOKEN:  ${{ secrets.DATABRICKS_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements-dev.txt
+
+      - name: Run unit tests
+        run: |
+          echo "Launching unit tests"
+          
+          check-destinations
+          
+          echo "More tests TBD"

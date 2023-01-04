@@ -1,0 +1,66 @@
+-- Databricks notebook source
+-- MAGIC %md
+-- MAGIC # Transactions Sum Amount in last 30 days
+
+-- COMMAND ----------
+
+-- MAGIC %run ../init/target_store
+
+-- COMMAND ----------
+
+create or replace temporary view card_transactions_source as (
+    select 1 as customer_id, timestamp('2020-12-12') as process_date, 201.5 as amount_czk
+)
+
+-- COMMAND ----------
+
+create or replace temporary view target_store as (
+    select 1 as customer_id, timestamp('2020-12-12') as timestamp
+)
+
+-- COMMAND ----------
+
+-- MAGIC %run ../init/window_functions
+
+-- COMMAND ----------
+
+create widget text timestamp default "";
+create widget text target default "no target"
+
+-- COMMAND ----------
+
+create
+or replace temporary view card_transactions as (
+  select
+    *
+  from
+    card_transactions_source
+    join target_store using (customer_id)
+  where
+    process_date <= timestamp('2020-12-12')
+)
+
+-- COMMAND ----------
+
+-- MAGIC %python
+-- MAGIC metadata = {
+-- MAGIC     "category": "transactions",
+-- MAGIC     "features": {
+-- MAGIC         "transactions_sum_amount_in_last_{time_window}": {
+-- MAGIC             "description": "Total volume of transactions in last {time_window}",
+-- MAGIC         }
+-- MAGIC     }
+-- MAGIC }
+
+-- COMMAND ----------
+
+select
+  customer_id,
+  timestamp,
+  sum(amount_czk) as transactions_sum_amount_in_last_30d
+from
+  card_transactions
+where
+  process_date between timestamp('2020-12-12') - interval 30 days and timestamp('2020-12-12')
+group by
+  customer_id, timestamp
