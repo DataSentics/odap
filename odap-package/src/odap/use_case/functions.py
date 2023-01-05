@@ -18,11 +18,11 @@ def get_unique_sdm(config: dict) -> List[str]:
     data = []
     for segment in get_unique_segments(config):
         data += [sdm.split(".")[1] for sdm in get_sdm_data(segment)]
-    return [*set(data)]
+    return list(set(data))
 
 
 def get_unique_attributes(config: dict) -> List[str]:
     data = []
     for segment in get_unique_segments(config):
         data += [attribute.split(".")[1] for attribute in get_segment_attributes(segment)]
-    return [*set(data)]
+    return list(set(data))

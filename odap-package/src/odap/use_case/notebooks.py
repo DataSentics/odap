@@ -29,4 +29,4 @@ def get_sdm_data(segment: str) -> List[str]:
     for sql in get_segment_data(segment).split("\n"):
         if " AS " in sql:
             data.append(sql.split(" AS ")[0].replace(" ", ""))
-    return [*set(data)]
+    return list(set(data))

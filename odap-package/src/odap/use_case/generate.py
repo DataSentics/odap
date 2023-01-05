@@ -1,12 +1,12 @@
 from pyspark.sql import SparkSession
 from odap.common.config import get_config_namespace, ConfigNamespace
 from odap.use_case.schemas import get_use_case_schema
-from odap.use_case.usecases import generate_usecases
+from odap.use_case.usecases import generate_use_cases
 
 
-def table_name():
+def write_use_case_table():
     spark = SparkSession.getActiveSession()
-    path = get_config_namespace(ConfigNamespace.USECASE_FACTORY)["path"]
-    data = spark.createDataFrame(data=generate_usecases(), schema=get_use_case_schema())
+    table = get_config_namespace(ConfigNamespace.USECASE_FACTORY)["table"]
+    data = spark.createDataFrame(data=generate_use_cases(), schema=get_use_case_schema())
 
-    data.write.mode("overwrite").saveAsTable(path)
+    data.write.mode("overwrite").saveAsTable(table)
