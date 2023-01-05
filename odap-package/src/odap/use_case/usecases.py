@@ -17,7 +17,7 @@ def generate_use_cases() -> List[dict]:
                 "owner": use_case_config["owner"] if "owner" in use_case_config else "",
                 "kpi": use_case_config["kpi"] if "kpi" in use_case_config else [],
                 "status": get_status(use_case_config),
-                "destinations": [*set(get_export_data(use_case_config, "destination"))],
+                "destinations": list(set(get_export_data(use_case_config, "destination"))),
                 "exports": list(use_case_config["exports"].keys()) if "exports" in use_case_config else [],
                 "segments": get_unique_segments(use_case_config),
                 "model": None,

@@ -17,12 +17,12 @@ def get_unique_segments(config: dict) -> List[str]:
 def get_unique_sdm(config: dict) -> List[str]:
     data = []
     for segment in get_unique_segments(config):
-        data += [sdm.split(".")[1] for sdm in get_sdm_data(segment)]
+        data += [sdm.split(".")[1] for sdm in get_sdm_data(config["name"], segment)]
     return list(set(data))
 
 
 def get_unique_attributes(config: dict) -> List[str]:
     data = []
     for segment in get_unique_segments(config):
-        data += [attribute.split(".")[1] for attribute in get_segment_attributes(segment)]
+        data += [attribute.split(".")[1] for attribute in get_segment_attributes(config["name"], segment)]
     return list(set(data))
