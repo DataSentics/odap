@@ -52,5 +52,6 @@ def write_export_log(
         )
         .write.mode("append")
         .option("path", get_log_table_path(segment_factory_config))
+        .option("mergeSchema", "true")
         .saveAsTable(log_table)
     )
