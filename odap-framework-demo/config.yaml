@@ -1,9 +1,9 @@
 parameters:
   featurefactory:
-    database: "odap_features_{entity}"
+    database: "{write_env}_odap_features_{entity}"
     features:
-      latest_table: "features_{entity}_latest"
-      dir_path: "dbfs:/odap_features/{entity}/features"
+      latest_table: "features_latest"
+      dir_path: "dbfs:/{write_env}/odap_features/{entity}/features"
 
     metadata:
       table: "metadata"

@@ -2,6 +2,6 @@
 SELECT
   customer_id
 FROM
-  odap_features_customer.features_customer_latest
+  ${env:READ_ENV}_odap_features_customer.features_latest
 WHERE
   pujcky_web_visits_count_in_last_30d > 0

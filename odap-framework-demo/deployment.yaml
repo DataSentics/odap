@@ -4,6 +4,9 @@ build:
 clusters:
   basic-cluster-props: &basic-cluster-props
     spark_version: "11.3.x-cpu-ml-scala2.12"
+    spark_env_vars:
+      WRITE_ENV: "dev"
+      READ_ENV: "dev"
 
   basic-static-cluster: &basic-static-cluster
     new_cluster:
