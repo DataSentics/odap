@@ -1,3 +1,5 @@
+import os
+from odap.common.databricks import resolve_branch
 from odap.common.config import Config
 
 from odap.common.exceptions import ConfigAttributeMissingException
@@ -56,13 +58,23 @@ def get_metadata(config: Config):
     return metadata
 
 
+def resolve_dev_database_name(database: str):
+    if os.environ.get("WRITE_ENV") == "dev":
+        branch = resolve_branch()
+        database = f"{branch}_{database}"
+
+    return database
+
+
 def get_database_for_entity(entity_name: str, config: Config) -> str:
     features_database = config.get("database")
 
     if not features_database:
         raise ConfigAttributeMissingException("features.database not defined in config.yaml")
 
-    return features_database.format(entity=entity_name)
+    database = features_database.format(entity=entity_name)
+
+    return resolve_dev_database_name(database)
 
 
 def get_database(config: Config) -> str:
