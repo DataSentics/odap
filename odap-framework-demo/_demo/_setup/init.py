@@ -1,17 +1,21 @@
 # Databricks notebook source
+
 import os
 from databricks import feature_store
 
 # COMMAND ----------
 
 feature_store_client = feature_store.FeatureStoreClient()
+env = os.environ.get("WRITE_ENV")
+account_db = f'{env}_odap_features_account'
+customer_db = f'{env}_odap_features_customer'
 
 # COMMAND ----------
 
 spark.sql("DROP DATABASE IF EXISTS odap_offline_sdm_l2 CASCADE")
 spark.sql("DROP DATABASE IF EXISTS odap_digi_sdm_l2 CASCADE")
-spark.sql("DROP DATABASE IF EXISTS dev_odap_features_account CASCADE")
-spark.sql("DROP DATABASE IF EXISTS dev_odap_features_customer CASCADE")
+spark.sql(f"DROP DATABASE IF EXISTS {account_db} CASCADE")
+spark.sql(f"DROP DATABASE IF EXISTS {customer_db} CASCADE")
 spark.sql("DROP DATABASE IF EXISTS odap_segments CASCADE")
 spark.sql("DROP DATABASE IF EXISTS odap_targets CASCADE")
 
@@ -19,8 +23,8 @@ spark.sql("DROP DATABASE IF EXISTS odap_targets CASCADE")
 
 spark.sql("CREATE DATABASE IF NOT EXISTS odap_offline_sdm_l2")
 spark.sql("CREATE DATABASE IF NOT EXISTS odap_digi_sdm_l2")
-spark.sql("CREATE DATABASE IF NOT EXISTS dev_odap_features_account")
-spark.sql("CREATE DATABASE IF NOT EXISTS dev_odap_features_customer")
+spark.sql(f"CREATE DATABASE IF NOT EXISTS {account_db}")
+spark.sql(f"CREATE DATABASE IF NOT EXISTS {customer_db}")
 spark.sql("CREATE DATABASE IF NOT EXISTS odap_segments")
 spark.sql("CREATE DATABASE IF NOT EXISTS odap_targets")
 
@@ -35,12 +39,12 @@ def drop_feature_store(table: str):
 
 # COMMAND ----------
 
-drop_feature_store("dev_odap_features_customer.simple_features")
-drop_feature_store("dev_odap_features_customer.product_features")
+drop_feature_store(f"{customer_db}.simple_features")
+drop_feature_store(f"{customer_db}.product_features")
 
 # COMMAND ----------
 
-dbutils.fs.rm("dbfs:/dev/odap_features", recurse=True)
+dbutils.fs.rm(f"dbfs:/{env}/odap_features", recurse=True)
 dbutils.fs.rm("dbfs:/odap_segments", recurse=True)
 
 # COMMAND ----------
@@ -66,5 +70,5 @@ target_store.write.format("delta").mode("overwrite").option("overwriteSchema", "
 
 # COMMAND ----------
 
-account_features.write.format("delta").mode("overwrite").option("overwriteSchema", "true").saveAsTable("dev_odap_features_account.features_latest")
-account_metadata.write.format("delta").mode("overwrite").option("overwriteSchema", "true").saveAsTable("dev_odap_features_account.metadata")
+account_features.write.format("delta").mode("overwrite").option("overwriteSchema", "true").saveAsTable(f"{account_db}.features_latest")
+account_metadata.write.format("delta").mode("overwrite").option("overwriteSchema", "true").saveAsTable(f"{account_db}.metadata")

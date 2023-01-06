@@ -6,6 +6,10 @@ class InvalidConfigAttributException(Exception):
     pass
 
 
+class UnableToResolveBranchException(Exception):
+    pass
+
+
 class WriteEnvNotSetException(Exception):
     pass
 

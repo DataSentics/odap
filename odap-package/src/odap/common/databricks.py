@@ -4,6 +4,8 @@ from pyspark.sql import SparkSession
 from databricks_cli.workspace.api import WorkspaceApi
 from databricks_cli.repos.api import ReposApi
 from databricks_cli.sdk.api_client import ApiClient
+from odap.common.utils import get_repository_info
+from odap.common.exceptions import UnableToResolveBranchException
 
 
 def resolve_dbutils() -> DBUtils:
@@ -48,3 +50,14 @@ def get_host() -> str:
 
 def get_token(dbutils: DBUtils) -> str:
     return dbutils.notebook.entry_point.getDbutils().notebook().getContext().apiToken().get()
+
+
+def resolve_branch() -> str:
+    context = get_repository_info(workspace_api=get_workspace_api(), repos_api=get_repos_api())
+
+    branch = context.get("branch")
+
+    if not branch:
+        raise UnableToResolveBranchException("Cannot resolve current branch!")
+
+    return branch
