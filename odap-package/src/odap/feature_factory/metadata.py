@@ -115,6 +115,12 @@ def add_additional_metadata(metadata: FeatureMetadataType, feature_df: DataFrame
     resolve_fillna_with(metadata)
 
 
+def resolve_global_metadata(feature_metadata: FeatureMetadataType, global_metadata: FeatureMetadataType):
+    for key, value in global_metadata.items():
+        if key not in feature_metadata:
+            feature_metadata[key] = value
+
+
 def resolve_metadata(notebook_cells: List[str], feature_path: str, feature_df: DataFrame) -> FeaturesMetadataType:
     raw_metadata = extract_raw_metadata_from_cells(notebook_cells, feature_path)
 
@@ -124,7 +130,7 @@ def resolve_metadata(notebook_cells: List[str], feature_path: str, feature_df: D
     features_metadata = resolve_metadata_templates(feature_df, raw_features)
 
     for metadata in features_metadata:
-        metadata.update(global_metadata)
+        resolve_global_metadata(metadata, global_metadata)
 
         add_additional_metadata(metadata, feature_df, feature_path)
 
