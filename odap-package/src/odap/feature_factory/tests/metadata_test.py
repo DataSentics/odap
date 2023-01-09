@@ -66,6 +66,7 @@ def test_metadata_integration(mocker):
 # MAGIC             "description": "{product} feature2 in {time_window}",
 # MAGIC             "dtype": "double",
 # MAGIC             "tags": ["tag1", "tag2", "tag3"],
+# MAGIC             "category": "not_general",
 # MAGIC         },
 # MAGIC     },
 # MAGIC }
@@ -105,7 +106,7 @@ def test_metadata_integration(mocker):
                 "feature_template": f_template,
                 "description_template": d_template,
                 "extra": {"product": feature.split("_")[0], "time_window": feature.split("_")[-1]},
-                "category": "general",
+                "category": "not_general" if "feature2" in feature else "general",
                 "table": "general_features",
                 "notebook_name": "feature",
                 "notebook_absolute_path": FEATURE_PATH,
