@@ -1,0 +1,23 @@
+parameters:
+  exports:
+    upsell_uc_investment_interest:
+      destination: "email_currency_csv_dbfs_export"
+      schedule:
+        quartz_cron_expression: "34 38 18 * * ?"
+        timezone_id: "UTC"
+        pause_status: "UNPAUSED"
+      segments:
+        customer_account_investment_interest:
+          name: "Interested in investment"
+
+    upsell_uc_loan_interest:
+      destination: "email_csv_dbfs_export"
+      schedule:
+        quartz_cron_expression: "34 38 18 * * ?"
+        timezone_id: "UTC"
+        pause_status: "UNPAUSED"
+      segments:
+        customer_loan_interest:
+          name: "Interested in loan"
+        customer_mortgage_interest:
+          name: "Interested in mortgages"
