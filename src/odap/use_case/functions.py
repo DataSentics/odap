@@ -1,5 +1,8 @@
 from typing import List
-from odap.use_case.notebooks import get_sdm_data, get_segment_attributes
+from odap.use_case.notebooks import get_sdm_data
+from odap.common.utils import get_project_root_fs_path
+from odap.common.config import get_config_on_rel_path, CONFIG_NAME
+from odap.segment_factory.config import USE_CASES_FOLDER
 
 
 def get_export_data(config: dict, value: str):
@@ -21,8 +24,17 @@ def get_unique_sdm(config: dict) -> List[str]:
     return [*set(data)]
 
 
-def get_unique_attributes(config: dict) -> List[str]:
-    data = []
-    for segment in get_unique_segments(config):
-        data += [attribute.split(".")[1] for attribute in get_segment_attributes(segment)]
-    return [*set(data)]
+def get_unique_attributes(destinations: list):
+    config = get_config_on_rel_path(USE_CASES_FOLDER, get_project_root_fs_path(), CONFIG_NAME)["segmentfactory"][
+        "destinations"
+    ]
+
+    result = {}
+    for export in destinations:
+        value = config[export]["attributes"]
+        for attribute in value.keys():
+            if attribute in result:
+                result[attribute] = list(set(result[attribute] + value[attribute]))
+            else:
+                result[attribute] = value[attribute]
+    return result

@@ -14,15 +14,6 @@ def get_segment_data(segment: str) -> str:
     return b64decode(content).decode("utf-8").split("COMMAND ----------")[1]
 
 
-def get_segment_attributes(segment: str) -> List[str]:
-    segments = re.match(
-        "SELECT (.*)FROM",
-        get_segment_data(segment).replace("\n", ""),
-    )
-    if segments:
-        return segments.group(1).replace(" ", "").split(",")
-    return []
-
 
 def get_sdm_data(segment: str) -> List[str]:
     data = []

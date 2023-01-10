@@ -21,7 +21,7 @@ def generate_usecases() -> List[dict]:
                 "exports": list(use_case_config["exports"].keys()) if "exports" in use_case_config else [],
                 "segments": get_unique_segments(use_case_config),
                 "model": None,
-                "attributes": get_unique_attributes(use_case_config),
+                "attributes": get_unique_attributes([*set(get_export_data(use_case_config, "destination"))]),
                 "sdms": get_unique_sdm(use_case_config),
                 "data_sources": [],
             }
