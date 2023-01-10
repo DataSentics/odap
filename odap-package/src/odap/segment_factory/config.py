@@ -80,10 +80,10 @@ def get_destination(destination_name: str, config: Config) -> Dict[str, Any]:
 
 
 def get_use_cases() -> List[str]:
-    worskpace_api = get_workspace_api()
+    workspace_api = get_workspace_api()
 
     use_cases_path = get_absolute_api_path(USE_CASES_FOLDER)
-    use_cases_folders = list_folders(use_cases_path, worskpace_api)
+    use_cases_folders = list_folders(use_cases_path, workspace_api)
 
     return [use_case_folder.basename for use_case_folder in use_cases_folders]
 

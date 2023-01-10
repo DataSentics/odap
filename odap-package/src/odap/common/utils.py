@@ -9,12 +9,16 @@ from databricks_cli.workspace.api import WorkspaceFileInfo
 from databricks_cli.repos.api import ReposApi
 
 
+def get_api_path(path: str) -> str:
+    return re.sub("^/Workspace", "", path)
+
+
 def get_repository_root_fs_path() -> str:
     return min((path for path in sys.path if path.startswith("/Workspace/Repos")), key=len)
 
 
 def get_repository_root_api_path() -> str:
-    return re.sub("^/Workspace", "", get_repository_root_fs_path())
+    return get_api_path(get_repository_root_fs_path())
 
 
 def get_project_root_fs_path() -> str:
