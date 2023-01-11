@@ -76,13 +76,9 @@ dbutils.widgets.text("9. model_name", "RandomForest")
 if dbutils.widgets.get("1. use_dummy_data") == "Yes":
     df_model_dataset = generate_dummy_data()
 else:
-    latest_year, latest_month, latest_day = get_date_parts(
-        dbutils.widgets.get("2. latest_date")
-    )
-    
     df_data = spark.table(
         f"odap_digi_features.features_{dbutils.widgets.get('3. entity_name')}"
-    ).filter(f.col("timestamp") == dt.date(latest_year, latest_month, latest_day))
+    ).filter(f.col("timestamp") == dt.datetime.strptime(dbutils.widgets.get("2. latest_date"), "%Y-%m-%d"))
 
     df_to_enrich = (
         spark.table("odap_digi_use_case_segments.segments")

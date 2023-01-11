@@ -59,11 +59,6 @@ def define_lookalikes(value, df_predictions):
 
 # COMMAND ----------
 
-def get_date_parts(date_string):
-    return [int(date_part) for date_part in date_string.split("-")]
-
-# COMMAND ----------
-
 def predict(features: DataFrame, model: PipelineModel, feature_name: str):
     prediction_col = f.round(f.element_at(vector_to_array(f.col("probability")), 2).cast("float"), 3) if "probability" in predictions_df.columns else f.round("prediction", 3)
 
@@ -89,13 +84,9 @@ def return_slider(criterion):
 
 # COMMAND ----------
 
-latest_year, latest_month, latest_day = get_date_parts(
-    dbutils.widgets.get("latest_date")
-)
-
 df_data = spark.table(
     f"odap_digi_features.features_{dbutils.widgets.get('entity_name')}"
-).filter(f.col("timestamp") == dt.date(latest_year, latest_month, latest_day))
+).filter(f.col("timestamp") == dt.datetime.strptime(dbutils.widgets.get("latest_date"), "%Y-%m-%d"))
 
 df_to_enrich = (
     spark.table("odap_digi_use_case_segments.segments")
