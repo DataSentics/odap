@@ -116,13 +116,13 @@ df_to_enrich = (
 df_inference_dataset = df_data.join(
     df_to_enrich,
     on=dbutils.widgets.get("entity_id_column_name"),
-    how="anti",
+    how="leftanti",
 ).withColumn("label", f.lit(0))
 
 df_modelling_dataset = df_data.join(
     df_to_enrich,
     on=dbutils.widgets.get("entity_id_column_name"),
-    how="semi",
+    how="leftsemi",
 ).withColumn("label", f.lit(1)).union(df_inference_dataset)
 
 # COMMAND ----------
