@@ -59,11 +59,6 @@ def define_lookalikes(value, df_predictions):
 
 # COMMAND ----------
 
-def get_date_parts(date_string):
-    return [int(date_part) for date_part in date_string.split("-")]
-
-# COMMAND ----------
-
 def predict(features: DataFrame, model: PipelineModel, prediction_output_col_name: str):
     prediction_col = f.round(f.element_at(vector_to_array(f.col("probability")), 2).cast("float"), 3) if "probability" in predictions_df.columns else f.round("prediction", 3)
 
