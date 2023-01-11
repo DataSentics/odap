@@ -65,23 +65,13 @@ def get_date_parts(date_string):
 # COMMAND ----------
 
 def predict(features: DataFrame, model: PipelineModel, feature_name: str):
-    predictions_df = model.transform(features)
+    prediction_col = f.round(f.element_at(vector_to_array(f.col("probability")), 2).cast("float"), 3) if "probability" in predictions_df.columns else f.round("prediction", 3)
 
-    if "probability" in predictions_df.columns:
-        df_output = predictions_df.select(
-            entity_id_column_name,
-            "timestamp",
-            f.round(
-                f.element_at(vector_to_array(f.col("probability")), 2).cast("float"), 3
-            ).alias(feature_name),
-        )
-    else:
-        df_output = predictions_df.select(
-            entity_id_column_name,
-            "timestamp",
-            f.round("prediction", 3).alias(feature_name),
-        )
-    return df_output
+    return predictions_df.select(
+        dbutils.widgets.get("entity_id_column_name"),
+        "timestamp",
+        prediction_col.alias(feature_name),
+    )
 
 # COMMAND ----------
 
