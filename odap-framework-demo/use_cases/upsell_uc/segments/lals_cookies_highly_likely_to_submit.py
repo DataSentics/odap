@@ -85,15 +85,6 @@ def predict(features: DataFrame, model: PipelineModel, feature_name: str):
 
 # COMMAND ----------
 
-def return_slider(criterion):
-    if (criterion == "probability_threshold"):
-        slider = widgets.FloatSlider(max=1.0, min=0.0,  step=0.01, value=0.5)
-    else:
-        slider = widgets.IntSlider(min=100, max=100000, step=100, value=500)
-    return slider
-
-# COMMAND ----------
-
 # MAGIC %md
 # MAGIC ## Data
 
