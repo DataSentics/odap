@@ -1,13 +1,60 @@
 import datetime as dt
+import ipywidgets as widgets
 import json
 import os
+from pyspark.ml.pipeline import PipelineModel
+from pyspark.sql import DataFrame
 from pyspark.sql.functions import udf
+from pyspark.ml.functions import vector_to_array
 import pyspark.sql.functions as F
 from pyspark.sql import SparkSession
 import pyspark.sql.types as T
 from pyspark.sql.window import Window
 import random
-import tempfile    
+import tempfile
+
+def return_slider(criterion):
+    if (criterion == "probability_threshold"):
+        slider = widgets.FloatSlider(max=1.0, min=0.0,  step=0.01, value=0.5)
+    else:
+        slider = widgets.IntSlider(min=100, max=100000, step=100, value=500)
+    return slider
+
+def define_lookalikes(value, df_predictions, entity_id_column_name):
+    if (isinstance(value, float)):
+        df_lookalikes = (
+            df_predictions.sort("probability_of_lookalike", ascending=False)
+            .filter(
+                F.col("probability_of_lookalike") >= value
+            )
+            .select(entity_id_column_name, "probability_of_lookalike")
+        )
+        report_string = f"Computation completed. Number of lookalikes to add based on {value} probability threshold: {df_lookalikes.count()}"
+    else:
+        df_lookalikes = (
+            df_predictions.sort("probability_of_lookalike", ascending=False)
+            .limit(value)
+            .select(entity_id_column_name, "probability_of_lookalike")
+        )
+
+        lowest_prob = round(df_lookalikes.select(F.min("probability_of_lookalike")).collect()[0][0], 4)
+
+        report_string = f"Computation completed. The lowest probability of the lookalike subject admitted: {lowest_prob}"
+    
+    print(report_string)
+
+    return df_lookalikes
+
+def predict(features: DataFrame, model: PipelineModel, prediction_output_col_name: str, entity_id_column_name: str):
+    predictions_df = model.transform(features)
+
+    prediction_col = F.round(F.element_at(vector_to_array(F.col("probability")), 2).cast("float"), 3) if "probability" in predictions_df.columns else F.round("prediction", 3)
+
+    return predictions_df.select(
+        entity_id_column_name,
+        "timestamp",
+        prediction_col.alias(prediction_output_col_name),
+    )
 
 def generate_dummy_data():
     

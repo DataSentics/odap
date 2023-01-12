@@ -1,14 +1,22 @@
 # Databricks notebook source
 # MAGIC %md
+# MAGIC ## Setup
+
+# COMMAND ----------
+
+# MAGIC %run ../../../init/odap
+
+# COMMAND ----------
+
+# MAGIC %md
 # MAGIC ## Import
 
 # COMMAND ----------
 
 import datetime as dt
 import mlflow
-from pyspark.ml.functions import vector_to_array
-from pyspark.ml.pipeline import PipelineModel
-from pyspark.sql import DataFrame, functions as f
+from lookalike_modelling.ml_functions import define_lookalikes, predict
+from pyspark.sql import functions as f
 
 # COMMAND ----------
 
@@ -20,53 +28,10 @@ from pyspark.sql import DataFrame, functions as f
 entity_id_column_name = "id_col"
 entity_name = "cookie"
 latest_date = "2022-09-30"
-model_uri = "runs:/1ffc9dd4c3834751b132c70df455a00d/Model_test_lookalike"
+model_uri = "runs:/4546ea3d2ba741ebab80dc3433a857fe/Model_test_lookalike"
 segment_name = "customers_likely_to_churn"
 criterion_choice = "probability_threshold" #probability_threshold or lookalike_count
 slider_value = 0.5 #float for probability threshold, int for lookalike count
-
-# COMMAND ----------
-
-# MAGIC %md
-# MAGIC ## Functions
-
-# COMMAND ----------
-
-def define_lookalikes(value, df_predictions):
-    if (isinstance(value, float)):
-        df_lookalikes = (
-            df_predictions.sort("probability_of_lookalike", ascending=False)
-            .filter(
-                f.col("probability_of_lookalike") >= value
-            )
-            .select(entity_id_column_name, "probability_of_lookalike")
-        )
-        report_string = f"Computation completed. Number of lookalikes to add based on {value} probability threshold: {df_lookalikes.count()}"
-    else:
-        df_lookalikes = (
-            df_predictions.sort("probability_of_lookalike", ascending=False)
-            .limit(value)
-            .select(entity_id_column_name, "probability_of_lookalike")
-        )
-
-        lowest_prob = round(df_lookalikes.select(f.min("probability_of_lookalike")).collect()[0][0], 4)
-
-        report_string = f"Computation completed. The lowest probability of the lookalike subject admitted: {lowest_prob}"
-    
-    print(report_string)
-
-    return df_lookalikes
-
-# COMMAND ----------
-
-def predict(features: DataFrame, model: PipelineModel, prediction_output_col_name: str):
-    prediction_col = f.round(f.element_at(vector_to_array(f.col("probability")), 2).cast("float"), 3) if "probability" in predictions_df.columns else f.round("prediction", 3)
-
-    return predictions_df.select(
-        dbutils.widgets.get("entity_id_column_name"),
-        "timestamp",
-        prediction_col.alias(prediction_output_col_name),
-    )
 
 # COMMAND ----------
 
@@ -75,13 +40,9 @@ def predict(features: DataFrame, model: PipelineModel, prediction_output_col_nam
 
 # COMMAND ----------
 
-latest_year, latest_month, latest_day = get_date_parts(
-    latest_date
-)
-
 df_data = spark.table(
     f"odap_digi_features.features_{entity_name}"
-).filter(f.col("timestamp") == dt.date(latest_year, latest_month, latest_day))
+).filter(f.col("timestamp") == dt.datetime.strptime(latest_date, "%Y-%m-%d"))
 
 df_to_enrich = (
     spark.table("odap_digi_use_case_segments.segments")
@@ -102,13 +63,13 @@ model = mlflow.spark.load_model(model_uri)
 run_id = model_uri.split("/")[1]
 
 #specify path for the feature names logged in your mlflow experiment
-features = mlflow.artifacts.load_text(f"dbfs:/databricks/mlflow-tracking/21eba1de169f4aabb0c709f2f34475ed/{run_id}/artifacts/features.txt")
+features = mlflow.artifacts.load_text(f"dbfs:/databricks/mlflow-tracking/3460828603755368/{run_id}/artifacts/features.txt")
 
 feature_store_features = [
     feature for feature in features if feature not in ["intercept", "intercept_vector"]
 ]
         
-df_predictions = predict(df_inference_dataset, model, "probability_of_lookalike")
+df_predictions = predict(df_inference_dataset, model, "probability_of_lookalike", entity_id_column_name)
 
 # COMMAND ----------
 
@@ -117,7 +78,7 @@ df_predictions = predict(df_inference_dataset, model, "probability_of_lookalike"
 
 # COMMAND ----------
 
-df_lookalikes = define_lookalikes(slider_value, df_predictions)
+df_lookalikes = define_lookalikes(slider_value, df_predictions, entity_id_column_name)
 
 # COMMAND ----------
 

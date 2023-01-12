@@ -1,15 +1,23 @@
 # Databricks notebook source
 # MAGIC %md
+# MAGIC ## Setup
+
+# COMMAND ----------
+
+# MAGIC %run ../init/odap
+
+# COMMAND ----------
+
+# MAGIC %md
 # MAGIC ## Import
 
 # COMMAND ----------
 
 import datetime as dt
 import ipywidgets as widgets
+from lookalike_modelling.ml_functions import define_lookalikes, predict, return_slider
 import mlflow
 import plotly.express as px
-from pyspark.ml.functions import vector_to_array
-from pyspark.ml.pipeline import PipelineModel
 from pyspark.sql import DataFrame, functions as f
 
 # COMMAND ----------
@@ -19,63 +27,11 @@ from pyspark.sql import DataFrame, functions as f
 
 # COMMAND ----------
 
-dbutils.widgets.text("entity_id_column_name", "customer_id")
-dbutils.widgets.text("entity_name", "customer")
+dbutils.widgets.text("entity_id_column_name", "id_col")
+dbutils.widgets.text("entity_name", "cookie")
 dbutils.widgets.text("latest_date", "2022-09-30")
 dbutils.widgets.text("model_uri", "runs:/1ffc9dd4c3834751b132c70df455a00d/pipeline")
-dbutils.widgets.text("segment_name", "customers_likely_to_churn")
-
-# COMMAND ----------
-
-# MAGIC %md
-# MAGIC ## Functions
-
-# COMMAND ----------
-
-def define_lookalikes(value, df_predictions):
-    if (isinstance(value, float)):
-        df_lookalikes = (
-            df_predictions.sort("probability_of_lookalike", ascending=False)
-            .filter(
-                f.col("probability_of_lookalike") >= value
-            )
-            .select(dbutils.widgets.get("entity_id_column_name"), "probability_of_lookalike")
-        )
-        report_string = f"Computation completed. Number of lookalikes to add based on {value} probability threshold: {df_lookalikes.count()}"
-    else:
-        df_lookalikes = (
-            df_predictions.sort("probability_of_lookalike", ascending=False)
-            .limit(value)
-            .select(dbutils.widgets.get("entity_id_column_name"), "probability_of_lookalike")
-        )
-
-        lowest_prob = round(df_lookalikes.select(f.min("probability_of_lookalike")).collect()[0][0], 4)
-
-        report_string = f"Computation completed. The lowest probability of the lookalike subject admitted: {lowest_prob}"
-    
-    print(report_string)
-
-    return df_lookalikes
-
-# COMMAND ----------
-
-def predict(features: DataFrame, model: PipelineModel, prediction_output_col_name: str):
-    prediction_col = f.round(f.element_at(vector_to_array(f.col("probability")), 2).cast("float"), 3) if "probability" in predictions_df.columns else f.round("prediction", 3)
-
-    return predictions_df.select(
-        dbutils.widgets.get("entity_id_column_name"),
-        "timestamp",
-        prediction_col.alias(prediction_output_col_name),
-    )
-
-# COMMAND ----------
-
-def return_slider(criterion):
-    if (criterion == "probability_threshold"):
-        slider = widgets.FloatSlider(max=1.0, min=0.0,  step=0.01, value=0.5)
-    else:
-        slider = widgets.IntSlider(min=100, max=100000, step=100, value=500)
-    return slider
+dbutils.widgets.text("segment_name", "cookies_likely_to_churn")
 
 # COMMAND ----------
 
@@ -113,13 +69,13 @@ model = mlflow.spark.load_model(dbutils.widgets.get("model_uri"))
 run_id = dbutils.widgets.get("model_uri").split("/")[1]
 
 #specify path for the feature names logged in your mlflow experiment
-features = mlflow.artifacts.load_text(f"dbfs:/databricks/mlflow-tracking/21eba1de169f4aabb0c709f2f34475ed/{run_id}/artifacts/features.txt")
+features = mlflow.artifacts.load_text(f"dbfs:/databricks/mlflow-tracking/3460828603755368/{run_id}/artifacts/features.txt")
 
 feature_store_features = [
     feature for feature in features if feature not in ["intercept", "intercept_vector"]
 ]
         
-df_predictions = predict(df_inference_dataset, model, "probability_of_lookalike")
+df_predictions = predict(df_inference_dataset, model, "probability_of_lookalike", dbutils.widgets.get("entity_id_column_name"))
 
 # COMMAND ----------
 
@@ -145,7 +101,7 @@ slider
 
 # COMMAND ----------
 
-df_lookalikes = define_lookalikes(slider.value, df_predictions)
+df_lookalikes = define_lookalikes(slider.value, df_predictions, dbutils.widgets.get("entity_id_column_name"))
 
 # COMMAND ----------
 
@@ -191,7 +147,7 @@ df_visualization_groups = (
 
 # DBTITLE 1,Score the dataset for visualization
 df_visualization_scores = predict(
-    df_modelling_dataset, model, "probability_of_lookalike"
+    df_modelling_dataset, model, "probability_of_lookalike", dbutils.widgets.get("entity_id_column_name")
 ).join(df_visualization_groups, on="id_col")
 
 # COMMAND ----------

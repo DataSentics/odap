@@ -7,6 +7,10 @@
 
 # COMMAND ----------
 
+# MAGIC %run ../init/odap
+
+# COMMAND ----------
+
 import datetime as dt
 from hyperopt import hp
 from hyperopt.pyll import scope
@@ -35,17 +39,8 @@ from pyspark.mllib.util import MLUtils
 from pyspark.sql.dataframe import DataFrame
 import pyspark.sql.functions as f
 import pyspark.sql.types as t
-from lookalike_models.ml_functions import lift_curve_colname_specified, ith, process_multiple_segments_input, compute_lift_train_test, lift_curve, generate_dummy_data
+from lookalike_modelling.ml_functions import lift_curve_colname_specified, ith, process_multiple_segments_input, compute_lift_train_test, lift_curve, generate_dummy_data
 import shap
-
-# COMMAND ----------
-
-# MAGIC %md ####Functions
-
-# COMMAND ----------
-
-def get_date_parts(date_string):
-    return [int(date_part) for date_part in date_string.split("-")]
 
 # COMMAND ----------
 
