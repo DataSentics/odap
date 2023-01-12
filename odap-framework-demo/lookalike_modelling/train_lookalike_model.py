@@ -188,14 +188,6 @@ else:
 
 # COMMAND ----------
 
-# DBTITLE 1,Feature selection
-selector = ChiSqSelector(numTopFeatures=12, featuresCol="features",
-                        outputCol="selectedFeatures", labelCol="label")
-
-stages = stages + [selector]
-
-# COMMAND ----------
-
 # MAGIC %md ## Model estimation
 
 # COMMAND ----------
