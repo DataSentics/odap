@@ -331,64 +331,59 @@ prob_th=0.5
 
 # COMMAND ----------
 
-try:
-    df_train_model_testing = (score_df_train
-                .select('label', f.when(f.col("score2") >= prob_th, 1).otherwise(0).alias("TARGET_PRED"))
-                .groupBy('label', "TARGET_PRED")
-                .count()
-                .sort(f.desc('count'))
-                )
+df_train_model_testing = (score_df_train
+            .select('label', f.when(f.col("score2") >= prob_th, 1).otherwise(0).alias("TARGET_PRED"))
+            .groupBy('label', "TARGET_PRED")
+            .count()
+            .sort(f.desc('count'))
+            )
 
-    print('train')
-    display(df_train)
+print('train')
+display(df_train)
 
-    df_test_model_testing = (score_df
-                .select('label', f.when(f.col("score2") >= prob_th, 1).otherwise(0).alias("TARGET_PRED"))
-                .groupBy('label', "TARGET_PRED")
-                .count()
-                .sort(f.desc('count'))
-                )
+df_test_model_testing = (score_df
+            .select('label', f.when(f.col("score2") >= prob_th, 1).otherwise(0).alias("TARGET_PRED"))
+            .groupBy('label', "TARGET_PRED")
+            .count()
+            .sort(f.desc('count'))
+            )
 
-    print('test')
-    display(df_test_model_testing)
+print('test')
+display(df_test_model_testing)
 
-    print('accuracy test')
-    n_label_1 = df_test_model_testing.filter(f.col('label') == 1).groupBy().agg(f.sum('count').alias('count')).select('count').collect()[0][0]
-    n_pred_1 = df_test_model_testing.filter((f.col('label') == 1) & (f.col('TARGET_PRED') == 1)).groupBy().agg(f.sum('count').alias('count')).select('count').collect()[0][0]
-    print(n_pred_1/n_label_1)
-except BaseException as e:
-    print(f"ERROR: preiction_ov_1: {e}")
+print('accuracy test')
+n_label_1 = df_test_model_testing.filter(f.col('label') == 1).groupBy().agg(f.sum('count').alias('count')).select('count').collect()[0][0]
+n_pred_1 = df_test_model_testing.filter((f.col('label') == 1) & (f.col('TARGET_PRED') == 1)).groupBy().agg(f.sum('count').alias('count')).select('count').collect()[0][0]
+print(n_pred_1/n_label_1)
+print(f"ERROR: preiction_ov_1: {e}")
 
 # COMMAND ----------
 
-try:
-    n_train = score_df_train.count()
+n_train = score_df_train.count()
 
-    df_train_model_testing = (score_df_train
-                    .withColumn('pred', f.round('score2', 2))
-                    .groupBy("pred")
-                    .count()
-                    .sort(f.desc("pred"))
-                    .withColumn('SHARE', f.col('count')/n_train)
-                    )
+df_train_model_testing = (score_df_train
+                .withColumn('pred', f.round('score2', 2))
+                .groupBy("pred")
+                .count()
+                .sort(f.desc("pred"))
+                .withColumn('SHARE', f.col('count')/n_train)
+                )
 
-    print('train')
-    display(df_train)
+print('train')
+display(df_train)
 
-    n_test = score_df.count()
+n_test = score_df.count()
 
-    df_test_model_testing = (score_df
-                    .withColumn('pred', f.round('score2', 2))
-                    .groupBy("pred")
-                    .count()
-                    .sort(f.desc("pred"))
-                    .withColumn('SHARE', f.col('count')/n_test)
-                    )
+df_test_model_testing = (score_df
+                .withColumn('pred', f.round('score2', 2))
+                .groupBy("pred")
+                .count()
+                .sort(f.desc("pred"))
+                .withColumn('SHARE', f.col('count')/n_test)
+                )
 
-    print('test')
-    display(df_test_model_testing)
-except BaseException as e:
-    print(f"ERROR: preiction_ov_2: {e}")
+print('test')
+display(df_test_model_testing)
 
 # COMMAND ----------
 
@@ -397,10 +392,7 @@ except BaseException as e:
 
 # COMMAND ----------
 
-try:
-    display(compute_lift_train_test(score_df_train, score_df, "label", "features").withColumnRenamed('lift_train', 'Lift Train').withColumnRenamed('lift_test', 'Lift Test'))
-except BaseException as e:
-    print(f"ERROR: lift: {e}")
+display(compute_lift_train_test(score_df_train, score_df, "label", "features").withColumnRenamed('lift_train', 'Lift Train').withColumnRenamed('lift_test', 'Lift Test'))
 
 # COMMAND ----------
 
@@ -409,50 +401,47 @@ except BaseException as e:
 
 # COMMAND ----------
 
-try:
-    model_pipeline_all_fi = model_pipeline_all.stages[-1].stages[-1]
-                    
-    feature_importances = list(model_pipeline_all_fi.featureImportances.toArray())
-    feature_importances_with_names = []
+model_pipeline_all_fi = model_pipeline_all.stages[-1].stages[-1]
+                
+feature_importances = list(model_pipeline_all_fi.featureImportances.toArray())
+feature_importances_with_names = []
 
-    for feature_name, importance in zip(features_names, feature_importances):
-        feature_importances_with_names.append((feature_name, float(importance)))
+for feature_name, importance in zip(features_names, feature_importances):
+    feature_importances_with_names.append((feature_name, float(importance)))
 
-    feature_importances = spark.createDataFrame(feature_importances_with_names, schema="`feature` STRING, `importance` FLOAT") 
-    feature_importances = feature_importances.orderBy("importance")
+feature_importances = spark.createDataFrame(feature_importances_with_names, schema="`feature` STRING, `importance` FLOAT") 
+feature_importances = feature_importances.orderBy("importance")
 
-    importance_min = feature_importances.select('importance').groupBy().agg(f.min('importance')).collect()[0][0]
-    importance_max = feature_importances.select('importance').groupBy().agg(f.max('importance')).collect()[0][0]
+importance_min = feature_importances.select('importance').groupBy().agg(f.min('importance')).collect()[0][0]
+importance_max = feature_importances.select('importance').groupBy().agg(f.max('importance')).collect()[0][0]
 
-    if importance_min < 0:
-        color_schema = "greenred"
-    else:
-        color_schema = "rdylgn"
-    
-    feature_importances = feature_importances.withColumn('feature',  f.regexp_replace('feature', '_', ' '))
-    feature_importances = feature_importances.filter(f.col('importance') > 0)
-    
-    fig = px.bar(feature_importances.orderBy("importance", ascending=False).limit(30).orderBy("importance").toPandas(), x="feature", y="importance",
-                        hover_data=["feature", "importance"], color="importance",
-                        color_continuous_scale=color_schema,
-                        height=700)
-    fig.show()
-    
-    # top 15
-    fig = px.bar(feature_importances.orderBy("importance").limit(15).toPandas(), x="feature", y="importance",
+if importance_min < 0:
+    color_schema = "greenred"
+else:
+    color_schema = "rdylgn"
+
+feature_importances = feature_importances.withColumn('feature',  f.regexp_replace('feature', '_', ' '))
+feature_importances = feature_importances.filter(f.col('importance') > 0)
+
+fig = px.bar(feature_importances.orderBy("importance", ascending=False).limit(30).orderBy("importance").toPandas(), x="feature", y="importance",
                     hover_data=["feature", "importance"], color="importance",
-                    color_continuous_scale=color_schema, range_color=[importance_min, importance_max],
-                    height=700,)
-    fig.show()
-    
-    # min 15
-    fig = px.bar(feature_importances.orderBy("importance", ascending=False).limit(15).orderBy("importance").toPandas(), x="feature", y="importance",
-                    hover_data=["feature", "importance"], color="importance",
-                    color_continuous_scale=color_schema, range_color=[importance_min, importance_max],
-                    height=700, )
-    fig.show()
-except BaseException as e:
-    print(f"ERROR: features importances not available: {e}")
+                    color_continuous_scale=color_schema,
+                    height=700)
+fig.show()
+
+# top 15
+fig = px.bar(feature_importances.orderBy("importance").limit(15).toPandas(), x="feature", y="importance",
+                hover_data=["feature", "importance"], color="importance",
+                color_continuous_scale=color_schema, range_color=[importance_min, importance_max],
+                height=700,)
+fig.show()
+
+# min 15
+fig = px.bar(feature_importances.orderBy("importance", ascending=False).limit(15).orderBy("importance").toPandas(), x="feature", y="importance",
+                hover_data=["feature", "importance"], color="importance",
+                color_continuous_scale=color_schema, range_color=[importance_min, importance_max],
+                height=700, )
+fig.show()
 
 # COMMAND ----------
 
@@ -464,73 +453,64 @@ except BaseException as e:
 df = score_df_train
 prob_th = 0.5
 
-try:
-    df = (df
-            .withColumn("xs", vector_to_array("features"))
-            .select(["label", "score2"] + [f.col("xs")[i].alias(name) for i, name in enumerate(features_names)])
-            .withColumn("TARGET_PRED", f.when(f.col("score2") >= prob_th, 1).otherwise(0))
-            )
-    
-    df_target = (df
-                    .groupBy("label")
-                    .agg(
-                        f.count(f.lit(1)).alias('count'),
-                        *[f.mean(f.col(c)).alias(c) for c in features_names]
-                    )
-                    .sort('label')
-                )
-    
-    df_pred = (df
-                .groupBy("TARGET_PRED")
+df = (df
+        .withColumn("xs", vector_to_array("features"))
+        .select(["label", "score2"] + [f.col("xs")[i].alias(name) for i, name in enumerate(features_names)])
+        .withColumn("TARGET_PRED", f.when(f.col("score2") >= prob_th, 1).otherwise(0))
+        )
+
+df_target = (df
+                .groupBy("label")
                 .agg(
                     f.count(f.lit(1)).alias('count'),
                     *[f.mean(f.col(c)).alias(c) for c in features_names]
                 )
-                .sort("TARGET_PRED")
-                )
-    
-    display(df_target)
-    display(df_pred)
-    
-except BaseException as e:
-    
-        print(f'ERROR: {e}')
+                .sort('label')
+            )
+
+df_pred = (df
+            .groupBy("TARGET_PRED")
+            .agg(
+                f.count(f.lit(1)).alias('count'),
+                *[f.mean(f.col(c)).alias(c) for c in features_names]
+            )
+            .sort("TARGET_PRED")
+            )
+
+display(df_target)
+display(df_pred)
 
 # COMMAND ----------
 
 df = score_df
 prob_th = 0.5
 
-try:
-    df = (df
-            .withColumn("xs", vector_to_array("features"))
-            .select(["label", "score2"] + [f.col("xs")[i].alias(name) for i, name in enumerate(features_names)])
-            .withColumn("TARGET_PRED", f.when(f.col("score2") >= prob_th, 1).otherwise(0))
-            )
-    
-    df_target = (df
-                    .groupBy("label")
-                    .agg(
-                        f.count(f.lit(1)).alias('count'),
-                        *[f.mean(f.col(c)).alias(c) for c in features_names]
-                    )
-                    .sort('label')
-                )
-    
-    df_pred = (df
-                .groupBy("TARGET_PRED")
+df = (df
+        .withColumn("xs", vector_to_array("features"))
+        .select(["label", "score2"] + [f.col("xs")[i].alias(name) for i, name in enumerate(features_names)])
+        .withColumn("TARGET_PRED", f.when(f.col("score2") >= prob_th, 1).otherwise(0))
+        )
+
+df_target = (df
+                .groupBy("label")
                 .agg(
                     f.count(f.lit(1)).alias('count'),
                     *[f.mean(f.col(c)).alias(c) for c in features_names]
                 )
-                .sort("TARGET_PRED")
-                )
-    
-    display(df_target)
-    display(df_pred)
-    
-except BaseException as e:
-        print(f'ERROR: {e}')
+                .sort('label')
+            )
+
+df_pred = (df
+            .groupBy("TARGET_PRED")
+            .agg(
+                f.count(f.lit(1)).alias('count'),
+                *[f.mean(f.col(c)).alias(c) for c in features_names]
+            )
+            .sort("TARGET_PRED")
+            )
+
+display(df_target)
+display(df_pred)
 
 # COMMAND ----------
 
@@ -541,19 +521,15 @@ except BaseException as e:
 
 df = score_df_train
 
-try:
-    df = (df
-            .withColumn("xs", vector_to_array("features"))
-            .select(["label"] + [f.col("xs")[i].alias(name) for i, name in enumerate(features_names)])
-            )
-    
-    X = df.select(features_names).toPandas()
-    explainer = shap.TreeExplainer(model_pipeline_all.stages[-1].stages[-1])
-    shap_values = explainer.shap_values(X, check_additivity=False)
-    
-    shap.summary_plot(shap_values, X, plot_size=[30,20])
-    shap.summary_plot(shap_values, X, plot_type='violin', plot_size=[30,20])
-    shap.summary_plot(shap_values, X, plot_type="bar")
-    
-except BaseException as e:
-        print(f'ERROR: Shapley values not available: {e}')
+df = (df
+        .withColumn("xs", vector_to_array("features"))
+        .select(["label"] + [f.col("xs")[i].alias(name) for i, name in enumerate(features_names)])
+        )
+
+X = df.select(features_names).toPandas()
+explainer = shap.TreeExplainer(model_pipeline_all.stages[-1].stages[-1])
+shap_values = explainer.shap_values(X, check_additivity=False)
+
+shap.summary_plot(shap_values, X, plot_size=[30,20])
+shap.summary_plot(shap_values, X, plot_type='violin', plot_size=[30,20])
+shap.summary_plot(shap_values, X, plot_type="bar")
