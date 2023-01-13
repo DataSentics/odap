@@ -1,5 +1,4 @@
 # Databricks notebook source
-
 import os
 from databricks import feature_store
 
