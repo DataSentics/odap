@@ -15,7 +15,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: ./odap-framework-demo
+        working-directory: ./odap_framework_demo
 
     steps:
       - uses: actions/checkout@v1

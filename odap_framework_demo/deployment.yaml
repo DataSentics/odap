@@ -1,5 +1,5 @@
 build:
-   no_build: true
+  no_build: true
 
 clusters:
   basic-cluster-props: &basic-cluster-props
@@ -57,7 +57,7 @@ environments:
               no_package: true
             job_cluster_key: "default"
             notebook_task:
-              notebook_path: "odap-framework-demo/orchestration/features_orchestrator"
+              notebook_path: "odap_framework_demo/orchestration/features_orchestrator"
               base_parameters:
                 target: "no target"
                 timestamp: "2020-12-12"
@@ -78,7 +78,7 @@ environments:
               no_package: true
             job_cluster_key: "default"
             notebook_task:
-              notebook_path: "odap-framework-demo/orchestration/segments_orchestrator"
+              notebook_path: "odap_framework_demo/orchestration/segments_orchestrator"
               base_parameters:
                 export: "upsell_uc: upsell_uc_investment_interest"
 
@@ -98,7 +98,7 @@ environments:
               no_package: true
             job_cluster_key: "default"
             notebook_task:
-              notebook_path: "odap-framework-demo/orchestration/segments_orchestrator"
+              notebook_path: "odap_framework_demo/orchestration/segments_orchestrator"
               base_parameters:
                 export: "upsell_uc: upsell_uc_loan_interest"
 
@@ -115,7 +115,7 @@ environments:
               no_package: true
             job_cluster_key: "default"
             notebook_task:
-              notebook_path: "odap-framework-demo/_demo/_setup/init"
+              notebook_path: "odap_framework_demo/_demo/_setup/init"
           - <<: *generate-use-cases
             depends_on:
               - task_key: "init"
