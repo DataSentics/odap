@@ -1,7 +1,7 @@
 # Databricks notebook source
 import unittest
 import datetime as dt
-from functions.core import with_timestamps_no_filter, run_test
+from odap_framework_demo.functions.core import with_timestamps_no_filter, run_test
 
 # COMMAND ----------
 
