@@ -7,6 +7,7 @@ import datetime as dt
 from typing import List
 from pyspark.sql import functions as f
 from odap.feature_factory import time_windows as tw
+from odap_framework_demo.functions.core import with_timestamps_no_filter
 
 # COMMAND ----------
 
@@ -39,7 +40,7 @@ target_store = spark.read.table("target_store")
 
 # COMMAND ----------
 
-wdf = wdf_orig.join(target_store, on="customer_id").filter(f.col("visit_timestamp") <= f.col("timestamp"))
+wdf = with_timestamps_no_filter(df=wdf_orig, target_store=target_store, entity_id="customer_id", time_column="visit_timestamp")
 
 # COMMAND ----------
 
@@ -69,4 +70,3 @@ def product_agg_features(time_window: str) -> List[tw.WindowedColumn]:
 # COMMAND ----------
 
 df_final = wdf.time_windowed(group_keys=["customer_id", "timestamp"], agg_columns_function=product_agg_features)
-# df_final.display()
