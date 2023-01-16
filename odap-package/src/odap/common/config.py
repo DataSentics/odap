@@ -15,6 +15,7 @@ Config = Dict[str, Any]
 class ConfigNamespace(enum.Enum):
     FEATURE_FACTORY = "featurefactory"
     SEGMENT_FACTORY = "segmentfactory"
+    USECASE_FACTORY = "usecasefactory"
 
 
 def resolve_env(raw_config: str):

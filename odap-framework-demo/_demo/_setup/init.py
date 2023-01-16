@@ -18,6 +18,7 @@ spark.sql(f"DROP DATABASE IF EXISTS {account_db} CASCADE")
 spark.sql(f"DROP DATABASE IF EXISTS {customer_db} CASCADE")
 spark.sql("DROP DATABASE IF EXISTS odap_segments CASCADE")
 spark.sql("DROP DATABASE IF EXISTS odap_targets CASCADE")
+spark.sql("DROP DATABASE IF EXISTS odap_use_cases CASCADE")
 
 # COMMAND ----------
 
@@ -27,6 +28,7 @@ spark.sql(f"CREATE DATABASE IF NOT EXISTS {account_db}")
 spark.sql(f"CREATE DATABASE IF NOT EXISTS {customer_db}")
 spark.sql("CREATE DATABASE IF NOT EXISTS odap_segments")
 spark.sql("CREATE DATABASE IF NOT EXISTS odap_targets")
+spark.sql("CREATE DATABASE IF NOT EXISTS odap_use_cases")
 
 # COMMAND ----------
 
