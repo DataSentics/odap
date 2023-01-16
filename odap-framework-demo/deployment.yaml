@@ -117,6 +117,8 @@ environments:
             notebook_task:
               notebook_path: "odap-framework-demo/_demo/_setup/init"
           - <<: *generate-use-cases
+            depends_on:
+              - task_key: "init"
           - <<: *odap-features-task
             depends_on:
               - task_key: "init"
