@@ -4,10 +4,9 @@
 # COMMAND ----------
 
 import datetime as dt
-from typing import List
 from pyspark.sql import functions as f
 from odap.feature_factory import time_windows as tw
-from odap_framework_demo.functions.core import with_timestamps_no_filter
+from odap_framework_demo.functions.product_web_visits_count import product_agg_features
 
 # COMMAND ----------
 
@@ -17,10 +16,6 @@ dbutils.widgets.text("target", "")
 # COMMAND ----------
 
 # MAGIC %run ../init/target_store
-
-# COMMAND ----------
-
-products = ["investice", "pujcky", "hypoteky"]
 
 # COMMAND ----------
 
@@ -40,7 +35,7 @@ target_store = spark.read.table("target_store")
 
 # COMMAND ----------
 
-wdf = with_timestamps_no_filter(df=wdf_orig, target_store=target_store, entity_id="customer_id", time_column="visit_timestamp")
+wdf = wdf_orig.join(target_store, on="customer_id").filter(f.col("visit_timestamp") <= f.col("timestamp"))
 
 # COMMAND ----------
 
@@ -55,17 +50,6 @@ wdf = with_timestamps_no_filter(df=wdf_orig, target_store=target_store, entity_i
 # MAGIC         }
 # MAGIC     }
 # MAGIC }
-
-# COMMAND ----------
-
-def product_agg_features(time_window: str) -> List[tw.WindowedColumn]:    
-    return [
-        tw.sum_windowed(
-            f"{product}_web_visits_count_in_last_{time_window}",
-            f.lower("url").contains(product).cast("integer"),
-        )
-        for product in products
-    ]
 
 # COMMAND ----------
 

@@ -2,7 +2,7 @@ import os
 import datetime as dt
 import unittest
 from unittest.mock import MagicMock, patch
-from odap.common.test.PysparkTestCase import PySparkTestCase
+from odap.common.test.PySparkTestCase import PySparkTestCase
 from odap.common.notebook import split_notebok_to_cells
 from odap.common.dataframes import create_dataframe_from_notebook_cells
 
