@@ -1,4 +1,7 @@
 parameters:
+  usecasefactory:
+    table: "odap_use_cases.use_cases"
+    
   featurefactory:
     database: "{write_env}_odap_features_{entity}"
     features:
