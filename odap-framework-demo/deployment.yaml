@@ -23,6 +23,24 @@ git:
 environments:
   default:
     workflows:
+      - name: "generate-use-cases"
+        git_source: *odap-git-source
+        job_clusters:
+          - job_cluster_key: "default"
+            <<: *basic-static-cluster
+        schedule:
+          quartz_cron_expression: "0 0 2 * * ?"
+          timezone_id: "Europe/Belgrade"
+          pause_status: "UNPAUSED"
+        tasks:
+          - &generate-use-cases
+            task_key: "use-case-table"
+            deployment_config:
+              no_package: true
+            job_cluster_key: "default"
+            notebook_task:
+              notebook_path: "odap-framework-demo/orchestration/generate_use_case_table"
+
       - name: "odap-features"
         git_source: *odap-git-source
         job_clusters:
@@ -98,6 +116,7 @@ environments:
             job_cluster_key: "default"
             notebook_task:
               notebook_path: "odap-framework-demo/_demo/_setup/init"
+          - <<: *generate-use-cases
           - <<: *odap-features-task
             depends_on:
               - task_key: "init"
