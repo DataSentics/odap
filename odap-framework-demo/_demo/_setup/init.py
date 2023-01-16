@@ -14,6 +14,7 @@ spark.sql("DROP DATABASE IF EXISTS dev_odap_features_account CASCADE")
 spark.sql("DROP DATABASE IF EXISTS dev_odap_features_customer CASCADE")
 spark.sql("DROP DATABASE IF EXISTS odap_segments CASCADE")
 spark.sql("DROP DATABASE IF EXISTS odap_targets CASCADE")
+spark.sql("DROP DATABASE IF EXISTS odap_use_cases CASCADE")
 
 # COMMAND ----------
 
@@ -23,6 +24,7 @@ spark.sql("CREATE DATABASE IF NOT EXISTS dev_odap_features_account")
 spark.sql("CREATE DATABASE IF NOT EXISTS dev_odap_features_customer")
 spark.sql("CREATE DATABASE IF NOT EXISTS odap_segments")
 spark.sql("CREATE DATABASE IF NOT EXISTS odap_targets")
+spark.sql("CREATE DATABASE IF NOT EXISTS odap_use_cases")
 
 # COMMAND ----------
 
