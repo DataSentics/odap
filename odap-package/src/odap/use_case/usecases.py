@@ -2,7 +2,7 @@ from typing import List
 from odap.segment_factory.config import get_use_cases
 from odap.use_case.config import get_use_case_config
 from odap.use_case.status import get_status
-from odap.use_case.functions import get_export_data, get_unique_segments, get_unique_sdm, get_unique_attributes
+from odap.use_case.functions import get_export_data, get_unique_segments, get_unique_attributes
 
 
 def generate_use_cases() -> List[dict]:
@@ -21,8 +21,8 @@ def generate_use_cases() -> List[dict]:
                 "exports": list(use_case_config["exports"].keys()) if "exports" in use_case_config else [],
                 "segments": get_unique_segments(use_case_config),
                 "model": None,
-                "attributes": get_unique_attributes(use_case_config),
-                "sdms": get_unique_sdm(use_case_config),
+                "attributes": get_unique_attributes(set(get_export_data(use_case_config, "destination"))),
+                "sdms": [],
                 "data_sources": [],
             }
         )

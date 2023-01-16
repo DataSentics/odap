@@ -1,5 +1,7 @@
-from typing import List
-from odap.use_case.notebooks import get_sdm_data, get_segment_attributes
+from typing import List, Iterable
+from odap.common.utils import get_project_root_fs_path
+from odap.common.config import get_config_on_rel_path, CONFIG_NAME
+from odap.segment_factory.config import USE_CASES_FOLDER
 
 
 def get_export_data(config: dict, value: str):
@@ -14,15 +16,18 @@ def get_unique_segments(config: dict) -> List[str]:
     return [list(segment.keys())[0] for segment in get_export_data(config, "segments")]
 
 
-def get_unique_sdm(config: dict) -> List[str]:
-    data = []
-    for segment in get_unique_segments(config):
-        data += [sdm.split(".")[1] for sdm in get_sdm_data(config["name"], segment)]
-    return list(set(data))
+def get_unique_attributes(destinations: Iterable[dict]):
+    config = get_config_on_rel_path(USE_CASES_FOLDER, get_project_root_fs_path(), CONFIG_NAME)["segmentfactory"][
+        "destinations"
+    ]
 
+    result = {}
 
-def get_unique_attributes(config: dict) -> List[str]:
-    data = []
-    for segment in get_unique_segments(config):
-        data += [attribute.split(".")[1] for attribute in get_segment_attributes(config["name"], segment)]
-    return list(set(data))
+    for destination in destinations:
+        attributes = config[destination]["attributes"]
+        for attribute in attributes:
+            if attribute in result:
+                result[attribute] = list(set(result[attribute] + attributes[attribute]))
+            else:
+                result[attribute] = attributes[attribute]
+    return result
