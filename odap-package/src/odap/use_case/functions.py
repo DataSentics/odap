@@ -16,17 +16,6 @@ def get_unique_segments(config: dict) -> List[str]:
     return [list(segment.keys())[0] for segment in get_export_data(config, "segments")]
 
 
-def merge_attributes(result: dict, attributes: list) -> dict:
-    for attribute in attributes:
-        result = merge_attributes(result, attribute)
-
-        result[attribute] = (
-            list(set(result[attribute] + attributes[attribute])) if attribute in result else attributes[attribute]
-        )
-
-    return result
-
-
 def get_unique_attributes(destinations: Iterable[dict]) -> dict:
     config = get_config_on_rel_path(USE_CASES_FOLDER, get_project_root_fs_path(), CONFIG_NAME)["segmentfactory"][
         "destinations"
@@ -35,6 +24,9 @@ def get_unique_attributes(destinations: Iterable[dict]) -> dict:
     result = {}
     for destination in destinations:
         attributes = config[destination]["attributes"]
-        result = merge_attributes(result, attributes)
+        for attribute in attributes:
+            result[attribute] = (
+                list(set(result[attribute] + attributes[attribute])) if attribute in result else attributes[attribute]
+            )
 
     return result
