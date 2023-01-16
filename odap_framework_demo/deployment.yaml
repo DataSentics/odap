@@ -39,7 +39,7 @@ environments:
               no_package: true
             job_cluster_key: "default"
             notebook_task:
-              notebook_path: "odap-framework-demo/orchestration/generate_use_case_table"
+              notebook_path: "odap_framework_demo/orchestration/generate_use_case_table"
 
       - name: "odap-features"
         git_source: *odap-git-source

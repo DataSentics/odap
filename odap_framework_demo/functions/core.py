@@ -1,10 +1,21 @@
 import unittest
-from pyspark.sql import functions as f
+import sys
+import os
+from pathlib import Path
 
-def with_timestamps_no_filter(df, target_store, entity_id, time_column):
-    return df.join(target_store, on=entity_id).filter(f.col(time_column) <= f.col("timestamp"))
 
 def run_test(test_case):
     loader = unittest.TestLoader()
     suite = loader.loadTestsFromTestCase(test_case)
     return unittest.TextTestRunner().run(suite)
+
+def import_all_test_modules():
+    for module in os.listdir(f"{Path.cwd()}/tests"):
+        if module[-3:] == '.py':
+            __import__(f"tests.{module[:-3]}", locals(), globals())
+
+def run_all_tests():
+    sys.path.append(f"{Path.cwd().parent}/odap-package/src")
+    sys.path.append(f"{Path.cwd().parent}/odap_framework_demo")
+    
+    import_all_test_modules()

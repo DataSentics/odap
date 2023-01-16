@@ -5,7 +5,7 @@ import datetime as dt
 
 from pyspark.sql import functions as f
 
-from odap.common.test.PysparkTestCase import PySparkTestCase
+from odap.common.test.PySparkTestCase import PySparkTestCase
 from odap.feature_factory.time_windows import (
     WindowedDataFrame,
     count_windowed,
