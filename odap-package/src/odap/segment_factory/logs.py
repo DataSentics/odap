@@ -11,6 +11,7 @@ from odap.segment_factory.segments import write_segment
 from odap.segment_factory.config import get_destination, get_log_table, get_log_table_path
 
 
+# pylint: disable=too-many-statements
 def write_export_log(
     segment_df: DataFrame,
     export_name: str,
@@ -31,6 +32,13 @@ def write_export_log(
 
     log_table = get_log_table(segment_factory_config)
     logger.info(f"Writing export log {export_id} to hive table {log_table}")
+
+    options = {"mergeSchema": True}
+
+    if path := get_log_table_path(segment_factory_config):
+        logger.info(f"Path in config, saving '{log_table}' to '{path}'")
+        options["path"] = path
+
     (
         spark.createDataFrame(
             [
@@ -51,7 +59,6 @@ def write_export_log(
             get_export_schema(),
         )
         .write.mode("append")
-        .option("path", get_log_table_path(segment_factory_config))
-        .option("mergeSchema", "true")
+        .options(**options)
         .saveAsTable(log_table)
     )

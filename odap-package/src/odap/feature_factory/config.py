@@ -1,4 +1,6 @@
 import os
+from typing import Optional
+
 from odap.common.databricks import resolve_branch
 from odap.common.config import Config
 
@@ -114,17 +116,15 @@ def get_latest_features_table(config: Config) -> str:
     return get_latest_features_table_for_entity(entity_name, config)
 
 
-def get_features_table_dir_path(config: Config) -> str:
+def get_features_table_dir_path(config: Config) -> Optional[str]:
     features_table_path = get_features(config).get("dir_path")
 
-    if not features_table_path:
-        raise ConfigAttributeMissingException("features.dir_path not defined in config.yaml")
-
-    return features_table_path.format(entity=get_entity(config))
+    return features_table_path.format(entity=get_entity(config)) if features_table_path else None
 
 
-def get_latest_features_table_path(config: Config) -> str:
-    return f"{get_features_table_dir_path(config)}/latest"
+def get_latest_features_table_path(config: Config) -> Optional[str]:
+    dir_path = get_features_table_dir_path(config)
+    return f"{dir_path}/latest" if dir_path else None
 
 
 def get_metadata_table_for_entity(entity_name: str, config: Config) -> str:

@@ -1,4 +1,4 @@
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from odap.common.config import get_config_on_rel_path, ConfigNamespace, CONFIG_NAME
 from odap.common.utils import get_absolute_api_path, list_folders
 from odap.common.exceptions import ConfigAttributeMissingException
@@ -18,12 +18,8 @@ def get_segment_table(config: Config) -> str:
     return segment_table
 
 
-def get_segment_table_path(config: Config) -> str:
-    segment_path = config.get("segment", {}).get("path")
-
-    if not segment_path:
-        raise ConfigAttributeMissingException(f"'{SEGMENT_FACTORY}.segment.path' not defined in config.yaml")
-    return segment_path
+def get_segment_table_path(config: Config) -> Optional[str]:
+    return config.get("segment", {}).get("path")
 
 
 def get_log_table(config: Config) -> str:
@@ -34,12 +30,8 @@ def get_log_table(config: Config) -> str:
     return log_table
 
 
-def get_log_table_path(config: Config) -> str:
-    log_path = config.get("log", {}).get("path")
-
-    if not log_path:
-        raise ConfigAttributeMissingException(f"'{SEGMENT_FACTORY}.log_path' not defined in config.yaml")
-    return log_path
+def get_log_table_path(config: Config) -> Optional[str]:
+    return config.get("log", {}).get("path")
 
 
 def get_exports(config: Config) -> Dict[str, Any]:

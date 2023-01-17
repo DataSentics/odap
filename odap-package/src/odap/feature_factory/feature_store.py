@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from pyspark.sql import SparkSession, DataFrame
 from databricks.feature_store import FeatureStoreClient
 
@@ -45,12 +45,14 @@ def write_df_to_feature_store(
     logger.info("Write successful.")
 
 
-def write_latest_table(latest_features_df: DataFrame, latest_table_name: str, latest_table_path: str):
+def write_latest_table(latest_features_df: DataFrame, latest_table_name: str, latest_table_path: Optional[str]):
     logger.info(f"Writing latest data to table: '{latest_table_name}'")
-    (
-        latest_features_df.write.mode("overwrite")
-        .option("overwriteSchema", True)
-        .option("path", latest_table_path)
-        .saveAsTable(latest_table_name)
-    )
+
+    options = {"mergeSchema": True}
+
+    if latest_table_path:
+        logger.info(f"Path in config, saving '{latest_table_name}' to '{latest_table_path}'")
+        options["path"] = latest_table_path
+
+    (latest_features_df.write.mode("overwrite").options(**options).saveAsTable(latest_table_name))
     logger.info("Write successful.")
