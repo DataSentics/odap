@@ -1,8 +1,11 @@
 import os
+from typing import Optional
+
 from odap.common.databricks import resolve_branch
 from odap.common.config import Config
 
 from odap.common.exceptions import ConfigAttributeMissingException
+from odap.common.utils import concat_catalog_db_table
 from odap.common.widgets import get_widget_value
 from odap.feature_factory import const
 
@@ -77,24 +80,30 @@ def get_database_for_entity(entity_name: str, config: Config) -> str:
     return resolve_dev_database_name(database)
 
 
+def get_catalog(config: Config) -> str:
+    catalog = config.get("catalog")
+
+    if not catalog:
+        raise ConfigAttributeMissingException("features.catalog not defined in config.yaml")
+
+    return catalog
+
+
 def get_database(config: Config) -> str:
     entity_name = get_entity(config)
 
     return get_database_for_entity(entity_name, config)
 
 
-def concat_db_table(database: str, table_name: str) -> str:
-    return f"{database}.{table_name}"
-
-
 def get_features_table(table_name: str, config: Config) -> str:
     database = get_database(config)
 
-    return concat_db_table(database, table_name)
+    return concat_catalog_db_table("hive_metastore", database, table_name)
 
 
-def get_features_table_path(table_name: str, config: Config) -> str:
-    return f"{get_features_table_dir_path(config)}/{table_name}"
+def get_features_table_path(table_name: str, config: Config) -> Optional[str]:
+    dir_path = get_features_table_dir_path(config)
+    return f"{dir_path}/{table_name}" if dir_path else None
 
 
 def get_latest_features_table_for_entity(entity_name: str, config: Config) -> str:
@@ -104,8 +113,9 @@ def get_latest_features_table_for_entity(entity_name: str, config: Config) -> st
         raise ConfigAttributeMissingException("features.latest_table not defined in config.yaml")
 
     table_name = table_name.format(entity=entity_name)
+    catalog = get_catalog(config)
     database = get_database_for_entity(entity_name, config)
-    return concat_db_table(database, table_name)
+    return concat_catalog_db_table(catalog, database, table_name)
 
 
 def get_latest_features_table(config: Config) -> str:
@@ -114,17 +124,14 @@ def get_latest_features_table(config: Config) -> str:
     return get_latest_features_table_for_entity(entity_name, config)
 
 
-def get_features_table_dir_path(config: Config) -> str:
+def get_features_table_dir_path(config: Config) -> Optional[str]:
     features_table_path = get_features(config).get("dir_path")
 
-    if not features_table_path:
-        raise ConfigAttributeMissingException("features.dir_path not defined in config.yaml")
-
-    return features_table_path.format(entity=get_entity(config))
+    return features_table_path.format(entity=get_entity(config)) if features_table_path else None
 
 
-def get_latest_features_table_path(config: Config) -> str:
-    return f"{get_features_table_dir_path(config)}/latest"
+def get_latest_features_table_path(config: Config) -> Optional[str]:
+    return get_features_table_path("latest", config)
 
 
 def get_metadata_table_for_entity(entity_name: str, config: Config) -> str:
@@ -134,8 +141,9 @@ def get_metadata_table_for_entity(entity_name: str, config: Config) -> str:
         raise ConfigAttributeMissingException("metadata.table not defined in config.yaml")
 
     metadata_table = metadata_table.format(entity=entity_name)
+    catalog = get_catalog(config)
     database = get_database_for_entity(entity_name, config)
-    return concat_db_table(database, metadata_table)
+    return concat_catalog_db_table(catalog, database, metadata_table)
 
 
 def get_metadata_table(config: Config) -> str:
@@ -144,13 +152,10 @@ def get_metadata_table(config: Config) -> str:
     return get_metadata_table_for_entity(entity_name, config)
 
 
-def get_metadata_table_path(config: Config) -> str:
+def get_metadata_table_path(config: Config) -> Optional[str]:
     metadata_table_path = get_metadata(config).get("path")
 
-    if not metadata_table_path:
-        raise ConfigAttributeMissingException("metadata.path not defined in config.yaml")
-
-    return metadata_table_path.format(entity=get_entity(config))
+    return metadata_table_path.format(entity=get_entity(config)) if metadata_table_path else None
 
 
 def is_no_target_mode() -> bool:

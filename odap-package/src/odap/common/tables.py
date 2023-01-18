@@ -1,9 +1,10 @@
 from typing import Optional
 from pyspark.sql import SparkSession, DataFrame
-from pyspark.sql import functions as f
 from pyspark.sql.types import StructType
 from delta import DeltaTable
 from databricks.feature_store import FeatureStoreClient
+
+from odap.common.logger import logger
 
 
 def hive_table_exists(full_table_name: str) -> bool:
@@ -40,19 +41,13 @@ def get_existing_table(table_name: str) -> Optional[DataFrame]:
     return None
 
 
-def table_path_exists(path: str) -> bool:
+def create_table_if_not_exists(table_name: str, path: Optional[str], schema: StructType):
     spark = SparkSession.getActiveSession()
 
-    return DeltaTable.isDeltaTable(spark, path)
+    table = DeltaTable.createIfNotExists(spark).tableName(table_name).addColumns(schema)
 
+    if path:
+        logger.info(f"Path in config, saving '{table_name}' to '{path}'")
+        table = table.location(path)
 
-def get_table_path(full_table_name: str) -> str:
-    spark = SparkSession.getActiveSession()
-
-    return spark.sql(f"DESCRIBE FORMATTED {full_table_name}").filter(f.col("col_name") == "Location").collect()[0][1]
-
-
-def create_table_if_not_exists(table_name: str, path: str, schema: StructType):
-    spark = SparkSession.getActiveSession()
-
-    DeltaTable.createIfNotExists(spark).tableName(table_name).location(path).addColumns(schema).execute()
+    table.execute()

@@ -21,13 +21,14 @@ def write_segment(
 
     table = get_segment_table(segment_factory_config)
     logger.info(f"Writing segments to hive table {table}")
-    (
-        extended_segment_df.write.format("delta")
-        .mode("append")
-        .option("path", get_segment_table_path(segment_factory_config))
-        .option("mergeSchema", "True")
-        .saveAsTable(table)
-    )
+
+    options = {"mergeSchema": "true"}
+
+    if path := get_segment_table_path(segment_factory_config):
+        logger.info(f"Path in config, saving '{table}' to '{path}'")
+        options["path"] = path
+
+    (extended_segment_df.write.format("delta").mode("append").options(**options).saveAsTable(table))
 
 
 def create_segment_df(segment_name: str, use_case_name: str) -> DataFrame:

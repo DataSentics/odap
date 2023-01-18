@@ -102,3 +102,7 @@ def string_contains_any_pattern(string: str, patterns: List[str]):
             return True
 
     return False
+
+
+def concat_catalog_db_table(catalog: str, database: str, table_name: str) -> str:
+    return f"{catalog}.{database}.{table_name}"
