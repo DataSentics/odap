@@ -22,7 +22,7 @@ def write_segment(
     table = get_segment_table(segment_factory_config)
     logger.info(f"Writing segments to hive table {table}")
 
-    options = {"mergeSchema": True}
+    options = {"mergeSchema": "true"}
 
     if path := get_segment_table_path(segment_factory_config):
         logger.info(f"Path in config, saving '{table}' to '{path}'")

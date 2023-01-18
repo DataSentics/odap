@@ -52,7 +52,7 @@ def write_df_to_feature_store(
 def write_latest_table(latest_features_df: DataFrame, latest_table_name: str, latest_table_path: Optional[str]):
     logger.info(f"Writing latest data to table: '{latest_table_name}'")
 
-    options = {"mergeSchema": True}
+    options = {"mergeSchema": "true"}
 
     if latest_table_path:
         logger.info(f"Path in config, saving '{latest_table_name}' to '{latest_table_path}'")

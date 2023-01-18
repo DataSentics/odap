@@ -33,7 +33,7 @@ def write_export_log(
     log_table = get_log_table(segment_factory_config)
     logger.info(f"Writing export log {export_id} to hive table {log_table}")
 
-    options = {"mergeSchema": True}
+    options = {"mergeSchema": "true"}
 
     if path := get_log_table_path(segment_factory_config):
         logger.info(f"Path in config, saving '{log_table}' to '{path}'")
