@@ -1,18 +1,18 @@
 parameters:
   usecasefactory:
     catalog: "hive_metastore"
-    database: "{write_env}_odap_use_cases2"
+    database: "{write_env}_odap_use_cases"
     table: "use_cases"
     
   featurefactory:
     catalog: "hive_metastore"
-    database: "{write_env}_odap_features_test_{entity}"
+    database: "{write_env}_odap_features_{entity}"
     features:
       latest_table: "features_latest"
       #dir_path: "dbfs:/{write_env}_odap_features/{entity}/features"
 
     metadata:
-      table: "metadata_fdjksofds"
+      table: "metadata"
       #path: "dbfs:/{write_env}_odap_features/{entity}/metadata"
 
     entities:
@@ -29,7 +29,7 @@ parameters:
 
   segmentfactory:
     catalog: "hive_metastore"
-    database: "{write_env}_odap_segments_test_fdsjfds"
+    database: "{write_env}_odap_segments"
     log:
       table: "export_logs"
       #path: "dbfs:/{write_env}_odap_segments/export_logs.delta"
