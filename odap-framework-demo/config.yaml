@@ -1,16 +1,19 @@
 parameters:
   usecasefactory:
-    table: "{write_env}_odap_use_cases.use_cases"
+    catalog: "hive_metastore"
+    database: "{write_env}_odap_use_cases2"
+    table: "use_cases"
     
   featurefactory:
-    database: "{write_env}_odap_features_{entity}"
+    catalog: "hive_metastore"
+    database: "{write_env}_odap_features_test_{entity}"
     features:
       latest_table: "features_latest"
-      dir_path: "dbfs:/{write_env}_odap_features/{entity}/features"
+      #dir_path: "dbfs:/{write_env}_odap_features/{entity}/features"
 
     metadata:
-      table: "metadata"
-      path: "dbfs:/{write_env}_odap_features/{entity}/metadata"
+      table: "metadata_fdjksofds"
+      #path: "dbfs:/{write_env}_odap_features/{entity}/metadata"
 
     entities:
       customer:
@@ -25,13 +28,15 @@ parameters:
       dbutils_secrets_scope: "unit-kv"
 
   segmentfactory:
+    catalog: "hive_metastore"
+    database: "{write_env}_odap_segments_test_fdsjfds"
     log:
-      table: "{write_env}_odap_segments.export_logs"
-      path: "dbfs:/{write_env}_odap_segments/export_logs.delta"
+      table: "export_logs"
+      #path: "dbfs:/{write_env}_odap_segments/export_logs.delta"
 
     segment:
-      table: "{write_env}_odap_segments.segments"
-      path: "dbfs:/{write_env}_odap_segments/segments.delta"
+      table: "segments"
+      #path: "dbfs:/{write_env}_odap_segments/segments.delta"
 
     destinations:
       email_currency_csv_dbfs_export:
