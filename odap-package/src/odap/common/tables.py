@@ -4,6 +4,8 @@ from pyspark.sql.types import StructType
 from delta import DeltaTable
 from databricks.feature_store import FeatureStoreClient
 
+from odap.common.logger import logger
+
 
 def hive_table_exists(full_table_name: str) -> bool:
     spark = SparkSession.getActiveSession()
@@ -45,6 +47,7 @@ def create_table_if_not_exists(table_name: str, path: Optional[str], schema: Str
     table = DeltaTable.createIfNotExists(spark).tableName(table_name).addColumns(schema)
 
     if path:
+        logger.info(f"Path in config, saving '{table_name}' to '{path}'")
         table = table.location(path)
 
     table.execute()

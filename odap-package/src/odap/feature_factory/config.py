@@ -99,10 +99,9 @@ def concat_catalog_db_table(catalog: str, database: str, table_name: str) -> str
 
 
 def get_features_table(table_name: str, config: Config) -> str:
-    catalog = get_catalog(config)
     database = get_database(config)
 
-    return concat_catalog_db_table(catalog, database, table_name)
+    return concat_catalog_db_table("hive_metastore", database, table_name)
 
 
 def get_features_table_path(table_name: str, config: Config) -> str:

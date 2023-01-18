@@ -20,13 +20,17 @@ def create_feature_store_table(
     if hive_table_exists(table_name):
         return
 
-    fs.create_table(
-        name=table_name,
-        path=table_path,
-        schema=df.schema,
-        primary_keys=primary_keys,
-        timestamp_keys=timestamp_keys,
-    )
+    kwargs = {
+        "name": table_name,
+        "schema": df.schema,
+        "primary_keys": primary_keys,
+        "timestamp_keys": timestamp_keys,
+    }
+    if table_path:
+        logger.info(f"Path in config, saving '{table_name}' to '{table_path}'")
+        kwargs["path"] = table_path
+
+    fs.create_table(**kwargs)
 
 
 def write_df_to_feature_store(
