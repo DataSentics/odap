@@ -10,7 +10,7 @@ def create_feature_store_table(
     fs: FeatureStoreClient,
     df: DataFrame,
     table_name: str,
-    table_path: str,
+    table_path: Optional[str],
     primary_keys: List[str],
     timestamp_keys: List[str],
 ) -> None:
