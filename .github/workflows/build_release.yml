@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./odap-package
+        working-directory: odap-package
     steps:
       - uses: actions/checkout@v2
         with:
@@ -64,7 +64,7 @@ jobs:
     if: "startsWith(github.event.head_commit.message, 'bump version to')"
     defaults:
       run:
-        working-directory: ./odap-package
+        working-directory: odap-package
     steps:
       - name: Extract version
         id: extract_version
@@ -81,10 +81,6 @@ jobs:
           pattern: '^[\d.]+(\.dev[\d]+|a[\d]+|b[\d]+|rc[\d]+)?$'
           string: ${{ steps.extract_version.outputs.replaced }}
           replace-with: '$1'
-      - name: Show extracted version
-        run: echo "${{ steps.extract_version.outputs.replaced }}"
-      - name: Show extracted prerelease
-        run: echo "${{ steps.extract_prerelease.outputs.replaced }}"
       - name: Install Poetry
         uses: snok/install-poetry@v1.3.3
         with:
