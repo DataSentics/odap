@@ -1,6 +1,5 @@
 from typing import Optional
 from pyspark.sql import SparkSession, DataFrame
-from pyspark.sql import functions as f
 from pyspark.sql.types import StructType
 from delta import DeltaTable
 from databricks.feature_store import FeatureStoreClient
@@ -38,18 +37,6 @@ def get_existing_table(table_name: str) -> Optional[DataFrame]:
         return spark.read.table(table_name)
 
     return None
-
-
-def table_path_exists(path: str) -> bool:
-    spark = SparkSession.getActiveSession()
-
-    return DeltaTable.isDeltaTable(spark, path)
-
-
-def get_table_path(full_table_name: str) -> str:
-    spark = SparkSession.getActiveSession()
-
-    return spark.sql(f"DESCRIBE FORMATTED {full_table_name}").filter(f.col("col_name") == "Location").collect()[0][1]
 
 
 def create_table_if_not_exists(table_name: str, path: Optional[str], schema: StructType):
