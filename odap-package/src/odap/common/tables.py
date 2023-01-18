@@ -52,7 +52,12 @@ def get_table_path(full_table_name: str) -> str:
     return spark.sql(f"DESCRIBE FORMATTED {full_table_name}").filter(f.col("col_name") == "Location").collect()[0][1]
 
 
-def create_table_if_not_exists(table_name: str, path: str, schema: StructType):
+def create_table_if_not_exists(table_name: str, path: Optional[str], schema: StructType):
     spark = SparkSession.getActiveSession()
 
-    DeltaTable.createIfNotExists(spark).tableName(table_name).location(path).addColumns(schema).execute()
+    table = DeltaTable.createIfNotExists(spark).tableName(table_name).addColumns(schema)
+
+    if path:
+        table = table.location(path)
+
+    table.execute()
