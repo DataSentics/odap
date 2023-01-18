@@ -30,7 +30,7 @@ def create_feature_store_table(
         logger.info(f"Path in config, saving '{table_name}' to '{table_path}'")
         kwargs["path"] = table_path
 
-    fs.create_table(**kwargs)
+    fs.create_table(**kwargs)  # pyre-ignore[6]
 
 
 def write_df_to_feature_store(

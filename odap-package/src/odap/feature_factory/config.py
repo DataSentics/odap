@@ -101,7 +101,7 @@ def get_features_table(table_name: str, config: Config) -> str:
     return concat_catalog_db_table("hive_metastore", database, table_name)
 
 
-def get_features_table_path(table_name: str, config: Config) -> str:
+def get_features_table_path(table_name: str, config: Config) -> Optional[str]:
     dir_path = get_features_table_dir_path(config)
     return f"{dir_path}/{table_name}" if dir_path else None
 
