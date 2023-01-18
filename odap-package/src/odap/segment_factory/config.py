@@ -1,6 +1,6 @@
 from typing import Dict, Any, List, Optional
 from odap.common.config import get_config_on_rel_path, ConfigNamespace, CONFIG_NAME
-from odap.common.utils import get_absolute_api_path, list_folders
+from odap.common.utils import get_absolute_api_path, list_folders, concat_catalog_db_table
 from odap.common.exceptions import ConfigAttributeMissingException
 from odap.common.databricks import get_workspace_api
 
@@ -10,12 +10,31 @@ SEGMENT_FACTORY = ConfigNamespace.SEGMENT_FACTORY.value
 Config = Dict[str, Any]
 
 
+def get_catalog(config: Config) -> str:
+    catalog = config.get("catalog")
+
+    if not catalog:
+        raise ConfigAttributeMissingException(f"'{SEGMENT_FACTORY}.catalog' not defined in config.yaml")
+    return catalog
+
+
+def get_database(config: Config) -> str:
+    database = config.get("database")
+
+    if not database:
+        raise ConfigAttributeMissingException(f"'{SEGMENT_FACTORY}.database' not defined in config.yaml")
+    return database
+
+
 def get_segment_table(config: Config) -> str:
     segment_table = config.get("segment", {}).get("table")
 
     if not segment_table:
         raise ConfigAttributeMissingException(f"'{SEGMENT_FACTORY}.segment.table' not defined in config.yaml")
-    return segment_table
+
+    catalog = get_catalog(config)
+    database = get_database(config)
+    return concat_catalog_db_table(catalog, database, segment_table)
 
 
 def get_segment_table_path(config: Config) -> Optional[str]:
@@ -27,7 +46,10 @@ def get_log_table(config: Config) -> str:
 
     if not log_table:
         raise ConfigAttributeMissingException(f"'{SEGMENT_FACTORY}.log.table' not defined in config.yaml")
-    return log_table
+
+    catalog = get_catalog(config)
+    database = get_database(config)
+    return concat_catalog_db_table(catalog, database, log_table)
 
 
 def get_log_table_path(config: Config) -> Optional[str]:

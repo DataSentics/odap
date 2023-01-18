@@ -5,6 +5,7 @@ from odap.common.databricks import resolve_branch
 from odap.common.config import Config
 
 from odap.common.exceptions import ConfigAttributeMissingException
+from odap.common.utils import concat_catalog_db_table
 from odap.common.widgets import get_widget_value
 from odap.feature_factory import const
 
@@ -92,10 +93,6 @@ def get_database(config: Config) -> str:
     entity_name = get_entity(config)
 
     return get_database_for_entity(entity_name, config)
-
-
-def concat_catalog_db_table(catalog: str, database: str, table_name: str) -> str:
-    return f"{catalog}.{database}.{table_name}"
 
 
 def get_features_table(table_name: str, config: Config) -> str:
