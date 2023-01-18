@@ -4,9 +4,9 @@
 # COMMAND ----------
 
 import datetime as dt
-from typing import List
 from pyspark.sql import functions as f
 from odap.feature_factory import time_windows as tw
+from odap_framework_demo.functions.product_web_visits_count import product_agg_features
 
 # COMMAND ----------
 
@@ -16,10 +16,6 @@ dbutils.widgets.text("target", "")
 # COMMAND ----------
 
 # MAGIC %run ../init/target_store
-
-# COMMAND ----------
-
-products = ["investice", "pujcky", "hypoteky"]
 
 # COMMAND ----------
 
@@ -57,16 +53,4 @@ wdf = wdf_orig.join(target_store, on="customer_id").filter(f.col("visit_timestam
 
 # COMMAND ----------
 
-def product_agg_features(time_window: str) -> List[tw.WindowedColumn]:    
-    return [
-        tw.sum_windowed(
-            f"{product}_web_visits_count_in_last_{time_window}",
-            f.lower("url").contains(product).cast("integer"),
-        )
-        for product in products
-    ]
-
-# COMMAND ----------
-
 df_final = wdf.time_windowed(group_keys=["customer_id", "timestamp"], agg_columns_function=product_agg_features)
-# df_final.display()

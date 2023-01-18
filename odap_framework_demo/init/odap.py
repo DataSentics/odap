@@ -16,4 +16,4 @@ sys.path.append(f"{resolve_repository_root()}/odap-package/src")
 
 # COMMAND ----------
 
-sys.path.append(f"{resolve_repository_root()}/odap-framework-demo")
+sys.path.append(f"{resolve_repository_root()}/odap_framework_demo")

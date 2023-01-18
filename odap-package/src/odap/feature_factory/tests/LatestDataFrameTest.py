@@ -1,7 +1,7 @@
 import datetime as dt
 import unittest
 
-from odap.common.test.PysparkTestCase import PySparkTestCase
+from odap.common.test.PySparkTestCase import PySparkTestCase
 from odap.feature_factory.dataframes.dataframe_creator import join_dataframes
 
 
