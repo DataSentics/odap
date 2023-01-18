@@ -106,7 +106,8 @@ def get_features_table(table_name: str, config: Config) -> str:
 
 
 def get_features_table_path(table_name: str, config: Config) -> str:
-    return f"{get_features_table_dir_path(config)}/{table_name}"
+    dir_path = get_features_table_dir_path(config)
+    return f"{dir_path}/{table_name}" if dir_path else None
 
 
 def get_latest_features_table_for_entity(entity_name: str, config: Config) -> str:
@@ -134,8 +135,7 @@ def get_features_table_dir_path(config: Config) -> Optional[str]:
 
 
 def get_latest_features_table_path(config: Config) -> Optional[str]:
-    dir_path = get_features_table_dir_path(config)
-    return f"{dir_path}/latest" if dir_path else None
+    return get_features_table_path("latest", config)
 
 
 def get_metadata_table_for_entity(entity_name: str, config: Config) -> str:
