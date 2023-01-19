@@ -95,10 +95,15 @@ def get_database(config: Config) -> str:
     return get_database_for_entity(entity_name, config)
 
 
+def preview_catalog_enabled(config: Config) -> bool:
+    return config.get("preview_catalog") is not None
+
+
 def get_features_table(table_name: str, config: Config) -> str:
     database = get_database(config)
 
-    return concat_catalog_db_table("hive_metastore", database, table_name)
+    catalog = get_catalog(config) if preview_catalog_enabled(config) else "hive_metastore"
+    return concat_catalog_db_table(catalog, database, table_name)
 
 
 def get_features_table_path(table_name: str, config: Config) -> Optional[str]:
