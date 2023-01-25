@@ -1,4 +1,5 @@
 # Databricks notebook source
+import os
 import datetime as dt
 import time
 import random
@@ -30,7 +31,7 @@ while True:
         )
         .write
         .mode("append")
-        .saveAsTable("odap_digi_sdm_l2.web_visits_stream")
+        .saveAsTable(f"{os.environ['WRITE_ENV']}_odap_digi_sdm_l2.web_visits_stream")
     )
 
     time.sleep(random.randint(1, 20))
