@@ -1,4 +1,5 @@
 # Databricks notebook source
+import os
 from pyspark.sql import functions as f
 
 # COMMAND ----------
@@ -11,7 +12,7 @@ dbutils.widgets.text("target", "no target")
 
 (
     # insert your table containing all ids
-    spark.table("odap_offline_sdm_l2.customer")
+    spark.table(f"{os.environ['READ_ENV']}_odap_offline_sdm_l2.customer")
     .select(
         "customer_id",
         f.lit("no target").alias("target"),
@@ -21,7 +22,7 @@ dbutils.widgets.text("target", "no target")
         ).alias("timestamp"),
     )
     # insert your table containing targets
-    .unionByName(spark.table("odap_targets.targets"))
+    .unionByName(spark.table(f"{os.environ['READ_ENV']}_odap_targets.targets"))
     .filter(f.col("target") == dbutils.widgets.get("target"))
 ).createOrReplaceTempView("target_store")
 

@@ -17,7 +17,7 @@ or replace temporary view card_transactions as (
   select
     *
   from
-    hive_metastore.odap_offline_sdm_l2.card_transactions
+    hive_metastore.${env:READ_ENV}_odap_offline_sdm_l2.card_transactions
     join target_store using (customer_id)
   where
     process_date <= timestamp(getargument("timestamp"))
