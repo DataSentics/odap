@@ -9,17 +9,15 @@ from pyspark.sql import functions as f
 class PySparkTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.spark = SparkSession.builder.master("local[1]").appName("PySparkTest").getOrCreate()
+        cls.spark = (
+            SparkSession.getActiveSession()
+            or SparkSession.builder.master("local[1]").appName("PySparkTest").getOrCreate()
+        )
         cls.sc = cls.spark.sparkContext  # noqa
 
         warnings.filterwarnings("ignore", category=RuntimeWarning)
         warnings.filterwarnings("ignore", category=ResourceWarning)
         warnings.filterwarnings("ignore", category=DeprecationWarning)
-
-    @classmethod
-    def tearDownClass(cls):
-        cls.sc.stop()  # noqa
-        cls.spark.stop()  # noqa
 
     def compare_dataframes(self, df1: DataFrame, df2: DataFrame, sort_keys: List[str]):
         df1_columns = sorted(df1.columns)
