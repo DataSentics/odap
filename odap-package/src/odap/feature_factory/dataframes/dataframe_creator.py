@@ -1,3 +1,5 @@
+import ast
+import pydoc
 from typing import Dict, List, Iterable
 from functools import reduce
 from pyspark.sql import SparkSession, DataFrame, functions as f
@@ -79,18 +81,22 @@ def fill_nulls_in_notebook(notebook: List[Dict]) -> Dict:
         if feature[const.DTYPE].startswith("array"):
             continue
 
-        fill_dict[feature[const.FEATURE]] = feature[const.FILLNA_VALUE]
+        fillna_value = convert_fillna_value(feature[const.FILLNA_VALUE], feature[const.FILLNA_VALUE_TYPE])
+        fill_dict[feature[const.FEATURE]] = fillna_value
+
     return fill_dict
 
 
 def fill_array_nulls(df: DataFrame, notebook: List[Dict]) -> DataFrame:
     for feature in notebook:
-        if feature[const.DTYPE].startswith("array") and feature[const.FILLNA_VALUE] is not None:
+        fillna_value = convert_fillna_value(feature[const.FILLNA_VALUE], feature[const.FILLNA_VALUE_TYPE])
+
+        if feature[const.DTYPE].startswith("array") and fillna_value is not None:
             df = df.withColumn(
                 feature[const.FEATURE],
-                f.when(
-                    f.col(feature[const.FEATURE]).isNull(), f.array(*map(f.lit, feature[const.FILLNA_VALUE]))
-                ).otherwise(f.col(feature[const.FEATURE])),
+                f.when(f.col(feature[const.FEATURE]).isNull(), f.array(*map(f.lit, fillna_value))).otherwise(
+                    f.col(feature[const.FEATURE])
+                ),
             )
     return df
 
@@ -107,6 +113,21 @@ def fill_nulls(df: DataFrame, feature_notebooks: FeatureNotebookList) -> DataFra
         df = fill_array_nulls(df, notebook)
 
     return df.fillna(fill_dict)
+
+
+def convert_fillna_value(fillna_value: str, fillna_value_type: str):
+    type_ = pydoc.locate(fillna_value_type)
+
+    if type_ is None:
+        return None
+
+    if type_ == str:
+        return str(fillna_value)
+
+    if type_ in [int, float, bool, list, dict]:
+        return ast.literal_eval(fillna_value)
+
+    raise Exception(f"fillna value '{fillna_value}' of type '{fillna_value_type}' cannot be converted")
 
 
 def create_features_df(feature_notebooks: FeatureNotebookList, entity_primary_key: str) -> DataFrame:
