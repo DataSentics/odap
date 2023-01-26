@@ -8,13 +8,15 @@ feature_store_client = feature_store.FeatureStoreClient()
 
 env = os.environ.get("WRITE_ENV")
 
-offline_sdm_db = f"{env}_odap_offline_sdm_l2"
-digi_sdm_db = f"{env}_odap_digi_sdm_l2"
-account_db = f"{env}_odap_features_account"
-customer_db = f"{env}_odap_features_customer"
-segments_db = f"{env}_odap_segments"
-targets_db = f"{env}_odap_targets"
-use_cases_db = f"{env}_odap_use_cases"
+print(f"{env=}")
+
+offline_sdm_db = f"{env}.odap_offline_sdm_l2"
+digi_sdm_db = f"{env}.odap_digi_sdm_l2"
+account_db = f"{env}.odap_features_account"
+customer_db = f"{env}.odap_features_customer"
+segments_db = f"{env}.odap_segments"
+targets_db = f"{env}.odap_targets"
+use_cases_db = f"{env}.odap_use_cases"
 
 # COMMAND ----------
 

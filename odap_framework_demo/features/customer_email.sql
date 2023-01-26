@@ -38,7 +38,7 @@ select
   t.timestamp,
   customer_email
 from
-  hive_metastore.${env:READ_ENV}_odap_offline_sdm_l2.customer join target_store t using (customer_id)
+  ${env:READ_ENV}.odap_offline_sdm_l2.customer join target_store t using (customer_id)
 -- union (
 --   select
 --     123456789 as customer_id,

@@ -1,12 +1,13 @@
 parameters:
   usecasefactory:
-    catalog: "hive_metastore"
-    database: "{write_env}_odap_use_cases"
+    catalog: "{write_env}"
+    database: "odap_use_cases"
     table: "use_cases"
     
   featurefactory:
-    catalog: "hive_metastore"
-    database: "{write_env}_odap_features_{entity}"
+    catalog: "{write_env}"
+    preview_catalog: "on"
+    database: "odap_features_{entity}"
     features:
       latest_table: "features_latest"
       #dir_path: "dbfs:/{write_env}_odap_features/{entity}/features"
@@ -28,8 +29,8 @@ parameters:
       dbutils_secrets_scope: "unit-kv"
 
   segmentfactory:
-    catalog: "hive_metastore"
-    database: "{write_env}_odap_segments"
+    catalog: "{write_env}"
+    database: "odap_segments"
     log:
       table: "export_logs"
       #path: "dbfs:/{write_env}_odap_segments/export_logs.delta"

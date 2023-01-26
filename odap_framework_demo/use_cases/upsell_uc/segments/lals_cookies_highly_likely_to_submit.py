@@ -15,6 +15,7 @@
 
 import datetime as dt
 import mlflow
+import os
 from lookalike_modelling.ml_functions import define_lookalikes, predict
 from pyspark.sql import functions as f
 
@@ -32,6 +33,7 @@ model_uri = "runs:/4546ea3d2ba741ebab80dc3433a857fe/Model_test_lookalike"
 segment_name = "customers_likely_to_churn"
 criterion_choice = "probability_threshold" #probability_threshold or lookalike_count
 slider_value = 0.5 #float for probability threshold, int for lookalike count
+env = os.environ["READ_ENV"]
 
 # COMMAND ----------
 
