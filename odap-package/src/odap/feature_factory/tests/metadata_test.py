@@ -112,7 +112,7 @@ def test_metadata_integration(mocker):
                 "notebook_absolute_path": FEATURE_PATH,
                 "notebook_relative_path": RELATIVE_PATH,
                 "variable_type": "numerical",
-                "fillna_value": "None",
+                "fillna_value": None,
                 "fillna_value_type": "NoneType",
             }
             for feature, description, f_template, d_template in variable_metadata
