@@ -100,7 +100,7 @@ def set_fs_compatible_metadata(features_metadata: FeaturesMetadataType, config: 
 def resolve_fillna_with(feature_metadata: FeatureMetadataType):
     fillna_with = feature_metadata.pop(const.FILLNA_WITH, None)
 
-    feature_metadata[const.FILLNA_VALUE] = str(fillna_with)
+    feature_metadata[const.FILLNA_VALUE] = fillna_with
     feature_metadata[const.FILLNA_VALUE_TYPE] = type(fillna_with).__name__
 
     check_fillna_valid(feature_metadata[const.DTYPE], fillna_with, feature_metadata[const.FEATURE])
