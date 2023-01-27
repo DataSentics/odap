@@ -12,7 +12,8 @@ clusters:
     new_cluster:
       <<: *basic-cluster-props
       num_workers: 1
-      node_type_id: "Standard_DS3_v2"
+      node_type_id: "Standard_D4a_v4"
+      instance_pool_id: "0712-081441-voile3-pool-dt4ut8z6"
 
 git:
   odap-git-source: &odap-git-source
