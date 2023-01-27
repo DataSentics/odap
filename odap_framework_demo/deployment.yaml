@@ -3,7 +3,7 @@ build:
 
 clusters:
   basic-cluster-props: &basic-cluster-props
-    spark_version: "11.3.x-cpu-ml-scala2.12"
+    spark_version: "12.1.x-cpu-ml-scala2.12"
     spark_env_vars:
       WRITE_ENV: "test"
       READ_ENV: "test"
@@ -12,7 +12,7 @@ clusters:
     new_cluster:
       <<: *basic-cluster-props
       num_workers: 1
-      node_type_id: "Standard_DS3_v2"
+      instance_pool_id: "0712-081441-voile3-pool-dt4ut8z6"
 
 git:
   odap-git-source: &odap-git-source

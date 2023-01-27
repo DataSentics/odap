@@ -24,7 +24,7 @@ time_windows = ["14d", "30d", "90d"]
 # COMMAND ----------
 
 wdf_orig = tw.WindowedDataFrame(
-    df=spark.read.table(f"{os.environ['READ_ENV']}_odap_digi_sdm_l2.web_visits"),
+    df=spark.read.table(f"{os.environ['READ_ENV']}.odap_digi_sdm_l2.web_visits"),
     time_column="visit_timestamp",
     time_windows=time_windows,
 )

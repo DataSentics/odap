@@ -1,20 +1,26 @@
 # Databricks notebook source
 import os
 from databricks import feature_store
+from databricks.feature_store.utils import request_context
+from databricks.feature_store.utils.request_context import (
+    RequestContext,
+)
 
 # COMMAND ----------
 
 feature_store_client = feature_store.FeatureStoreClient()
 
-env = os.environ.get("WRITE_ENV")
+env = os.environ["WRITE_ENV"]
 
-offline_sdm_db = f"{env}_odap_offline_sdm_l2"
-digi_sdm_db = f"{env}_odap_digi_sdm_l2"
-account_db = f"{env}_odap_features_account"
-customer_db = f"{env}_odap_features_customer"
-segments_db = f"{env}_odap_segments"
-targets_db = f"{env}_odap_targets"
-use_cases_db = f"{env}_odap_use_cases"
+print(f"{env=}")
+
+offline_sdm_db = f"{env}.odap_offline_sdm_l2"
+digi_sdm_db = f"{env}.odap_digi_sdm_l2"
+account_db = f"{env}.odap_features_account"
+customer_db = f"{env}.odap_features_customer"
+segments_db = f"{env}.odap_segments"
+targets_db = f"{env}.odap_targets"
+use_cases_db = f"{env}.odap_use_cases"
 
 # COMMAND ----------
 
@@ -39,11 +45,8 @@ spark.sql(f"CREATE DATABASE IF NOT EXISTS {use_cases_db}")
 # COMMAND ----------
 
 def drop_feature_store(table: str):
-    try:
-        feature_store_client.drop_table(table)
-
-    except:
-        pass
+    req_context = RequestContext(request_context.DROP_TABLE)
+    feature_store_client._compute_client._catalog_client.delete_feature_table(table, req_context)
 
 # COMMAND ----------
 
