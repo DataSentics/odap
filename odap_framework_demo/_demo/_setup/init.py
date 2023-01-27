@@ -1,6 +1,10 @@
 # Databricks notebook source
 import os
 from databricks import feature_store
+from databricks.feature_store.utils import request_context
+from databricks.feature_store.utils.request_context import (
+    RequestContext,
+)
 
 # COMMAND ----------
 
@@ -41,12 +45,8 @@ spark.sql(f"CREATE DATABASE IF NOT EXISTS {use_cases_db}")
 # COMMAND ----------
 
 def drop_feature_store(table: str):
-    from databricks.feature_store.utils import request_context
-    from databricks.feature_store.utils.request_context import (
-        RequestContext,
-    )
     req_context = RequestContext(request_context.DROP_TABLE)
-    fs._compute_client._catalog_client.delete_feature_table(table, req_context)
+    feature_store_client._compute_client._catalog_client.delete_feature_table(table, req_context)
 
 # COMMAND ----------
 
