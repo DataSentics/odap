@@ -18,7 +18,7 @@ def hive_table_exists(full_table_name: str) -> bool:
         return False
 
     # pylint: disable=use-implicit-booleaness-not-comparison
-    return spark.sql(f'SHOW TABLES IN {database} LIKE "{table}"').collect() != []
+    return spark.sql(f'SHOW TABLES IN {catalog}.{database} LIKE "{table}"').collect() != []
 
 
 def get_catalogs() -> List[str]:
