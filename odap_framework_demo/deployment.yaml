@@ -144,7 +144,6 @@ environments:
       - name: "prod-pipeline"
         git_source:
           <<: *odap-git-source
-          git_branch: "{{env['GITHUB_HEAD_REF']}}"
         job_clusters:
           - job_cluster_key: "default"
             <<: *prod-static-cluster
