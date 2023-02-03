@@ -1,4 +1,4 @@
-name: Build & Release pipeline
+name: Deploy Production pipeline
 
 on:
   push:
