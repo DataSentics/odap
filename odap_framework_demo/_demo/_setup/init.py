@@ -45,8 +45,11 @@ spark.sql(f"CREATE DATABASE IF NOT EXISTS {use_cases_db}")
 # COMMAND ----------
 
 def drop_feature_store(table: str):
-    req_context = RequestContext(request_context.DROP_TABLE)
-    feature_store_client._compute_client._catalog_client.delete_feature_table(table, req_context)
+    try:
+        req_context = RequestContext(request_context.DROP_TABLE)
+        feature_store_client._compute_client._catalog_client.delete_feature_table(table, req_context)
+    except Exception:
+        print(f"Feature table '{table}' does not exist")
 
 # COMMAND ----------
 
