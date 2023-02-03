@@ -8,11 +8,23 @@ clusters:
       WRITE_ENV: "test"
       READ_ENV: "test"
 
+  prod-cluster-props: &prod-cluster-props
+    spark_version: "12.1.x-cpu-ml-scala2.12"
+    spark_env_vars:
+      WRITE_ENV: "prod"
+      READ_ENV: "prod"
+
   basic-static-cluster: &basic-static-cluster
     new_cluster:
       <<: *basic-cluster-props
       num_workers: 1
       instance_pool_id: "0712-081441-voile3-pool-dt4ut8z6"
+
+  prod-static-cluster: &prod-static-cluster
+    new_cluster:
+      <<: *prod-cluster-props
+      num_workers: 1
+      instance_pool_id: "0712-081732-wham4-pool-j0p81582"
 
 git:
   odap-git-source: &odap-git-source
@@ -109,6 +121,33 @@ environments:
         job_clusters:
           - job_cluster_key: "default"
             <<: *basic-static-cluster
+        tasks:
+          - task_key: "init"
+            deployment_config:
+              no_package: true
+            job_cluster_key: "default"
+            notebook_task:
+              notebook_path: "odap_framework_demo/_demo/_setup/init"
+          - <<: *generate-use-cases
+            depends_on:
+              - task_key: "init"
+          - <<: *odap-features-task
+            depends_on:
+              - task_key: "init"
+          - <<: *upsell-uc-investment-interest-export-task
+            depends_on:
+              - task_key: "odap-features"
+          - <<: *upsell-uc-loan-interest-export-task
+            depends_on:
+              - task_key: "upsell-uc-investment-interest-export"
+
+      - name: "prod-pipeline"
+        git_source:
+          <<: *odap-git-source
+          git_branch: "{{env['GITHUB_HEAD_REF']}}"
+        job_clusters:
+          - job_cluster_key: "default"
+            <<: *prod-static-cluster
         tasks:
           - task_key: "init"
             deployment_config:

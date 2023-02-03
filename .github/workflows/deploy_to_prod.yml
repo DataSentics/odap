@@ -1,7 +1,7 @@
-name: Integration tests pipeline
+name: Build & Release pipeline
 
 on:
-  pull_request:
+  push:
     branches:
       - 'main'
 
@@ -10,8 +10,8 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      DATABRICKS_HOST: ${{ secrets.DATABRICKS_TEST_HOST }}
-      DATABRICKS_TOKEN:  ${{ secrets.DATABRICKS_TEST_TOKEN }}
+      DATABRICKS_HOST: ${{ secrets.DATABRICKS_PROD_HOST }}
+      DATABRICKS_TOKEN:  ${{ secrets.DATABRICKS_PROD_TOKEN }}
 
     defaults:
       run:
@@ -29,7 +29,6 @@ jobs:
         run: |
           pip install -r requirements-dev.txt
 
-      - name: Run integration tests
+      - name: Deploy production pipeline
         run: |
-          dbx deploy integration-test --deployment-file deployment.yaml
-          dbx launch integration-test --trace --existing-runs wait
+          dbx deploy prod-pipeline --deployment-file deployment.yaml
