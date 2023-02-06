@@ -140,6 +140,12 @@ environments:
           - <<: *upsell-uc-loan-interest-export-task
             depends_on:
               - task_key: "upsell-uc-investment-interest-export"
+          - task_key: "test"
+            deployment_config:
+              no_package: true
+            job_cluster_key: "default"
+            notebook_task:
+              notebook_path: "odap_framework_demo/test"
 
       - name: "prod-pipeline"
         git_source:
