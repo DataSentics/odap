@@ -1,9 +1,11 @@
+import re
 from functools import reduce
 from typing import Any, Dict
 from pyspark.sql import DataFrame, SparkSession, types as t, functions as f
 from odap.common.logger import logger
 from odap.common.databricks import get_workspace_api
 from odap.common.dataframes import create_dataframe, create_dataframe_from_notebook_cells
+from odap.feature_factory.config import get_features_table
 from odap.segment_factory.config import get_segment_table, get_segment_table_path, USE_CASES_FOLDER, SEGMENTS_FOLDER
 from odap.common.utils import get_absolute_api_path
 from odap.common.notebook import get_notebook_cells, get_notebook_info
@@ -38,11 +40,17 @@ def create_segment_df(segment_name: str, use_case_name: str) -> DataFrame:
     notebook_info = get_notebook_info(segment_path, workspace_api)
 
     notebook_cells = get_notebook_cells(notebook_info, workspace_api)
-    segment_df = create_dataframe_from_notebook_cells(notebook_info, notebook_cells)
+    last_cell = notebook_cells[-1]
+    pattern = re.compile(r"where.*", re.MULTILINE | re.DOTALL | re.IGNORECASE)
+    where_clause = pattern.search(last_cell).group(0)
 
-    if not segment_df:
-        raise SegmentNotFoundException(f"Segment '{segment_name}' could not be loaded")
-    return segment_df
+    # TODO get feature table
+    # TODO get entity id
+    # TODO run select and where on feature table + run_date filter
+    feature_table = "dev.odap_features_customer.simple_features"
+    entity_id = "customer_id"
+    sql_cmd = f"""select {entity_id} from {feature_table} {where_clause}"""
+    return SparkSession.getActiveSession().sql(sql_cmd)
 
 
 def create_segments_union_df(segments_config: Dict[str, Any], use_case_name: str) -> DataFrame:
