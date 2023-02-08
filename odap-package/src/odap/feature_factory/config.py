@@ -62,7 +62,7 @@ def get_metadata(config: Config):
 
 
 def resolve_dev_database_name(database: str):
-    if os.environ.get("WRITE_ENV") == "dev":
+    if os.environ.get("BRANCH_PREFIX") == "on":
         branch = resolve_branch()
         database = f"{branch}_{database}"
 
