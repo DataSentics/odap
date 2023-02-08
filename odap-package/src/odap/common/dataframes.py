@@ -1,5 +1,5 @@
 import copy
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, Hashable, Iterable, List, Union
 from pyspark.sql import DataFrame, SparkSession
 from databricks_cli.workspace.api import WorkspaceFileInfo
 
@@ -63,3 +63,9 @@ def create_dataframe_from_notebook_cells(notebook: WorkspaceFileInfo, notebook_c
 def create_dataframe(data: Union[List[Dict[str, Any]], List[List[Any]]], schema) -> DataFrame:
     spark = SparkSession.getActiveSession()  # pylint: disable=W0641
     return spark.createDataFrame(data, schema)  # type: ignore
+
+
+def get_values_missing_from_df_column(df: DataFrame, column: str, values: Iterable[Hashable]) -> List:
+    present_values = {row[0] for row in df.select(column).collect()}
+
+    return list(set(values) - present_values)

@@ -43,6 +43,12 @@ def get_entity_primary_key(config: Config) -> str:
     return entities[primary_entity]["id_column"].lower()
 
 
+def get_entity_primary_key_by_name(entity_name: str, config: Config) -> str:
+    entity = get_entity_by_name(entity_name, config)
+
+    return entity["id_column"].lower()
+
+
 def get_features(config: Config):
     features = config.get("features")
 
