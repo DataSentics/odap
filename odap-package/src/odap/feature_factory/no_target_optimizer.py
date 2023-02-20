@@ -3,6 +3,7 @@ from typing import List
 
 import re
 
+from py4j.protocol import Py4JJavaError
 from pyspark.sql import SparkSession
 from odap.common.exceptions import WidgetValueException
 
@@ -28,7 +29,12 @@ def replace_pyspark_target_join(cell: str, timestamp: datetime) -> str:
 
 
 def replace_no_target(notebook_language: str, notebook_cells: List[str]):
-    if get_widget_value(const.TARGET_WIDGET).strip() != const.NO_TARGET:
+    try:
+        selected_target = get_widget_value(const.TARGET_WIDGET)
+    except Py4JJavaError:
+        return
+
+    if selected_target.strip() != const.NO_TARGET:
         return
 
     timestamp = get_no_target_timestamp()
