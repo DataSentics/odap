@@ -17,7 +17,7 @@ parameters:
       #path: "dbfs:/{write_env}_odap_features/{entity}/metadata"
       
     ids:
-      table: "dev.odap_offline_sdm_l2.customer"
+      table: "{write_env}.odap_offline_sdm_l2.{entity}"
 
     entities:
       customer:
