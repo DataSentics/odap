@@ -1,13 +1,13 @@
 from datetime import datetime
 
-from pyspark.sql import functions as f, SparkSession
+from pyspark.sql import DataFrame, functions as f, SparkSession
 
 from odap.common.config import Config, TIMESTAMP_COLUMN
 from odap.common.logger import logger
 from odap.feature_factory.config import get_entity_primary_key, get_ids_table
 
 
-def read_ids_table(config: Config):
+def read_ids_table(config: Config) -> DataFrame:
     entity_id = get_entity_primary_key(config)
     table_name = get_ids_table(config)
 
