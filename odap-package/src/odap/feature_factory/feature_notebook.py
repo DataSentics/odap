@@ -1,4 +1,4 @@
-from typing import Any, List, Dict
+from typing import List, Dict
 from databricks_cli.workspace.api import WorkspaceFileInfo, WorkspaceApi
 from pyspark.sql import DataFrame
 

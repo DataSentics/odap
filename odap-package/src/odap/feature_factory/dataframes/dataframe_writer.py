@@ -1,6 +1,7 @@
+from datetime import datetime
 from typing import Dict
 
-from pyspark.sql import SparkSession
+from pyspark.sql import functions as f, SparkSession
 from databricks.feature_store import FeatureStoreClient
 from delta import DeltaTable
 
@@ -67,7 +68,11 @@ def write_latest_features(feature_notebooks: FeatureNotebookList, config: Config
     entity_name = get_entity(config)
     entity_id = get_entity_primary_key(config)
 
-    ids_df = SparkSession.getActiveSession().table(get_ids_table(config)).select(entity_id)
+    ids_df = (
+        SparkSession.getActiveSession()
+        .table(get_ids_table(config))
+        .select(entity_id, f.lit(datetime.now()).alias("timestamp"))
+    )
 
     latest_df = fs.create_training_set(ids_df, generate_feature_lookups(entity_name), label=None).load_df()
     latest_features_filled = fill_nulls(latest_df, feature_notebooks)
