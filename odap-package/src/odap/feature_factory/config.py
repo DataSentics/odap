@@ -184,10 +184,7 @@ def get_ids_table(config: Config) -> str:
 
     entity_name = get_entity(config)
 
-    catalog = get_catalog(config)
-    ids_table = ids_table.format(entity=entity_name)
-    database = get_database_for_entity(entity_name, config)
-    return concat_catalog_db_table(catalog, database, ids_table)
+    return ids_table.format(entity=entity_name)
 
 
 def use_no_target_optimization(config: Config) -> bool:
