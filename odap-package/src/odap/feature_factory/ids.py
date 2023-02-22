@@ -7,7 +7,7 @@ from odap.common.logger import logger
 from odap.feature_factory.config import get_entity_primary_key, get_ids_table
 
 
-def read_ids_table(config: Config) -> DataFrame:
+def get_latest_ids(config: Config) -> DataFrame:
     entity_id = get_entity_primary_key(config)
     table_name = get_ids_table(config)
 

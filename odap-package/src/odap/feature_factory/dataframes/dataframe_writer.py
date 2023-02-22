@@ -22,7 +22,7 @@ from odap.feature_factory.dataframes.dataframe_creator import (
     fill_nulls,
 )
 from odap.feature_factory.feature_store import write_df_to_feature_store, write_latest_table, generate_feature_lookups
-from odap.feature_factory.ids import read_ids_table
+from odap.feature_factory.ids import get_latest_ids
 from odap.feature_factory.metadata_schema import get_metadata_pk_columns, get_metadata_columns, get_metadata_schema
 from odap.feature_factory.feature_notebook import FeatureNotebookList
 
@@ -66,7 +66,7 @@ def write_latest_features(feature_notebooks: FeatureNotebookList, config: Config
     fs = FeatureStoreClient()
     entity_name = get_entity(config)
 
-    ids_df = read_ids_table(config)
+    ids_df = get_latest_ids(config)
 
     latest_df = (
         fs.create_training_set(ids_df, generate_feature_lookups(entity_name), label=None)
