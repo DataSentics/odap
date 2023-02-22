@@ -1,7 +1,9 @@
 from typing import Dict
 
 from pyspark.sql import SparkSession
+from databricks.feature_store import FeatureStoreClient
 from delta import DeltaTable
+
 from odap.common.config import TIMESTAMP_COLUMN, Config
 from odap.common.tables import create_table_if_not_exists
 from odap.feature_factory.config import (
@@ -12,16 +14,15 @@ from odap.feature_factory.config import (
     get_latest_features_table_path,
     get_metadata_table,
     get_metadata_table_path,
+    get_entity,
+    get_ids_table,
 )
 from odap.feature_factory.dataframes.dataframe_creator import (
     create_metadata_df,
     create_features_df,
-    get_latest_features,
-    join_dataframes,
-    get_all_feature_tables,
     fill_nulls,
 )
-from odap.feature_factory.feature_store import write_df_to_feature_store, write_latest_table
+from odap.feature_factory.feature_store import write_df_to_feature_store, write_latest_table, generate_feature_lookups
 from odap.feature_factory.metadata_schema import get_metadata_pk_columns, get_metadata_columns, get_metadata_schema
 from odap.feature_factory.feature_notebook import FeatureNotebookList
 
@@ -62,13 +63,14 @@ def write_features_df(notebook_table_mapping: Dict[str, FeatureNotebookList], co
 
 
 def write_latest_features(feature_notebooks: FeatureNotebookList, config: Config):
-    latest_feature_store_dataframes = []
-    for table_name in get_all_feature_tables(config):
-        latest_features = get_latest_features(table_name, config)
-        latest_feature_store_dataframes.append(latest_features)
+    fs = FeatureStoreClient()
+    entity_name = get_entity(config)
+    entity_id = get_entity_primary_key(config)
 
-    latest_features_all = join_dataframes(latest_feature_store_dataframes, [get_entity_primary_key(config)])
-    latest_features_filled = fill_nulls(latest_features_all, feature_notebooks)
+    ids_df = SparkSession.getActiveSession().table(get_ids_table(config)).select(entity_id)
+
+    latest_df = fs.create_training_set(ids_df, generate_feature_lookups(entity_name), label=None).load_df()
+    latest_features_filled = fill_nulls(latest_df, feature_notebooks)
 
     latest_table_path = get_latest_features_table_path(config)
     latest_table_name = get_latest_features_table(config)

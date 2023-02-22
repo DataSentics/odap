@@ -6,8 +6,6 @@ from odap.common.config import Config
 
 from odap.common.exceptions import ConfigAttributeMissingException
 from odap.common.utils import concat_catalog_db_table
-from odap.common.widgets import get_widget_value
-from odap.feature_factory import const
 
 
 def get_entities(config: Config) -> Config:
@@ -169,5 +167,28 @@ def get_metadata_table_path(config: Config) -> Optional[str]:
     return metadata_table_path.format(entity=get_entity(config)) if metadata_table_path else None
 
 
-def is_no_target_mode() -> bool:
-    return get_widget_value(const.TARGET_WIDGET).strip() == const.NO_TARGET
+def get_ids(config: Config):
+    features = config.get("ids")
+
+    if not features:
+        raise ConfigAttributeMissingException("ids not defined in config.yaml")
+
+    return features
+
+
+def get_ids_table(config: Config) -> str:
+    ids_table = get_ids(config).get("table")
+
+    if not ids_table:
+        raise ConfigAttributeMissingException("ids.table not defined in config.yaml")
+
+    entity_name = get_entity(config)
+
+    catalog = get_catalog(config)
+    ids_table = ids_table.format(entity=entity_name)
+    database = get_database_for_entity(entity_name, config)
+    return concat_catalog_db_table(catalog, database, ids_table)
+
+
+def use_no_target_optimization(config: Config) -> bool:
+    return config.get("no_target_optimization") is not None

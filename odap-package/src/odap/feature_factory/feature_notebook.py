@@ -12,7 +12,7 @@ from odap.common.notebook import eval_cell_with_header, get_notebook_cells
 
 from odap.common.utils import get_absolute_api_path
 from odap.common.utils import list_notebooks_info
-from odap.feature_factory.config import get_entity_primary_key
+from odap.feature_factory.config import get_entity_primary_key, use_no_target_optimization
 from odap.feature_factory.dataframes.dataframe_checker import check_feature_df
 from odap.feature_factory.metadata import resolve_metadata, set_fs_compatible_metadata
 from odap.feature_factory.metadata_schema import FeaturesMetadataType
@@ -36,9 +36,9 @@ class FeatureNotebook:
         self.post_load_actions(config)
 
     @classmethod
-    def from_api(cls, notebook_info: WorkspaceFileInfo, config: Dict[str, Any], workspace_api: WorkspaceApi):
+    def from_api(cls, notebook_info: WorkspaceFileInfo, config: Config, workspace_api: WorkspaceApi):
         info = notebook_info
-        cells = get_feature_notebook_cells(notebook_info, workspace_api)
+        cells = get_feature_notebook_cells(notebook_info, workspace_api, config)
         df = create_dataframe_from_notebook_cells(info, cells[:])
         metadata = resolve_metadata(cells, info.path, df)
         df_check_list = get_dq_checks_list(info, cells)
@@ -64,9 +64,10 @@ def get_feature_notebooks_info(workspace_api: WorkspaceApi) -> List[WorkspaceFil
     return list_notebooks_info(features_path, workspace_api, recurse=True)
 
 
-def get_feature_notebook_cells(info: WorkspaceFileInfo, workspace_api: WorkspaceApi) -> List[str]:
+def get_feature_notebook_cells(info: WorkspaceFileInfo, workspace_api: WorkspaceApi, config: Config) -> List[str]:
     notebook_cells = get_notebook_cells(info, workspace_api)
-    replace_no_target(info.language, notebook_cells)
+    if use_no_target_optimization(config):
+        replace_no_target(info.language, notebook_cells)
     return notebook_cells
 
 
