@@ -29,3 +29,9 @@ create_notebooks_widget()
 from odap.feature_factory.orchestrate import orchestrate
 
 orchestrate()
+
+# COMMAND ----------
+
+from odap.feature_factory.orchestrate import calculate_latest_table
+
+calculate_latest_table()
