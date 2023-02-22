@@ -12,4 +12,8 @@ def read_ids_table(config: Config):
     table_name = get_ids_table(config)
 
     logger.info(f"Reading IDs from table `{table_name}`")
-    return SparkSession.getActiveSession().table(table_name).select(entity_id, f.lit(datetime.now()).alias(TIMESTAMP_COLUMN))
+    return (
+        SparkSession.getActiveSession()
+        .table(table_name)
+        .select(entity_id, f.lit(datetime.now()).alias(TIMESTAMP_COLUMN))
+    )
