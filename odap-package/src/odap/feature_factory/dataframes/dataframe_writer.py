@@ -68,7 +68,11 @@ def write_latest_features(feature_notebooks: FeatureNotebookList, config: Config
 
     ids_df = read_ids_table(config)
 
-    latest_df = fs.create_training_set(ids_df, generate_feature_lookups(entity_name), label=None).load_df()
+    latest_df = (
+        fs.create_training_set(ids_df, generate_feature_lookups(entity_name), label=None)
+        .load_df()
+        .drop(TIMESTAMP_COLUMN)
+    )
     latest_features_filled = fill_nulls(latest_df, feature_notebooks)
 
     latest_table_path = get_latest_features_table_path(config)
