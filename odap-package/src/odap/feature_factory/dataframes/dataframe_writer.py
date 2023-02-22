@@ -1,7 +1,6 @@
-from datetime import datetime
 from typing import Dict
 
-from pyspark.sql import functions as f, SparkSession
+from pyspark.sql import SparkSession
 from databricks.feature_store import FeatureStoreClient
 from delta import DeltaTable
 
@@ -16,7 +15,6 @@ from odap.feature_factory.config import (
     get_metadata_table,
     get_metadata_table_path,
     get_entity,
-    get_ids_table,
 )
 from odap.feature_factory.dataframes.dataframe_creator import (
     create_metadata_df,
@@ -24,6 +22,7 @@ from odap.feature_factory.dataframes.dataframe_creator import (
     fill_nulls,
 )
 from odap.feature_factory.feature_store import write_df_to_feature_store, write_latest_table, generate_feature_lookups
+from odap.feature_factory.ids import read_ids_table
 from odap.feature_factory.metadata_schema import get_metadata_pk_columns, get_metadata_columns, get_metadata_schema
 from odap.feature_factory.feature_notebook import FeatureNotebookList
 
@@ -66,13 +65,8 @@ def write_features_df(notebook_table_mapping: Dict[str, FeatureNotebookList], co
 def write_latest_features(feature_notebooks: FeatureNotebookList, config: Config):
     fs = FeatureStoreClient()
     entity_name = get_entity(config)
-    entity_id = get_entity_primary_key(config)
 
-    ids_df = (
-        SparkSession.getActiveSession()
-        .table(get_ids_table(config))
-        .select(entity_id, f.lit(datetime.now()).alias("timestamp"))
-    )
+    ids_df = read_ids_table(config)
 
     latest_df = fs.create_training_set(ids_df, generate_feature_lookups(entity_name), label=None).load_df()
     latest_features_filled = fill_nulls(latest_df, feature_notebooks)
