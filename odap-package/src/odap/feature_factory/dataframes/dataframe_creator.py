@@ -10,7 +10,6 @@ from odap.common.config import TIMESTAMP_COLUMN
 from odap.feature_factory import const
 from odap.feature_factory.config import (
     get_metadata_table,
-    get_features_table,
 )
 from odap.feature_factory.dq_checks import execute_soda_checks_from_feature_notebooks
 from odap.feature_factory.feature_notebook import FeatureNotebookList
@@ -41,25 +40,6 @@ def get_all_feature_tables(config: Dict) -> Iterable[str]:
     spark = SparkSession.getActiveSession()
     metadata_table = get_metadata_table(config)
     return {row.table for row in spark.table(metadata_table).select(const.TABLE).collect()}
-
-
-def get_latest_features(table_name: str, feature_factory_config: Dict) -> DataFrame:
-    spark = SparkSession.getActiveSession()
-    metadata_table = get_metadata_table(feature_factory_config)
-
-    last_compute_date = (
-        spark.read.table(metadata_table)
-        .filter(f.col(const.TABLE) == table_name)
-        .select(f.max(const.LAST_COMPUTE_DATE))
-        .collect()[0][0]
-    )
-    logger.info(f"Reading data from table: '{table_name}' using date '{last_compute_date}'")
-
-    return (
-        spark.read.table(get_features_table(table_name, feature_factory_config))
-        .filter(f.col(TIMESTAMP_COLUMN) == last_compute_date)
-        .drop(TIMESTAMP_COLUMN)
-    )
 
 
 def create_metadata_df(feature_notebooks: FeatureNotebookList) -> DataFrame:

@@ -56,6 +56,7 @@ def write_df_to_feature_store(
     logger.info("Write successful.")
 
 
+# pylint: disable=too-many-statements
 def write_latest_table(latest_features_df: DataFrame, latest_table_name: str, latest_table_path: Optional[str]):
     logger.info(f"Writing latest data to table: '{latest_table_name}'")
 
@@ -79,11 +80,13 @@ def check_df_column_contains_values(df: DataFrame, column: str, values: List[str
         raise Exception(f"Values {missing_values} are not present in column `{column}`")
 
 
+# pylint: disable=too-many-statements
 def generate_feature_lookups(
     entity_name: str, features: Optional[List[str]] = None, categories: Optional[List[str]] = None
 ) -> List[FeatureLookup]:
     features = features if features is not None else []
     categories = categories if categories is not None else []
+    lookup_all_features = not features and not categories
 
     config = get_config_namespace(ConfigNamespace.FEATURE_FACTORY)
 
@@ -95,11 +98,10 @@ def generate_feature_lookups(
     check_df_column_contains_values(df=metadata, column="category", values=categories)
     check_df_column_contains_values(df=metadata, column="feature", values=features)
 
-    table_to_features_agg = (
-        metadata.filter(metadata.feature.isin(features) | metadata.category.isin(categories))
-        .groupby("table")
-        .agg(f.collect_set("feature").alias("features"))
-    )
+    if not lookup_all_features:
+        metadata = metadata.filter(metadata.feature.isin(features) | metadata.category.isin(categories))
+
+    table_to_features_agg = metadata.groupby("table").agg(f.collect_set("feature").alias("features"))
 
     return [
         FeatureLookup(

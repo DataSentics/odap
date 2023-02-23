@@ -6,6 +6,7 @@ import re
 from py4j.protocol import Py4JJavaError
 from pyspark.sql import SparkSession
 from odap.common.exceptions import WidgetValueException
+from odap.common.logger import logger
 
 from odap.feature_factory import const
 from odap.common.widgets import get_widget_value
@@ -28,7 +29,9 @@ def replace_pyspark_target_join(cell: str, timestamp: datetime) -> str:
     return re.sub(const.PYTHON_TARGET_STORE_JOIN_REGEX, const.PYTHON_TIMESTAMP_LIT.format(timestamp=timestamp), cell)
 
 
+# pylint: disable=too-many-statements
 def replace_no_target(notebook_language: str, notebook_cells: List[str]):
+    logger.info("Optimization of `no target` calculation enabled")
     try:
         selected_target = get_widget_value(const.TARGET_WIDGET)
     except Py4JJavaError:
