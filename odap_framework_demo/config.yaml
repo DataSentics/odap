@@ -5,6 +5,8 @@ parameters:
     table: "use_cases"
     
   featurefactory:
+    feature_dir: "notebooks"
+
     catalog: "{write_env}"
     preview_catalog: "on"
     database: "odap_features_{entity}"

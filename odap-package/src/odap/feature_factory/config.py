@@ -189,3 +189,7 @@ def get_ids_table(config: Config) -> str:
 
 def use_no_target_optimization(config: Config) -> bool:
     return config.get("no_target_optimization") is not None
+
+
+def get_feature_dir(config: Config) -> str:
+    return config.get("feature_dir", "features")

@@ -21,14 +21,22 @@ def get_repository_root_api_path() -> str:
     return get_api_path(get_repository_root_fs_path())
 
 
+def offset_base_dir(root_path: Path) -> str:
+    odap_base_dir = os.environ.get("ODAP_BASE_DIR")
+
+    if not odap_base_dir:
+        return str(root_path)
+
+    return str(root_path / odap_base_dir)
+
+
 def get_project_root_fs_path() -> str:
-    dirs_to_search = [Path.cwd()] + list(Path.cwd().parents)
+    path = Path.cwd()
 
-    for path in dirs_to_search:
-        if path.joinpath("features").is_dir() and path.joinpath("config.yaml").is_file():
-            return str(path)
+    if path.parts[3] == ".internal":
+        return offset_base_dir(Path(*path.parts[0:6]))
 
-    raise Exception("Cannot resolve project root path")
+    return offset_base_dir(Path(*path.parts[0:5]))
 
 
 def get_project_root_api_path() -> str:
