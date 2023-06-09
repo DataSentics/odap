@@ -9,9 +9,9 @@ from odap.feature_factory.feature_notebook import get_feature_notebooks_info
 from odap.feature_factory.exceptions import WidgetException
 
 
-def get_list_of_selected_feature_notebooks() -> List[WorkspaceFileInfo]:
+def get_list_of_selected_feature_notebooks(feature_dir: str) -> List[WorkspaceFileInfo]:
     feature_notebooks_str = get_widget_value(const.FEATURE_WIDGET)
-    feature_notebooks = get_feature_notebooks_info(get_workspace_api())
+    feature_notebooks = get_feature_notebooks_info(get_workspace_api(), feature_dir)
 
     if feature_notebooks_str == const.ALL_FEATURES:
         return feature_notebooks

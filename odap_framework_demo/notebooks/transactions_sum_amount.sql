@@ -7,8 +7,8 @@
 
 -- COMMAND ----------
 
-create widget text timestamp default "";
-create widget text target default "no target"
+create widget text target default "no target";
+create widget text timestamp default "2020-12-12";
 
 -- COMMAND ----------
 

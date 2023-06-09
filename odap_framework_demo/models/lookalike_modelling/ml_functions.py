@@ -1,7 +1,5 @@
 import datetime as dt
 import ipywidgets as widgets
-import json
-import os
 from pyspark.ml.pipeline import PipelineModel
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import udf
@@ -11,7 +9,6 @@ from pyspark.sql import SparkSession
 import pyspark.sql.types as T
 from pyspark.sql.window import Window
 import random
-import tempfile
 
 def return_slider(criterion):
     if (criterion == "probability_threshold"):

@@ -16,7 +16,7 @@
 import datetime as dt
 import mlflow
 import os
-from lookalike_modelling.ml_functions import define_lookalikes, predict
+from models.lookalike_modelling.ml_functions import define_lookalikes, predict
 from pyspark.sql import functions as f
 
 # COMMAND ----------

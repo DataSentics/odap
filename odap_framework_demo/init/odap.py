@@ -3,6 +3,7 @@
 
 # COMMAND ----------
 
+import os
 import sys
 
 # COMMAND ----------
@@ -17,3 +18,4 @@ sys.path.append(f"{resolve_repository_root()}/odap-package/src")
 # COMMAND ----------
 
 sys.path.append(f"{resolve_repository_root()}/odap_framework_demo")
+os.environ["ODAP_BASE_DIR"] = "odap_framework_demo"

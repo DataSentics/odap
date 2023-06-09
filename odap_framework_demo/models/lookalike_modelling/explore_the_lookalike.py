@@ -15,10 +15,10 @@
 
 import datetime as dt
 import ipywidgets as widgets
-from lookalike_modelling.ml_functions import define_lookalikes, predict, return_slider
+from ..lookalike_modelling.ml_functions import define_lookalikes, predict, return_slider
 import mlflow
 import plotly.express as px
-from pyspark.sql import DataFrame, functions as f
+from pyspark.sql import functions as f
 
 # COMMAND ----------
 

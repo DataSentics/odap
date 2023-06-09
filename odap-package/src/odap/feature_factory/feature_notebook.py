@@ -58,8 +58,8 @@ class FeatureNotebook:
 FeatureNotebookList = List[FeatureNotebook]
 
 
-def get_feature_notebooks_info(workspace_api: WorkspaceApi) -> List[WorkspaceFileInfo]:
-    features_path = get_absolute_api_path("features")
+def get_feature_notebooks_info(workspace_api: WorkspaceApi, feature_dir: str) -> List[WorkspaceFileInfo]:
+    features_path = get_absolute_api_path(feature_dir)
 
     return list_notebooks_info(features_path, workspace_api, recurse=True)
 
