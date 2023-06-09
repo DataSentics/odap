@@ -4,14 +4,13 @@
 # COMMAND ----------
 
 import os
+
 from pyspark.sql import functions as f
-from odap.feature_factory import time_windows as tw
-from odap_framework_demo.functions.product_web_visits_count import product_agg_features
 
 # COMMAND ----------
 
-dbutils.widgets.text("timestamp", "")
-dbutils.widgets.text("target", "")
+dbutils.widgets.text("timestamp", "2020-12-12")
+dbutils.widgets.text("target", "no target")
 
 # COMMAND ----------
 
@@ -19,23 +18,44 @@ dbutils.widgets.text("target", "")
 
 # COMMAND ----------
 
-time_windows = ["14d", "30d", "90d"]
+time_windows = [14, 30, 90]
+products = ["investice", "pujcky", "hypoteky"]
 
 # COMMAND ----------
 
-wdf_orig = tw.WindowedDataFrame(
-    df=spark.read.table(f"{os.environ['READ_ENV']}.odap_digi_sdm_l2.web_visits"),
-    time_column="visit_timestamp",
-    time_windows=time_windows,
+df_web_visits = spark.read.table(
+    f"{os.environ['READ_ENV']}.odap_digi_sdm_l2.web_visits"
+)
+target_store = spark.read.table("target_store")
+
+df = df_web_visits.join(target_store, on="customer_id").filter(
+    f.col("visit_timestamp") <= f.col("timestamp")
 )
 
 # COMMAND ----------
 
-target_store = spark.read.table("target_store")
+def is_in_time_window(time_column, window_size):
+    return time_column.between(
+        time_column - f.lit(window_size).cast(f"interval day"), f.col("timestamp")
+    )
 
 # COMMAND ----------
 
-wdf = wdf_orig.join(target_store, on="customer_id").filter(f.col("visit_timestamp") <= f.col("timestamp"))
+df_final = df.groupBy(["customer_id", "timestamp"]).agg(
+    *[
+        f.sum(
+            f.when(
+                is_in_time_window(f.col("visit_timestamp"), time_window),
+                f.lower("url").contains(product).cast("integer"),
+            )
+        ).alias(
+            f"{product}_web_visits_count_in_last_{time_window}d",
+        )
+        for product in products
+        for time_window in time_windows
+    ],
+)
+# df_final.display()
 
 # COMMAND ----------
 
@@ -50,7 +70,3 @@ wdf = wdf_orig.join(target_store, on="customer_id").filter(f.col("visit_timestam
 # MAGIC         }
 # MAGIC     }
 # MAGIC }
-
-# COMMAND ----------
-
-df_final = wdf.time_windowed(group_keys=["customer_id", "timestamp"], agg_columns_function=product_agg_features)
