@@ -12,13 +12,8 @@
 # COMMAND ----------
 
 import datetime as dt
-from hyperopt import hp
-from hyperopt.pyll import scope
-import json
-import math
 import mlflow
 import mlflow.spark as mlflow_spark
-from mlflow.tracking.client import MlflowClient
 import plotly.express as px
 from pyspark.ml import Pipeline, PipelineModel
 from pyspark.ml.classification import (
@@ -30,13 +25,8 @@ from pyspark.ml.classification import (
     LinearSVC,
     NaiveBayes,
 )
-from pyspark.ml.evaluation import BinaryClassificationEvaluator, MulticlassClassificationEvaluator, RegressionEvaluator
-from pyspark.ml.feature import VectorAssembler, Normalizer, StandardScaler, MinMaxScaler, MaxAbsScaler, RobustScaler, StringIndexer, OneHotEncoder
+from pyspark.ml.feature import VectorAssembler, Normalizer, StandardScaler, MinMaxScaler, StringIndexer, OneHotEncoder
 from pyspark.ml.functions import vector_to_array
-from pyspark.ml.tuning import CrossValidator, ParamGridBuilder
-from pyspark.mllib.evaluation import MulticlassMetrics
-from pyspark.mllib.util import MLUtils
-from pyspark.sql.dataframe import DataFrame
 import pyspark.sql.functions as f
 import pyspark.sql.types as t
 from lookalike_modelling.ml_functions import lift_curve_colname_specified, ith, process_multiple_segments_input, compute_lift_train_test, lift_curve, generate_dummy_data
