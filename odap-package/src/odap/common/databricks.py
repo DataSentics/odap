@@ -8,6 +8,9 @@ from odap.common.utils import get_repository_info
 from odap.common.exceptions import UnableToResolveBranchException
 
 
+spark = SparkSession.getActiveSession()
+
+
 def resolve_dbutils() -> DBUtils:
     return resolve_databricks_service("dbutils")
 
@@ -44,7 +47,6 @@ def get_repos_api() -> ReposApi:
 
 
 def get_host() -> str:
-    spark = SparkSession.getActiveSession()
     return f"https://{spark.conf.get('spark.databricks.workspaceUrl')}"
 
 

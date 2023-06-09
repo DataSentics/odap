@@ -15,9 +15,9 @@ parameters:
     metadata:
       table: "metadata"
       #path: "dbfs:/{write_env}_odap_features/{entity}/metadata"
-      
-    ids:
-      table: "{write_env}.odap_offline_sdm_l2.{entity}"
+
+    checkpoint_dir: "dbfs:/odap-demo/checkpoints"
+    checkpoint_interval: 5
 
     entities:
       customer:
