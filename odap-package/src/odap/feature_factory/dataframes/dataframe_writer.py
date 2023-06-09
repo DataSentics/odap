@@ -1,10 +1,10 @@
-from typing import Dict
+from typing import Dict, Iterable
 
-from pyspark.sql import SparkSession
-from databricks.feature_store import FeatureStoreClient
+from pyspark.sql import SparkSession, functions as f
 from delta import DeltaTable
 
 from odap.common.config import TIMESTAMP_COLUMN, Config
+from odap.common.databricks import spark
 from odap.common.tables import create_table_if_not_exists
 from odap.feature_factory.config import (
     get_entity_primary_key,
@@ -14,15 +14,15 @@ from odap.feature_factory.config import (
     get_latest_features_table_path,
     get_metadata_table,
     get_metadata_table_path,
-    get_entity,
+    get_checkpoint_dir,
+    get_checkpoint_interval,
 )
 from odap.feature_factory.dataframes.dataframe_creator import (
     create_metadata_df,
     create_features_df,
     fill_nulls,
 )
-from odap.feature_factory.feature_store import write_df_to_feature_store, write_latest_table, generate_feature_lookups
-from odap.feature_factory.ids import get_latest_ids
+from odap.feature_factory.feature_store import write_df_to_feature_store, write_latest_table
 from odap.feature_factory.metadata_schema import get_metadata_pk_columns, get_metadata_columns, get_metadata_schema
 from odap.feature_factory.feature_notebook import FeatureNotebookList
 
@@ -62,17 +62,31 @@ def write_features_df(notebook_table_mapping: Dict[str, FeatureNotebookList], co
         )
 
 
+def get_latest_dataframe(feature_tables: Iterable[str], config: Config):
+    spark.sparkContext.setCheckpointDir(get_checkpoint_dir(config))
+
+    features_dfs = [spark.table(get_features_table(table, config)) for table in feature_tables]
+
+    features_dfs_max_date = [(df, df.select(f.max(TIMESTAMP_COLUMN)).collect()[0][0]) for df in features_dfs]
+
+    features_dfs_max_date_filtered = [
+        df.filter(f.col(TIMESTAMP_COLUMN) == max_ts).drop(TIMESTAMP_COLUMN) for df, max_ts in features_dfs_max_date
+    ]
+
+    latest_df = features_dfs_max_date_filtered[0]
+
+    for i, df in enumerate(features_dfs_max_date_filtered[1:]):
+        latest_df = latest_df.join(df, on=get_entity_primary_key(config), how="full")
+        if not i % get_checkpoint_interval(config):
+            latest_df.checkpoint()
+    return latest_df
+
+
 def write_latest_features(feature_notebooks: FeatureNotebookList, config: Config):
-    fs = FeatureStoreClient()
-    entity_name = get_entity(config)
+    metadata_df = spark.table(get_metadata_table(config))
+    feature_tables = [row.table for row in metadata_df.select("table").distinct().collect()]
 
-    ids_df = get_latest_ids(config)
-
-    latest_df = (
-        fs.create_training_set(ids_df, generate_feature_lookups(entity_name), label=None)
-        .load_df()
-        .drop(TIMESTAMP_COLUMN)
-    )
+    latest_df = get_latest_dataframe(feature_tables, config)
     latest_features_filled = fill_nulls(latest_df, feature_notebooks)
 
     latest_table_path = get_latest_features_table_path(config)
