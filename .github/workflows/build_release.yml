@@ -66,6 +66,30 @@ jobs:
       run:
         working-directory: odap-package
     steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Install Miniforge
+        uses: conda-incubator/setup-miniconda@v2.1.1
+        with:
+          miniforge-version: 4.10.3-6
+
+      - name: cache venv
+        id: cache-venv
+        uses: actions/cache@v2
+        with:
+          path: |
+            .venv
+            ~/.poetry/env
+          key: ${{ runner.os }}-env-${{ hashFiles('**/poetry.lock') }}
+
+      - name: setup
+        run: |
+          export SHELL=$SHELL # for python to be able to access the bash version
+          chmod +x env-init.sh
+          ./env-init.sh -y --verbose
+
       - name: Extract version
         id: extract_version
         uses: frabert/replace-string-action@v1.1
@@ -74,6 +98,7 @@ jobs:
           string: ${{ github.event.head_commit.message }}
           replace-with: '$1'
           flags: 's'
+
       - name: Extract prerelease
         id: extract_prerelease
         uses: frabert/replace-string-action@v1.1
@@ -81,25 +106,18 @@ jobs:
           pattern: '^[\d.]+(\.dev[\d]+|a[\d]+|b[\d]+|rc[\d]+)?$'
           string: ${{ steps.extract_version.outputs.replaced }}
           replace-with: '$1'
-      - name: Install Poetry
-        uses: snok/install-poetry@v1.3.3
-        with:
-          version: 1.1.8
-      - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Install Miniforge
-        uses: conda-incubator/setup-miniconda@v2.1.1
-        with:
-          miniforge-version: 4.10.3-6
+
       - name: Build package
         run: |
-          conda env create -f environment.yml -p .venv
           eval "$(conda shell.bash hook)"
           conda activate $PWD/.venv
+          source ~/.poetry/env
           poetry build -f wheel
+
       - name: Resolve wheel name
         run: |
           echo "WHEEL_NAME=$(ls -1 dist/ | grep -e "\.whl$" | sort -r | head -n 1)" >> $GITHUB_ENV
+
       - name: Create GitHub release
         id: create_release
         uses: softprops/action-gh-release@v1
@@ -110,6 +128,7 @@ jobs:
           draft: false
           prerelease: ${{ steps.extract_prerelease.outputs.replaced != '' }}
           token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Upload Release Asset
         id: upload_release_asset
         uses: actions/upload-release-asset@v1
@@ -120,8 +139,10 @@ jobs:
           asset_path: odap-package/dist/${{ env.WHEEL_NAME }}
           asset_name: ${{ env.WHEEL_NAME }}
           asset_content_type: application/zip
+
       - name: Publish package to pypi.org
         run: |
           eval "$(conda shell.bash hook)"
           conda activate $PWD/.venv
+          source ~/.poetry/env
           poetry publish -u __token__ -p ${{ secrets.PYPI_PUBLISH }}
