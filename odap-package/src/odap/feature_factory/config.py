@@ -211,4 +211,3 @@ def get_checkpoint_interval(config: Config):
         raise ConfigAttributeMissingException("checkpoint_interval not defined in config.yaml")
 
     return checkpoint_interval
-

@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      DATABRICKS_HOST: ${{ secrets.DATABRICKS_PROD_HOST }}
+      DATABRICKS_HOST: ${{ vars.DATABRICKS_PROD_HOST }}
       DATABRICKS_TOKEN:  ${{ secrets.DATABRICKS_PROD_TOKEN }}
 
     defaults:
