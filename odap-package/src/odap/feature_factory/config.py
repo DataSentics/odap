@@ -193,3 +193,22 @@ def use_no_target_optimization(config: Config) -> bool:
 
 def get_feature_dir(config: Config) -> str:
     return config.get("feature_dir", "features")
+
+
+def get_checkpoint_dir(config: Config):
+    checkpoint_dir = config.get("checkpoint_dir")
+
+    if not checkpoint_dir:
+        raise ConfigAttributeMissingException("checkpoint_dir not defined in config.yaml")
+
+    return checkpoint_dir
+
+
+def get_checkpoint_interval(config: Config):
+    checkpoint_interval = config.get("checkpoint_interval")
+
+    if not checkpoint_interval:
+        raise ConfigAttributeMissingException("checkpoint_interval not defined in config.yaml")
+
+    return checkpoint_interval
+
