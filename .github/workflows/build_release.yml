@@ -33,7 +33,7 @@ jobs:
         run: |
           export SHELL=$SHELL # for python to be able to access the bash version
           chmod +x env-init.sh
-          ./env-init.sh -y --verbose
+          ./env-init.sh
       - name: linting
         run: |
           eval "$(conda shell.bash hook)"
@@ -42,12 +42,7 @@ jobs:
           poe black-check
           poe pylint
           sed -i "s,/app/,,g" .pyre_configuration
-          pyre check
-      - name: crlf
-        run: |
-          eval "$(conda shell.bash hook)"
-          conda activate $PWD/.venv
-          bash check-crlf.sh
+          poe pyre
       - name: tests
         run: |
           eval "$(conda shell.bash hook)"
@@ -56,7 +51,7 @@ jobs:
           export PYSPARK_PYTHON=$PWD/.venv/bin/python
           export PYSPARK_DRIVER_PYTHON=$PWD/.venv/bin/python
           chmod +x .venv/ -R
-          bash run_tests.sh
+          pytest src
 
   release:
     name: Release package
@@ -88,7 +83,7 @@ jobs:
         run: |
           export SHELL=$SHELL # for python to be able to access the bash version
           chmod +x env-init.sh
-          ./env-init.sh -y --verbose
+          ./env-init.sh
 
       - name: Extract version
         id: extract_version

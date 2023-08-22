@@ -7,10 +7,8 @@ readme = "README.md"
 license = "Proprietary"
 
 authors = [
-    "Jiri Koutny <jiri.koutny@datasentics.com>",
+    "Lukas Langr <lukas.langr@datasentics.com>",
     "Karel Gudera <karel.gudera@datasentics.com>",
-    "Jakub Vins <jakub.vins@datasentics.com>",
-    "Jakub Vaclavik <jakub.vaclavik@datasentics.com>"
 ]
 
 packages = [
@@ -20,12 +18,11 @@ packages = [
 [tool.poetry.dependencies]
 python = "^3.8"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 databricks-cli = "^0.17.3"
 pyspark = {url = "https://daipe-packages.s3.eu-central-1.amazonaws.com/pyspark-3.2.0-py2.py3-none-any.whl"}
 delta-spark = {url = "https://daipe-packages.s3.eu-central-1.amazonaws.com/delta_spark-1.1.0-py3-none-any.whl"}
 ipython = "^8.5.0"
-PyYAML = "^6.0"
 pylint = "^2.15.4"
 pyre-check = "^0.9.16"
 black = "^22.10.0"
@@ -33,6 +30,7 @@ poethepoet = "^0.16.4"
 databricks-feature-store = "^0.7.0"
 pytest = "^7.1.3"
 pytest-mock = "^3.10.0"
+pyyaml = "^6.0.1"
 soda-core-spark-df = "^3.0.12"
 
 [tool.poetry.scripts]
@@ -61,3 +59,4 @@ python_files = "*_test.py *Test.py"
 black = "black src"
 black-check = "black --check src"
 pylint = "pylint src --max-nested-blocks 2 --max-statements 10"
+pyre = "pyre check"
