@@ -11,7 +11,7 @@ jobs:
       run:
         working-directory: odap-package
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           ref: ${{ github.ref }}
 
@@ -20,7 +20,14 @@ jobs:
         with:
           miniforge-version: 4.10.3-6
 
-      - name: cache venv
+      - name: Install and configure Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: 1.5.1
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: Cache Venv
         id: cache-venv
         uses: actions/cache@v2
         with:
@@ -29,28 +36,27 @@ jobs:
             ~/.poetry/env
           key: ${{ runner.os }}-env-${{ hashFiles('**/poetry.lock') }}
 
-      - name: setup
+      - name: Environment init
         run: |
-          export SHELL=$SHELL # for python to be able to access the bash version
           chmod +x env-init.sh
           ./env-init.sh
-      - name: linting
+
+      - name: Black, linting and static analysis
         run: |
           eval "$(conda shell.bash hook)"
           conda activate $PWD/.venv
-          source ~/.poetry/env
           poe black-check
           poe pylint
-          sed -i "s,/app/,,g" .pyre_configuration
           poe pyre
-      - name: tests
+
+      - name: Unit tests
         run: |
           eval "$(conda shell.bash hook)"
           conda activate $PWD/.venv
+          chmod +x .venv/ -R
           export SPARK_HOME=$(python -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])')/pyspark
           export PYSPARK_PYTHON=$PWD/.venv/bin/python
           export PYSPARK_DRIVER_PYTHON=$PWD/.venv/bin/python
-          chmod +x .venv/ -R
           pytest src
 
   release:
@@ -70,7 +76,7 @@ jobs:
         with:
           miniforge-version: 4.10.3-6
 
-      - name: cache venv
+      - name: Cache Venv
         id: cache-venv
         uses: actions/cache@v2
         with:
@@ -106,7 +112,6 @@ jobs:
         run: |
           eval "$(conda shell.bash hook)"
           conda activate $PWD/.venv
-          source ~/.poetry/env
           poetry build -f wheel
 
       - name: Resolve wheel name
