@@ -23,7 +23,7 @@ databricks-cli = "^0.17.3"
 pyspark = {url = "https://daipe-packages.s3.eu-central-1.amazonaws.com/pyspark-3.2.0-py2.py3-none-any.whl"}
 delta-spark = {url = "https://daipe-packages.s3.eu-central-1.amazonaws.com/delta_spark-1.1.0-py3-none-any.whl"}
 ipython = "^8.5.0"
-pylint = "^2.15.4"
+pylint = "~2.15"
 pyre-check = "^0.9.16"
 black = "^22.10.0"
 poethepoet = "^0.16.4"
