@@ -1,10 +1,30 @@
 -- Databricks notebook source
--- MAGIC %run ../init/target_store
+-- MAGIC %md
+-- MAGIC # Email feature
+
+-- COMMAND ----------
+
+-- MAGIC %md
+-- MAGIC ### Widgets
 
 -- COMMAND ----------
 
 create widget text target default "no target";
 create widget text timestamp default "2020-12-12";
+
+-- COMMAND ----------
+
+-- MAGIC %md
+-- MAGIC ### Init target store
+
+-- COMMAND ----------
+
+-- MAGIC %run ../init/target_store
+
+-- COMMAND ----------
+
+-- MAGIC %md
+-- MAGIC ### Define metadata
 
 -- COMMAND ----------
 
@@ -22,6 +42,11 @@ create widget text timestamp default "2020-12-12";
 
 -- COMMAND ----------
 
+-- MAGIC %md
+-- MAGIC ### Define DQ checks
+
+-- COMMAND ----------
+
 -- MAGIC %python
 -- MAGIC dq_checks = [
 -- MAGIC     {
@@ -30,6 +55,11 @@ create widget text timestamp default "2020-12-12";
 -- MAGIC         }
 -- MAGIC     }
 -- MAGIC ]
+
+-- COMMAND ----------
+
+-- MAGIC %md
+-- MAGIC ### Calculate features
 
 -- COMMAND ----------
 
