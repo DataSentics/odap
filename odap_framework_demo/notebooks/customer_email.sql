@@ -23,21 +23,6 @@ create widget text timestamp default "2020-12-12";
 
 -- COMMAND ----------
 
-select
-  customer_id,
-  t.timestamp,
-  customer_email
-from
-  ${env:READ_ENV}.odap_offline_sdm_l2.customer join target_store t using (customer_id)
--- union (
---   select
---     123456789 as customer_id,
---     timestamp(getargument("timestamp")) as timestamp,
---     "invalid_email" as customer_email
--- ) -- uncoment for email dq check validation fail
-
--- COMMAND ----------
-
 -- MAGIC %md
 -- MAGIC ### Define metadata
 
@@ -70,3 +55,23 @@ from
 -- MAGIC         }
 -- MAGIC     }
 -- MAGIC ]
+
+-- COMMAND ----------
+
+-- MAGIC %md
+-- MAGIC ### Calculate features
+
+-- COMMAND ----------
+
+select
+  customer_id,
+  t.timestamp,
+  customer_email
+from
+  ${env:READ_ENV}.odap_offline_sdm_l2.customer join target_store t using (customer_id)
+-- union (
+--   select
+--     123456789 as customer_id,
+--     timestamp(getargument("timestamp")) as timestamp,
+--     "invalid_email" as customer_email
+-- ) -- uncoment for email dq check validation fail

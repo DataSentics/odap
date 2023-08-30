@@ -52,24 +52,6 @@ or replace temporary view card_transactions as (
 -- COMMAND ----------
 
 -- MAGIC %md
--- MAGIC ### Calculate features
-
--- COMMAND ----------
-
-select
-  customer_id,
-  timestamp,
-  sum(time_windowed_double(amount_czk, timestamp, process_date, "30 days")) as transactions_sum_amount_in_last_30d,
-  sum(time_windowed_double(amount_czk, timestamp, process_date, "60 days")) as transactions_sum_amount_in_last_60d,
-  sum(time_windowed_double(amount_czk, timestamp, process_date, "90 days")) as transactions_sum_amount_in_last_90d
-from
-  card_transactions
-group by
-  customer_id, timestamp
-
--- COMMAND ----------
-
--- MAGIC %md
 -- MAGIC ### Define metadata
 
 -- COMMAND ----------
@@ -104,3 +86,21 @@ group by
 -- MAGIC     "missing_percent(transactions_sum_amount_in_last_60d) < 10%",
 -- MAGIC     "missing_percent(transactions_sum_amount_in_last_90d) < 15%",
 -- MAGIC ]
+
+-- COMMAND ----------
+
+-- MAGIC %md
+-- MAGIC ### Calculate features
+
+-- COMMAND ----------
+
+select
+  customer_id,
+  timestamp,
+  sum(time_windowed_double(amount_czk, timestamp, process_date, "30 days")) as transactions_sum_amount_in_last_30d,
+  sum(time_windowed_double(amount_czk, timestamp, process_date, "60 days")) as transactions_sum_amount_in_last_60d,
+  sum(time_windowed_double(amount_czk, timestamp, process_date, "90 days")) as transactions_sum_amount_in_last_90d
+from
+  card_transactions
+group by
+  customer_id, timestamp
