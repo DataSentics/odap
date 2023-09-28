@@ -11,9 +11,9 @@ def create_notebooks_widget():
 
     config = get_config_namespace(ConfigNamespace.FEATURE_FACTORY)
     feature_dir_init = get_feature_dir(config)
-    databricks_repo = get_repository(config)
+    databricks_repos = get_repository(config)
 
-    for repo_paths in databricks_repo:
+    for repo_paths in databricks_repos:
         feature_dir = f"{repo_paths['path']}/{feature_dir_init}"
         features = [
             get_notebook_name(notebook_info.path)
