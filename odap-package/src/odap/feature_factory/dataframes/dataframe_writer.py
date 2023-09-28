@@ -47,12 +47,12 @@ def write_metadata_df(feature_notebooks: FeatureNotebookList, config: Config):
     )
 
 
-def write_features_df(notebook_table_mapping: Dict[str, FeatureNotebookList], config: Config, prefix:str):
+def write_features_df(notebook_table_mapping: Dict[str, FeatureNotebookList], config: Config, prefix: str):
     entity_primary_key = get_entity_primary_key(config)
 
     for table_name, feature_notebooks_subset in notebook_table_mapping.items():
         df = create_features_df(feature_notebooks_subset, entity_primary_key, prefix)
-        
+
         write_df_to_feature_store(
             df,
             table_name=get_features_table(table_name, config),
@@ -60,6 +60,7 @@ def write_features_df(notebook_table_mapping: Dict[str, FeatureNotebookList], co
             primary_keys=[entity_primary_key],
             timestamp_keys=[TIMESTAMP_COLUMN],
         )
+
 
 def get_latest_dataframe(feature_tables: Iterable[str], config: Config):
     spark.sparkContext.setCheckpointDir(get_checkpoint_dir(config))

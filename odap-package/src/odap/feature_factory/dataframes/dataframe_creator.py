@@ -58,7 +58,7 @@ def fill_nulls_in_notebook(notebook: List[Dict], prefix: str) -> Dict:
             continue
         if feature[const.DTYPE].startswith("array"):
             continue
-        feature_name = f"{prefix}_{feature[const.FEATURE]}"    
+        feature_name = f"{prefix}_{feature[const.FEATURE]}"
         fill_dict[feature_name] = feature[const.FILLNA_VALUE]
     return fill_dict
 
@@ -66,12 +66,12 @@ def fill_nulls_in_notebook(notebook: List[Dict], prefix: str) -> Dict:
 def fill_array_nulls(df: DataFrame, notebook: List[Dict], prefix: str) -> DataFrame:
     for feature in notebook:
         if feature[const.DTYPE].startswith("array") and feature[const.FILLNA_VALUE] is not None:
-            feature_name = f"{prefix}_{feature[const.FEATURE]}" 
+            feature_name = f"{prefix}_{feature[const.FEATURE]}"
             df = df.withColumn(
                 feature_name,
-                f.when(
-                    f.col(feature_name).isNull(), f.array(*map(f.lit, feature[const.FILLNA_VALUE]))
-                ).otherwise(f.col(feature_name)),
+                f.when(f.col(feature_name).isNull(), f.array(*map(f.lit, feature[const.FILLNA_VALUE]))).otherwise(
+                    f.col(feature_name)
+                ),
             )
     return df
 
@@ -81,7 +81,7 @@ def fill_nulls(df: DataFrame, feature_notebooks: FeatureNotebookList, prefix: st
     fill_dict = {}
 
     for notebook in metadata:
-        notebook_dict = fill_nulls_in_notebook(notebook,prefix)
+        notebook_dict = fill_nulls_in_notebook(notebook, prefix)
         fill_dict.update(notebook_dict)
 
     for notebook in metadata:
@@ -96,10 +96,12 @@ def create_features_df(feature_notebooks: FeatureNotebookList, entity_primary_ke
     )
     if prefix:
         columns = joined_df.columns
-        renamed_columns = [f"{prefix}_{col}" if col not in [entity_primary_key, TIMESTAMP_COLUMN] else col for col in columns]
+        renamed_columns = [
+            f"{prefix}_{col}" if col not in [entity_primary_key, TIMESTAMP_COLUMN] else col for col in columns
+        ]
         joined_df = joined_df.toDF(*renamed_columns)
 
-    filled_df = fill_nulls(joined_df, feature_notebooks,prefix)
+    filled_df = fill_nulls(joined_df, feature_notebooks, prefix)
 
     execute_soda_checks_from_feature_notebooks(df=filled_df, feature_notebooks=feature_notebooks)
     return filled_df

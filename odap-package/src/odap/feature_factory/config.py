@@ -194,8 +194,9 @@ def use_no_target_optimization(config: Config) -> bool:
 def get_feature_dir(config: Config) -> str:
     return config.get("feature_dir", "features")
 
+
 def get_repository(config: Config) -> dict:
-    databricks_repos = config.get("repositories",{})
+    databricks_repos = config.get("repositories", {})
     return databricks_repos
 
 
