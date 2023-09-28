@@ -16,7 +16,7 @@ from odap.feature_factory.feature_notebook import FeatureNotebookList
 from odap.feature_factory.metadata_schema import get_metadata_schema
 
 
-def join_dataframes(dataframes: List[DataFrame], join_columns: List[str],prefix: str ="") -> DataFrame:
+def join_dataframes(dataframes: List[DataFrame], join_columns: List[str]) -> DataFrame:
     dataframes = [df.na.drop(how="any", subset=join_columns) for df in dataframes]
     window = Window.partitionBy(*join_columns).rowsBetween(Window.unboundedPreceding, Window.unboundedFollowing)
     union_df = reduce(lambda df1, df2: df1.unionByName(df2, allowMissingColumns=True), dataframes)
@@ -92,7 +92,7 @@ def fill_nulls(df: DataFrame, feature_notebooks: FeatureNotebookList, prefix: st
 
 def create_features_df(feature_notebooks: FeatureNotebookList, entity_primary_key: str, prefix: str) -> DataFrame:
     joined_df = join_dataframes(
-        dataframes=[notebook.df for notebook in feature_notebooks], join_columns=[entity_primary_key, TIMESTAMP_COLUMN], prefix = prefix
+        dataframes=[notebook.df for notebook in feature_notebooks], join_columns=[entity_primary_key, TIMESTAMP_COLUMN]
     )
     if prefix:
         columns = joined_df.columns

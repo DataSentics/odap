@@ -1,3 +1,4 @@
+from typing import Dict, Any
 from pyspark.sql import DataFrame
 
 from odap.common.config import ConfigNamespace, get_config_namespace
@@ -12,18 +13,26 @@ from odap.feature_factory.feature_notebooks_selection import get_list_of_selecte
 
 def dry_run():
     config = get_config_namespace(ConfigNamespace.FEATURE_FACTORY)
-    feature_dir = get_feature_dir(config)
+    feature_dir_init = get_feature_dir(config)
+    databricks_repos = get_repository(config)
+    
+    for repo_paths in databricks_repos:
+        feature_dir = f"{repo_paths['path']}/{feature_dir_init}"
+        prefix = repo_paths['prefix']
+        
+        process_feature_dir(config, feature_dir, prefix)
+
+def process_feature_dir(config: Dict, feature_dir: str, prefix: str) -> Any:
     feature_notebooks = load_feature_notebooks(config, get_list_of_selected_feature_notebooks(feature_dir))
-
+    
     entity_primary_key = get_entity_primary_key(config)
-
-    features_df = create_features_df(feature_notebooks, entity_primary_key)
+    
+    features_df = create_features_df(feature_notebooks, entity_primary_key, prefix)
     metadata_df = create_metadata_df(feature_notebooks)
-
+    
     logger.info("Success. No errors found!")
-
+    
     display_dataframes(features_df, metadata_df)
-
 
 def display_dataframes(features_df: DataFrame, metadata_df: DataFrame):
     display_widget_value = get_widget_value(const.DISPLAY_WIDGET)
