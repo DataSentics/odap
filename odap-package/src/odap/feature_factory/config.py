@@ -1,5 +1,5 @@
 import os
-from typing import Optional, List, Dict
+from typing import Optional
 
 from odap.common.databricks import resolve_branch
 from odap.common.config import Config

@@ -35,7 +35,7 @@ def get_project_root_fs_path() -> str:
 
     if path.parts[3] == ".internal":
         return offset_base_dir(Path(*path.parts[0:6]))
-    
+
     return offset_base_dir(Path(*path.parts[0:5]))
 
 def get_project_root_api_path() -> str:
@@ -54,13 +54,13 @@ def get_absolute_api_path(*paths: str) -> str:
     project_root_api_path = get_project_root_api_path()
     project_root_parts =  project_root_api_path.split("/")
 
-    if project_root_parts: 
+    if project_root_parts:
         project_root_parts[-2] = paths[-1]
         project_root_parts_final = project_root_parts[:-1]
 
-        return  "/".join(project_root_parts_final)
-    
-    return  project_root_api_path
+        return "/".join(project_root_parts_final)
+
+    return project_root_api_path
 
 
 def get_absolute_fs_path(*paths: str) -> str:

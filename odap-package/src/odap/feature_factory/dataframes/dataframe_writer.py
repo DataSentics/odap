@@ -52,7 +52,7 @@ def write_features_df(notebook_table_mapping: Dict[str, FeatureNotebookList], co
 
     for table_name, feature_notebooks_subset in notebook_table_mapping.items():
         df = create_features_df(feature_notebooks_subset, entity_primary_key)
-        
+
         write_df_to_feature_store(
             df,
             table_name=get_features_table(table_name, config),
@@ -84,7 +84,7 @@ def get_latest_dataframe(feature_tables: Iterable[str], config: Config):
 
 def write_latest_features(feature_notebooks: FeatureNotebookList, config: Config):
     list_feature_notebooks = [item for sublist in feature_notebooks for item in sublist]
-    
+
     metadata_df = spark.table(get_metadata_table(config))
     feature_tables = [row.table for row in metadata_df.select("table").distinct().collect()]
 

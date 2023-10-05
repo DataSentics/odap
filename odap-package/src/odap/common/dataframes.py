@@ -57,9 +57,10 @@ def create_dataframe_from_notebook_cells(notebook: WorkspaceFileInfo, notebook_c
 
     if prefix:
         df_with_lower_columns = df.toDF(*[f"{prefix}_{column.lower()}" for column in df.columns])
+
     else:
         df_with_lower_columns = df.toDF(*[column.lower() for column in df.columns])
-    
+
     return df_with_lower_columns
 
 

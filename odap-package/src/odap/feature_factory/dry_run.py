@@ -1,11 +1,10 @@
-from typing import Dict, Any
 from pyspark.sql import DataFrame
 
 from odap.common.config import ConfigNamespace, get_config_namespace
 from odap.common.logger import logger
 from odap.common.widgets import get_widget_value
 from odap.feature_factory import const
-from odap.feature_factory.config import get_entity_primary_key, get_feature_dir, get_repository
+from odap.feature_factory.config import get_entity_primary_key, get_feature_dir
 from odap.feature_factory.dataframes.dataframe_creator import create_features_df, create_metadata_df
 from odap.feature_factory.feature_notebook import load_feature_notebooks
 from odap.feature_factory.feature_notebooks_selection import get_list_of_selected_feature_notebooks
@@ -13,22 +12,17 @@ from odap.feature_factory.feature_notebooks_selection import get_list_of_selecte
 
 def dry_run():
     config = get_config_namespace(ConfigNamespace.FEATURE_FACTORY)
-    feature_dir_init = get_feature_dir(config)
-    databricks_repository = get_repository(config)
+    feature_dirs_init = get_feature_dir(config)
+    feature_notebooks = []
 
-    for repo_paths in databricks_repository:
-        feature_dir = f"{repo_paths['path']}/{feature_dir_init}"
-        prefix = repo_paths["prefix"]
+    for repository in feature_dirs_init:
 
-        process_feature_dir(config, feature_dir, prefix)
-
-
-def process_feature_dir(config: Dict, feature_dir: str, prefix: str) -> Any:
-    feature_notebooks = load_feature_notebooks(config, get_list_of_selected_feature_notebooks(feature_dir))
+        feature_dir = repository.get("path", "")
+        feature_notebooks.append(load_feature_notebooks(config, get_list_of_selected_feature_notebooks(feature_dir)))
 
     entity_primary_key = get_entity_primary_key(config)
 
-    features_df = create_features_df(feature_notebooks, entity_primary_key, prefix)
+    features_df = create_features_df(feature_notebooks, entity_primary_key)
     metadata_df = create_metadata_df(feature_notebooks)
 
     logger.info("Success. No errors found!")

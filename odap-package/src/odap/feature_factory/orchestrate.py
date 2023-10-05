@@ -1,4 +1,3 @@
-from typing import Dict, Any
 from odap.common.config import get_config_namespace, ConfigNamespace
 from odap.feature_factory.config import get_feature_dir
 from odap.feature_factory.dataframes.dataframe_writer import (
@@ -15,6 +14,7 @@ def orchestrate():
     config = get_config_namespace(ConfigNamespace.FEATURE_FACTORY)
     feature_dirs = get_feature_dir(config)
     feature_notebooks = []
+
     for repo in feature_dirs:
 
         feature_dir = repo.get("path", "")

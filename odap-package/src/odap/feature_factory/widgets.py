@@ -11,8 +11,7 @@ def create_notebooks_widget():
 
     config = get_config_namespace(ConfigNamespace.FEATURE_FACTORY)
     feature_dir = get_feature_dir(config)
-    feature_notebooks = []
-    
+
     for repo in feature_dir:
         feature_dir = repo.get("path", "")
 
