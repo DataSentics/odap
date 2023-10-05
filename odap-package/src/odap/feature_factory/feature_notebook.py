@@ -58,10 +58,7 @@ class FeatureNotebook:
                 break
 
         if prefix:
-            df_with_prefix = create_dataframe_from_notebook_cells(info, cells[:], prefix)
-            df = df_with_prefix.withColumnRenamed(
-                f"{prefix}_{entity_primary_key}", entity_primary_key
-            ).withColumnRenamed(f"{prefix}_timestamp", "timestamp")
+            df = create_dataframe_with_prefix(info, cells, prefix, entity_primary_key)
 
         else:
             df = create_dataframe_from_notebook_cells(info, cells[:])
@@ -70,6 +67,13 @@ class FeatureNotebook:
         df_check_list = get_dq_checks_list(info, cells)
 
         return cls(info, df, metadata, config, df_check_list)
+
+    def create_dataframe_with_prefix(info, cells, prefix, entity_primary_key):
+         df_with_prefix = create_dataframe_from_notebook_cells(info, cells[:], prefix)
+            df = df_with_prefix.withColumnRenamed(
+                f"{prefix}_{entity_primary_key}", entity_primary_key
+            ).withColumnRenamed(f"{prefix}_timestamp", "timestamp")
+        return df
 
     def post_load_actions(self, config: Config):
         entity_primary_key = get_entity_primary_key(config)
