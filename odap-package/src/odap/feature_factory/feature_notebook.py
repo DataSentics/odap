@@ -68,12 +68,6 @@ class FeatureNotebook:
 
         return cls(info, df, metadata, config, df_check_list)
 
-    def create_dataframe_with_prefix(info, cells, prefix, entity_primary_key):
-         df_with_prefix = create_dataframe_from_notebook_cells(info, cells[:], prefix)
-            df = df_with_prefix.withColumnRenamed(
-                f"{prefix}_{entity_primary_key}", entity_primary_key
-            ).withColumnRenamed(f"{prefix}_timestamp", "timestamp")
-        return df
 
     def post_load_actions(self, config: Config):
         entity_primary_key = get_entity_primary_key(config)
@@ -87,6 +81,14 @@ class FeatureNotebook:
 
 FeatureNotebookList = List[FeatureNotebook]
 
+
+def create_dataframe_with_prefix(info, cells, prefix, entity_primary_key):
+    df_with_prefix = create_dataframe_from_notebook_cells(info, cells[:], prefix)
+    df = df_with_prefix.withColumnRenamed(
+        f"{prefix}_{entity_primary_key}", entity_primary_key
+    ).withColumnRenamed(f"{prefix}_timestamp", "timestamp")
+
+    return df
 
 def get_feature_notebooks_info(workspace_api: WorkspaceApi, feature_dir: str) -> List[WorkspaceFileInfo]:
     features_path = get_absolute_api_path(feature_dir)
