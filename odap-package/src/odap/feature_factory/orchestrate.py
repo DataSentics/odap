@@ -12,7 +12,7 @@ from odap.feature_factory.tables_validator import validate_feature_store_tables
 
 def orchestrate():
     config = get_config_namespace(ConfigNamespace.FEATURE_FACTORY)
-  
+
     feature_notebooks = feature_notebooks_from_dirs(config)
     notebook_table_mapping = create_notebook_table_mapping(feature_notebooks)
     feature_tables = list(notebook_table_mapping.keys())
@@ -20,6 +20,7 @@ def orchestrate():
 
     write_metadata_df(feature_notebooks, config)
     write_features_df(notebook_table_mapping, config)
+
 
 def feature_notebooks_from_dirs(config):
     feature_dirs = get_feature_dir(config)
@@ -29,8 +30,9 @@ def feature_notebooks_from_dirs(config):
 
         feature_dir = repo.get("path", "")
         feature_notebooks.append(load_feature_notebooks(config, get_list_of_selected_feature_notebooks(feature_dir)))
-    
+
     return feature_notebooks
+
 
 def calculate_latest_table():
     config = get_config_namespace(ConfigNamespace.FEATURE_FACTORY)

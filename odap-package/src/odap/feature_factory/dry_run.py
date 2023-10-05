@@ -12,7 +12,6 @@ from odap.feature_factory.feature_notebooks_selection import get_list_of_selecte
 
 def dry_run():
     config = get_config_namespace(ConfigNamespace.FEATURE_FACTORY)
-    feature_dirs_init = get_feature_dir(config)
     feature_notebooks = get_feature_notebooks_from_dirs(config)
 
     entity_primary_key = get_entity_primary_key(config)
@@ -24,6 +23,7 @@ def dry_run():
 
     display_dataframes(features_df, metadata_df)
 
+
 def get_feature_notebooks_from_dirs(config):
     feature_dirs_init = get_feature_dir(config)
     feature_notebooks = []
@@ -32,8 +32,9 @@ def get_feature_notebooks_from_dirs(config):
 
         feature_dir = repo.get("path", "")
         feature_notebooks.append(load_feature_notebooks(config, get_list_of_selected_feature_notebooks(feature_dir)))
-    
+
     return feature_notebooks
+
 
 def display_dataframes(features_df: DataFrame, metadata_df: DataFrame):
     display_widget_value = get_widget_value(const.DISPLAY_WIDGET)

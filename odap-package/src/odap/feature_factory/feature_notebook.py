@@ -53,7 +53,6 @@ class FeatureNotebook:
 
         return cls(info, df, metadata, config, df_check_list)
 
-
     def post_load_actions(self, config: Config):
         entity_primary_key = get_entity_primary_key(config)
 
@@ -78,20 +77,20 @@ def get_prefix_for_feature(feature_path):
         if path in feature_path:
             prefix = repo.get("prefix", "")
             break
-        
+
     return prefix
 
 
 def create_dataframe_with_prefix(info, cells, prefix, entity_primary_key):
     if prefix:
         df_with_prefix = create_dataframe_from_notebook_cells(info, cells[:], prefix)
-        df = df_with_prefix.withColumnRenamed(
-                f"{prefix}_{entity_primary_key}", entity_primary_key
-            ).withColumnRenamed(f"{prefix}_timestamp", "timestamp")
+        df = df_with_prefix.withColumnRenamed(f"{prefix}_{entity_primary_key}", entity_primary_key).withColumnRenamed(
+            f"{prefix}_timestamp", "timestamp"
+        )
 
     else:
         df = create_dataframe_from_notebook_cells(info, cells[:])
-    
+
     return df
 
 
