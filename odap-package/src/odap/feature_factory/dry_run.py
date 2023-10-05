@@ -25,10 +25,10 @@ def dry_run():
     display_dataframes(features_df, metadata_df)
 
 def get_feature_notebooks_from_dirs(config):
-    feature_dirs = get_feature_dir(config)
+    feature_dirs_init = get_feature_dir(config)
     feature_notebooks = []
 
-    for repo in feature_dirs:
+    for repo in feature_dirs_init:
 
         feature_dir = repo.get("path", "")
         feature_notebooks.append(load_feature_notebooks(config, get_list_of_selected_feature_notebooks(feature_dir)))

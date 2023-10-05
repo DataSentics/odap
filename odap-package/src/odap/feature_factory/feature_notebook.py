@@ -48,21 +48,8 @@ class FeatureNotebook:
         info = notebook_info
         cells = get_feature_notebook_cells(notebook_info, workspace_api, config)
         feature_path = notebook_info.path
-        prefix = ""
-
-        for repo in feature_dirs:
-            path = repo.get("path", "")
-
-            if path in feature_path:
-                prefix = repo.get("prefix", "")
-                break
-
-        if prefix:
-            df = create_dataframe_with_prefix(info, cells, prefix, entity_primary_key)
-
-        else:
-            df = create_dataframe_from_notebook_cells(info, cells[:])
-
+        prefix = get_prefix_for_feature(feature_path, feature_dirs)
+        df = create_dataframe_with_prefix(info, cells, prefix, entity_primary_key)
         metadata = resolve_metadata(cells, info.path, df, prefix)
         df_check_list = get_dq_checks_list(info, cells)
 
@@ -82,13 +69,31 @@ class FeatureNotebook:
 FeatureNotebookList = List[FeatureNotebook]
 
 
-def create_dataframe_with_prefix(info, cells, prefix, entity_primary_key):
-    df_with_prefix = create_dataframe_from_notebook_cells(info, cells[:], prefix)
-    df = df_with_prefix.withColumnRenamed(
-        f"{prefix}_{entity_primary_key}", entity_primary_key
-    ).withColumnRenamed(f"{prefix}_timestamp", "timestamp")
+def get_prefix_for_feature(feature_path, feature_dirs):
+    prefix = ""
 
+    for repo in feature_dirs:
+        path = repo.get("path", "")
+
+        if path in feature_path:
+            prefix = repo.get("prefix", "")
+            break
+        
+    return prefix
+
+
+def create_dataframe_with_prefix(info, cells, prefix, entity_primary_key):
+    if prefix:
+        df_with_prefix = create_dataframe_from_notebook_cells(info, cells[:], prefix)
+        df = df_with_prefix.withColumnRenamed(
+                f"{prefix}_{entity_primary_key}", entity_primary_key
+            ).withColumnRenamed(f"{prefix}_timestamp", "timestamp")
+
+    else:
+        df = create_dataframe_from_notebook_cells(info, cells[:])
+    
     return df
+
 
 def get_feature_notebooks_info(workspace_api: WorkspaceApi, feature_dir: str) -> List[WorkspaceFileInfo]:
     features_path = get_absolute_api_path(feature_dir)
