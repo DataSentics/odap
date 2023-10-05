@@ -40,7 +40,9 @@ def get_sql_dataframe(notebook_cells: List[str]) -> DataFrame:
 
 
 # pylint: disable=too-many-statements
-def create_dataframe_from_notebook_cells(notebook: WorkspaceFileInfo, notebook_cells: List[str], prefix: str = "") -> DataFrame:
+def create_dataframe_from_notebook_cells(
+    notebook: WorkspaceFileInfo, notebook_cells: List[str], prefix: str = ""
+) -> DataFrame:
     remove_blacklisted_cells(notebook_cells)
 
     if notebook.language == "PYTHON":

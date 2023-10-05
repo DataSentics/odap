@@ -22,6 +22,7 @@ from odap.feature_factory.metadata_schema import (
     get_variable_type,
 )
 
+
 def set_notebook_paths(feature_path: str, global_metadata_dict: FeatureMetadataType):
     global_metadata_dict[const.NOTEBOOK_NAME] = get_notebook_name(feature_path)
     global_metadata_dict[const.NOTEBOOK_ABSOLUTE_PATH] = feature_path
@@ -119,7 +120,9 @@ def resolve_global_metadata(feature_metadata: FeatureMetadataType, global_metada
             feature_metadata[key] = value
 
 
-def resolve_metadata(notebook_cells: List[str], feature_path: str, feature_df: DataFrame, prefix: str ="") -> FeaturesMetadataType:
+def resolve_metadata(
+    notebook_cells: List[str], feature_path: str, feature_df: DataFrame, prefix: str = ""
+) -> FeaturesMetadataType:
     raw_metadata = extract_raw_metadata_from_cells(notebook_cells, feature_path)
 
     raw_features = get_features_from_raw_metadata(raw_metadata, feature_path)
@@ -128,8 +131,8 @@ def resolve_metadata(notebook_cells: List[str], feature_path: str, feature_df: D
     features_metadata = resolve_metadata_templates(feature_df, raw_features)
 
     for metadata in features_metadata:
-        if not metadata['feature'].startswith(prefix):
-            metadata['feature'] = f'{prefix}_{metadata["feature"]}'
+        if not metadata["feature"].startswith(prefix):
+            metadata["feature"] = f'{prefix}_{metadata["feature"]}'
 
         resolve_global_metadata(metadata, global_metadata)
 

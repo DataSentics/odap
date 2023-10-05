@@ -38,6 +38,7 @@ def get_project_root_fs_path() -> str:
 
     return offset_base_dir(Path(*path.parts[0:5]))
 
+
 def get_project_root_api_path() -> str:
     return re.sub("^/Workspace", "", get_project_root_fs_path())
 
@@ -52,7 +53,7 @@ def get_notebook_name(path: str):
 
 def get_absolute_api_path(*paths: str) -> str:
     project_root_api_path = get_project_root_api_path()
-    project_root_parts =  project_root_api_path.split("/")
+    project_root_parts = project_root_api_path.split("/")
 
     if project_root_parts:
         project_root_parts[-2] = paths[-1]

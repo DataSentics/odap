@@ -22,6 +22,7 @@ from odap.feature_factory.no_target_optimizer import replace_no_target
 from odap.feature_factory.config import get_feature_dir
 from odap.common.config import get_config_namespace, ConfigNamespace
 
+
 class FeatureNotebook:
     def __init__(
         self,
@@ -58,7 +59,9 @@ class FeatureNotebook:
 
         if prefix:
             df_with_prefix = create_dataframe_from_notebook_cells(info, cells[:], prefix)
-            df = df_with_prefix.withColumnRenamed(f"{prefix}_{entity_primary_key}", entity_primary_key).withColumnRenamed(f"{prefix}_timestamp", "timestamp")
+            df = df_with_prefix.withColumnRenamed(
+                f"{prefix}_{entity_primary_key}", entity_primary_key
+            ).withColumnRenamed(f"{prefix}_timestamp", "timestamp")
 
         else:
             df = create_dataframe_from_notebook_cells(info, cells[:])
