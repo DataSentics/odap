@@ -19,6 +19,9 @@ from odap.feature_factory.metadata_schema import FeaturesMetadataType
 from odap.feature_factory.no_target_optimizer import replace_no_target
 
 
+from odap.feature_factory.config import get_feature_dir
+from odap.common.config import get_config_namespace, ConfigNamespace
+
 class FeatureNotebook:
     def __init__(
         self,
@@ -37,10 +40,29 @@ class FeatureNotebook:
 
     @classmethod
     def from_api(cls, notebook_info: WorkspaceFileInfo, config: Config, workspace_api: WorkspaceApi):
+
+        config = get_config_namespace(ConfigNamespace.FEATURE_FACTORY)
+        feature_dirs = get_feature_dir(config)
+        entity_primary_key = get_entity_primary_key(config)
+    
         info = notebook_info
         cells = get_feature_notebook_cells(notebook_info, workspace_api, config)
-        df = create_dataframe_from_notebook_cells(info, cells[:])
-        metadata = resolve_metadata(cells, info.path, df)
+        feature_path=notebook_info.path
+        prefix=""
+        
+        for repo in feature_dirs:
+            path = repo.get("path", "")
+            if feature_path.startswith(path):
+                prefix = repo.get("prefix", "")
+                break
+
+        if prefix: 
+            df_with_prefix = create_dataframe_from_notebook_cells(info, cells[:], prefix)
+            df = df_with_prefix.withColumnRenamed(f"{prefix}_{entity_primary_key}", entity_primary_key).withColumnRenamed(f"{prefix}_timestamp", "timestamp")
+        else: 
+            df = create_dataframe_from_notebook_cells(info, cells[:])
+
+        metadata = resolve_metadata(cells, info.path, df, prefix)
         df_check_list = get_dq_checks_list(info, cells)
 
         return cls(info, df, metadata, config, df_check_list)
@@ -66,6 +88,7 @@ def get_feature_notebooks_info(workspace_api: WorkspaceApi, feature_dir: str) ->
 
 def get_feature_notebook_cells(info: WorkspaceFileInfo, workspace_api: WorkspaceApi, config: Config) -> List[str]:
     notebook_cells = get_notebook_cells(info, workspace_api)
+    
     if use_no_target_optimization(config):
         replace_no_target(info.language, notebook_cells)
     return notebook_cells
@@ -73,7 +96,7 @@ def get_feature_notebook_cells(info: WorkspaceFileInfo, workspace_api: Workspace
 
 def load_feature_notebooks(config: Config, notebooks_info: List[WorkspaceFileInfo]) -> FeatureNotebookList:
     workspace_api = get_workspace_api()
-
+    
     feature_notebooks = []
 
     for info in notebooks_info:
@@ -84,8 +107,9 @@ def load_feature_notebooks(config: Config, notebooks_info: List[WorkspaceFileInf
 
 def create_notebook_table_mapping(feature_notebooks: FeatureNotebookList) -> Dict[str, FeatureNotebookList]:
     mapping = {}
+    list_feature_notebooks = [item for sublist in feature_notebooks for item in sublist]
 
-    for feature_notebook in feature_notebooks:
+    for feature_notebook in list_feature_notebooks:
         table = feature_notebook.metadata[0].get("table", None)
 
         if table not in mapping:

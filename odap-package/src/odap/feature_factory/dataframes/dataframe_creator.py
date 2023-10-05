@@ -44,13 +44,14 @@ def get_all_feature_tables(config: Dict) -> Iterable[str]:
 
 def create_metadata_df(feature_notebooks: FeatureNotebookList) -> DataFrame:
     features_metadata = []
-    for notebook in feature_notebooks:
+    list_feature_notebooks = [item for sublist in feature_notebooks for item in sublist]
+    for notebook in list_feature_notebooks:
         features_metadata.extend(notebook.metadata)
 
     return create_dataframe(features_metadata, get_metadata_schema())
 
 
-def fill_nulls_in_notebook(notebook: List[Dict], prefix: str) -> Dict:
+def fill_nulls_in_notebook(notebook: List[Dict]) -> Dict:
     fill_dict = {}
 
     for feature in notebook:
@@ -58,50 +59,44 @@ def fill_nulls_in_notebook(notebook: List[Dict], prefix: str) -> Dict:
             continue
         if feature[const.DTYPE].startswith("array"):
             continue
-        feature_name = f"{prefix}_{feature[const.FEATURE]}"
-        fill_dict[feature_name] = feature[const.FILLNA_VALUE]
+
+        fill_dict[feature[const.FEATURE]] = feature[const.FILLNA_VALUE]
     return fill_dict
 
 
-def fill_array_nulls(df: DataFrame, notebook: List[Dict], prefix: str) -> DataFrame:
+def fill_array_nulls(df: DataFrame, notebook: List[Dict]) -> DataFrame:
     for feature in notebook:
         if feature[const.DTYPE].startswith("array") and feature[const.FILLNA_VALUE] is not None:
-            feature_name = f"{prefix}_{feature[const.FEATURE]}"
             df = df.withColumn(
-                feature_name,
-                f.when(f.col(feature_name).isNull(), f.array(*map(f.lit, feature[const.FILLNA_VALUE]))).otherwise(
-                    f.col(feature_name)
-                ),
+                feature[const.FEATURE],
+                f.when(
+                    f.col(feature[const.FEATURE]).isNull(), f.array(*map(f.lit, feature[const.FILLNA_VALUE]))
+                ).otherwise(f.col(feature[const.FEATURE])),
             )
     return df
 
 
-def fill_nulls(df: DataFrame, feature_notebooks: FeatureNotebookList, prefix: str) -> DataFrame:
+def fill_nulls(df: DataFrame, feature_notebooks: FeatureNotebookList) -> DataFrame:
     metadata = [notebook.metadata for notebook in feature_notebooks]
     fill_dict = {}
 
     for notebook in metadata:
-        notebook_dict = fill_nulls_in_notebook(notebook, prefix)
+        notebook_dict = fill_nulls_in_notebook(notebook)
         fill_dict.update(notebook_dict)
 
     for notebook in metadata:
-        df = fill_array_nulls(df, notebook, prefix)
+        df = fill_array_nulls(df, notebook)
 
     return df.fillna(fill_dict)
 
 
-def create_features_df(feature_notebooks: FeatureNotebookList, entity_primary_key: str, prefix: str) -> DataFrame:
+def create_features_df(feature_notebooks: FeatureNotebookList, entity_primary_key: str) -> DataFrame:
     joined_df = join_dataframes(
         dataframes=[notebook.df for notebook in feature_notebooks], join_columns=[entity_primary_key, TIMESTAMP_COLUMN]
     )
-    if prefix:
-        columns = joined_df.columns
-        renamed_columns = [
-            f"{prefix}_{col}" if col not in [entity_primary_key, TIMESTAMP_COLUMN] else col for col in columns
-        ]
-        joined_df = joined_df.toDF(*renamed_columns)
 
-    filled_df = fill_nulls(joined_df, feature_notebooks, prefix)
+    filled_df = fill_nulls(joined_df, feature_notebooks)
 
     execute_soda_checks_from_feature_notebooks(df=filled_df, feature_notebooks=feature_notebooks)
+
     return filled_df

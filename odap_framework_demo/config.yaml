@@ -5,13 +5,14 @@ parameters:
     table: "use_cases"
     
   featurefactory:
-    repositories:
-      - path: "/Repos/corina-teodora.coste@datasentics.com/odapglobaltest/odap_framework_demo"
+    feature_dir:
+      - path: "/Repos/corina-teodora.coste@datasentics.com/odapglobaltest/odap_framework_demo/notebooks"
         prefix: "global"
-      - path: "/Repos/corina-teodora.coste@datasentics.com/odaplocaltest/odap_framework_demo"
+      - path: "/Repos/corina-teodora.coste@datasentics.com/odaplocaltest/odap_framework_demo/notebooks"
         prefix: "local"
+      - path: "/Repos/corina-teodora.coste@datasentics.com/odapfoldertest/odap_framework_demo/notebooks"
         
-    feature_dir: "notebooks"
+    # feature_dir: "notebooks"
 
     catalog: "{write_env}"
     preview_catalog: "on"

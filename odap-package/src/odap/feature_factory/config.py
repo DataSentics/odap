@@ -1,5 +1,5 @@
 import os
-from typing import Optional
+from typing import Optional, List, Dict
 
 from odap.common.databricks import resolve_branch
 from odap.common.config import Config
@@ -191,14 +191,22 @@ def use_no_target_optimization(config: Config) -> bool:
     return config.get("no_target_optimization") is not None
 
 
-def get_feature_dir(config: Config) -> str:
-    return config.get("feature_dir", "features")
+# def get_feature_dir(config: Config) -> str:
+#     return config.get("feature_dir", "features")
 
 
-def get_repository(config: Config) -> dict:
-    databricks_repos = config.get("repositories", {})
-    return databricks_repos
+def get_feature_dir(config: Config) -> dict:
+    feature_dirs = config.get("feature_dir", {})
+    return feature_dirs
 
+# def get_feature_dir(config: Config) -> List[Dict[str,str]]:
+#     feature_dirs = config.get("feature_dir", {})
+#     result =[]
+#     for feature_dir in feature_dirs: 
+#         path = feature_dir.get("path","")
+#         prefix = feature_dir.get("prefix","")
+#         result.append({"path":path, "prefix":prefix})
+#     return result
 
 def get_checkpoint_dir(config: Config):
     checkpoint_dir = config.get("checkpoint_dir")
