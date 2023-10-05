@@ -52,7 +52,7 @@ class FeatureNotebook:
         
         for repo in feature_dirs:
             path = repo.get("path", "")
-            if feature_path.startswith(path):
+            if path in feature_path:
                 prefix = repo.get("prefix", "")
                 break
 

@@ -6,11 +6,12 @@ parameters:
     
   featurefactory:
     feature_dir:
-      - path: "/Repos/corina-teodora.coste@datasentics.com/odapglobaltest/odap_framework_demo/notebooks"
+      - path: "odapglobaltest/odap_framework_demo/notebooks"
         prefix: "global"
-      - path: "/Repos/corina-teodora.coste@datasentics.com/odaplocaltest/odap_framework_demo/notebooks"
+      - path: "odap/odap_framework_demo/notebooks"
+      - path: "odaplocaltest/odap_framework_demo/notebooks"
         prefix: "local"
-      - path: "/Repos/corina-teodora.coste@datasentics.com/odapfoldertest/odap_framework_demo/notebooks"
+      
         
     # feature_dir: "notebooks"
 
