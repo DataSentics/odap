@@ -42,13 +42,11 @@ class FeatureNotebook:
     @classmethod
     def from_api(cls, notebook_info: WorkspaceFileInfo, config: Config, workspace_api: WorkspaceApi):
 
-        config = get_config_namespace(ConfigNamespace.FEATURE_FACTORY)
-        feature_dirs = get_feature_dir(config)
         entity_primary_key = get_entity_primary_key(config)
         info = notebook_info
         cells = get_feature_notebook_cells(notebook_info, workspace_api, config)
         feature_path = notebook_info.path
-        prefix = get_prefix_for_feature(feature_path, feature_dirs)
+        prefix = get_prefix_for_feature(feature_path)
         df = create_dataframe_with_prefix(info, cells, prefix, entity_primary_key)
         metadata = resolve_metadata(cells, info.path, df, prefix)
         df_check_list = get_dq_checks_list(info, cells)
@@ -69,7 +67,9 @@ class FeatureNotebook:
 FeatureNotebookList = List[FeatureNotebook]
 
 
-def get_prefix_for_feature(feature_path, feature_dirs):
+def get_prefix_for_feature(feature_path):
+    config = get_config_namespace(ConfigNamespace.FEATURE_FACTORY)
+    feature_dirs = get_feature_dir(config)
     prefix = ""
 
     for repo in feature_dirs:
