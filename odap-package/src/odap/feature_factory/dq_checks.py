@@ -38,9 +38,10 @@ def create_temporary_view(df: DataFrame) -> str:
 
 
 def execute_soda_checks_from_feature_notebooks(df: DataFrame, feature_notebooks: FeatureNotebookList):
+    feature_notebooks_list = [notebook.metadata for sublist in feature_notebooks for notebook in sublist]
     checks_list = []
 
-    for notebook in feature_notebooks:
+    for notebook in feature_notebooks_list:
         checks_list += notebook.df_checks
 
     if checks_list:
