@@ -63,7 +63,7 @@ class FeatureNotebook:
         logger.info(f"Feature {self.info.path} successfully loaded.")
 
 
-FeatureNotebookList = List[FeatureNotebook]
+FeatureNotebookList = List[List[FeatureNotebook]]
 
 
 def get_prefix_for_feature(feature_path):
