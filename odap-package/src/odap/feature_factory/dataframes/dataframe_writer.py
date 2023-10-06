@@ -83,13 +83,12 @@ def get_latest_dataframe(feature_tables: Iterable[str], config: Config):
 
 
 def write_latest_features(feature_notebooks: FeatureNotebookList, config: Config):
-    list_feature_notebooks = [item for sublist in feature_notebooks for item in sublist]
 
     metadata_df = spark.table(get_metadata_table(config))
     feature_tables = [row.table for row in metadata_df.select("table").distinct().collect()]
 
     latest_df = get_latest_dataframe(feature_tables, config)
-    latest_features_filled = fill_nulls(latest_df, list_feature_notebooks)
+    latest_features_filled = fill_nulls(latest_df, feature_notebooks)
 
     latest_table_path = get_latest_features_table_path(config)
     latest_table_name = get_latest_features_table(config)

@@ -39,11 +39,6 @@ class FeatureNotebook:
 
         self.post_load_actions(config)
 
-    def __iter__(self):
-        yield self.df
-        yield self.metadata
-        yield self.df_checks
-
     @classmethod
     def from_api(cls, notebook_info: WorkspaceFileInfo, config: Config, workspace_api: WorkspaceApi):
 
@@ -126,9 +121,8 @@ def load_feature_notebooks(config: Config, notebooks_info: List[WorkspaceFileInf
 
 def create_notebook_table_mapping(feature_notebooks: FeatureNotebookList) -> Dict[str, FeatureNotebookList]:
     mapping = {}
-    list_feature_notebooks = [item for sublist in feature_notebooks for item in sublist]
-
-    for feature_notebook in list_feature_notebooks:
+  
+    for feature_notebook in feature_notebooks:
         table = feature_notebook.metadata[0].get("table", None)
 
         if table not in mapping:
