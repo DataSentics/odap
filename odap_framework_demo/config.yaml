@@ -8,9 +8,9 @@ parameters:
     feature_dir:
       - path: "odapglobaltest/odap_framework_demo/notebooks"
         prefix: "global"
-      - path: "odap/odap_framework_demo/notebooks"
-      - path: "odaplocaltest/odap_framework_demo/notebooks"
-        prefix: "local"
+      # - path: "odap/odap_framework_demo/notebooks"
+      # - path: "odaplocaltest/odap_framework_demo/notebooks"
+      #   prefix: "local"
       
         
     # feature_dir: "notebooks"
