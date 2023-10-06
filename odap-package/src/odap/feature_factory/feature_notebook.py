@@ -50,7 +50,6 @@ class FeatureNotebook:
         df = create_dataframe_with_prefix(info, cells, prefix, entity_primary_key)
         metadata = resolve_metadata(cells, info.path, df, prefix)
         df_check_list = get_dq_checks_list(info, cells)
-        
 
         return cls(info, df, metadata, config, df_check_list)
 

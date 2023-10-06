@@ -96,7 +96,7 @@ def create_features_df(feature_notebooks: FeatureNotebookList, entity_primary_ke
     )
 
     filled_df = fill_nulls(joined_df, feature_notebooks)
-    
+
     execute_soda_checks_from_feature_notebooks(df=filled_df, feature_notebooks=feature_notebooks)
 
     return filled_df
