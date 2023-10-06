@@ -121,7 +121,7 @@ def load_feature_notebooks(config: Config, notebooks_info: List[WorkspaceFileInf
 
 def create_notebook_table_mapping(feature_notebooks: FeatureNotebookList) -> Dict[str, FeatureNotebookList]:
     mapping = {}
-  
+
     for feature_notebook in feature_notebooks:
         table = feature_notebook.metadata[0].get("table", None)
 
