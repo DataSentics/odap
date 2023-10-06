@@ -39,6 +39,11 @@ class FeatureNotebook:
 
         self.post_load_actions(config)
 
+    def __iter__(self):
+        yield self.df
+        yield self.metadata
+        yield self.df_checks
+
     @classmethod
     def from_api(cls, notebook_info: WorkspaceFileInfo, config: Config, workspace_api: WorkspaceApi):
 
@@ -63,7 +68,7 @@ class FeatureNotebook:
         logger.info(f"Feature {self.info.path} successfully loaded.")
 
 
-FeatureNotebookList = FeatureNotebook
+FeatureNotebookList = List[FeatureNotebook]
 
 
 def get_prefix_for_feature(feature_path):
