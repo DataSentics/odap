@@ -77,7 +77,7 @@ def fill_array_nulls(df: DataFrame, notebook: List[Dict]) -> DataFrame:
 
 
 def fill_nulls(df: DataFrame, feature_notebooks: FeatureNotebookList) -> DataFrame:
-    metadata = [notebook.metadata for sublist in feature_notebooks for notebook in sublist]
+    metadata = [notebook.metadata for notebook in feature_notebooks]
     fill_dict = {}
 
     for notebook in metadata:
@@ -92,12 +92,11 @@ def fill_nulls(df: DataFrame, feature_notebooks: FeatureNotebookList) -> DataFra
 
 def create_features_df(feature_notebooks: FeatureNotebookList, entity_primary_key: str) -> DataFrame:
     joined_df = join_dataframes(
-        dataframes=[notebook.df for sublist in feature_notebooks for notebook in sublist],
-        join_columns=[entity_primary_key, TIMESTAMP_COLUMN],
+        dataframes=[notebook.df for notebook in feature_notebooks], join_columns=[entity_primary_key, TIMESTAMP_COLUMN]
     )
 
     filled_df = fill_nulls(joined_df, feature_notebooks)
-
+    
     execute_soda_checks_from_feature_notebooks(df=filled_df, feature_notebooks=feature_notebooks)
 
     return filled_df
