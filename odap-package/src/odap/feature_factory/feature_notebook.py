@@ -52,7 +52,7 @@ class FeatureNotebook:
         df_check_list = get_dq_checks_list(info, cells)
 
         return cls(info, df, metadata, config, df_check_list)
-
+    
     def post_load_actions(self, config: Config):
         entity_primary_key = get_entity_primary_key(config)
 
@@ -63,7 +63,7 @@ class FeatureNotebook:
         logger.info(f"Feature {self.info.path} successfully loaded.")
 
 
-FeatureNotebookList = List[FeatureNotebook]
+FeatureNotebookList = FeatureNotebook
 
 
 def get_prefix_for_feature(feature_path):
