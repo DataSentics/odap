@@ -40,9 +40,7 @@ def get_sql_dataframe(notebook_cells: List[str]) -> DataFrame:
 
 
 # pylint: disable=too-many-statements
-def create_dataframe_from_notebook_cells(
-    notebook: WorkspaceFileInfo, notebook_cells: List[str], prefix: Optional[str] = None
-) -> DataFrame:
+def create_dataframe_from_notebook_cells(notebook: WorkspaceFileInfo, notebook_cells: List[str]) -> DataFrame:
     remove_blacklisted_cells(notebook_cells)
 
     if notebook.language == "PYTHON":
@@ -57,11 +55,7 @@ def create_dataframe_from_notebook_cells(
     if not df:
         raise NotebookException("Notebook could not be loaded", path=notebook.path)
 
-    if prefix:
-        df_with_lower_columns = df.toDF(*[f"{prefix}_{column.lower()}" for column in df.columns])
-
-    else:
-        df_with_lower_columns = df.toDF(*[column.lower() for column in df.columns])
+    df_with_lower_columns = df.toDF(*[column.lower() for column in df.columns])
 
     return df_with_lower_columns
 

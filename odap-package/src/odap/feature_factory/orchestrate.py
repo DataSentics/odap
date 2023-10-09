@@ -26,10 +26,12 @@ def feature_notebooks_from_dirs(config):
     feature_dirs = get_feature_dir(config)
     feature_notebooks = []
 
-    for repo in feature_dirs:
+    for feature_dir in feature_dirs:
 
-        feature_dir = repo.get("path", "")
-        feature_notebooks.extend(load_feature_notebooks(config, get_list_of_selected_feature_notebooks(feature_dir)))
+        feature_path = feature_dir.get("path", "")
+        feature_prefix = feature_dir.get("prefix", "")
+
+        feature_notebooks.extend(load_feature_notebooks(config, get_list_of_selected_feature_notebooks(feature_path),feature_prefix))
 
     return feature_notebooks
 

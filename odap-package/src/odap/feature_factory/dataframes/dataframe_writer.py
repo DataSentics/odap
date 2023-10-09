@@ -83,7 +83,6 @@ def get_latest_dataframe(feature_tables: Iterable[str], config: Config):
 
 
 def write_latest_features(feature_notebooks: FeatureNotebookList, config: Config):
-
     metadata_df = spark.table(get_metadata_table(config))
     feature_tables = [row.table for row in metadata_df.select("table").distinct().collect()]
 

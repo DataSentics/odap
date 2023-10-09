@@ -8,11 +8,11 @@ parameters:
     feature_dir:
       - path: "odapglobaltest/odap_framework_demo/notebooks"
         prefix: "global"
-      - path: "odap/odap_framework_demo/notebooks"
-      - path: "odaplocaltest/odap_framework_demo/notebooks/notebooks2"
-        prefix: "local"
-      - path: "odaplocaltest/odap_framework_demo/notebooks/notebooks3"
-        prefix: "local"
+      # - path: "odap/odap_framework_demo/notebooks"
+      # - path: "odaplocaltest/odap_framework_demo/notebooks/notebooks2"
+      #   prefix: "local"
+      # - path: "odaplocaltest/odap_framework_demo/notebooks/notebooks3"
+      #   prefix: "local"
       
         
     # feature_dir: "notebooks"

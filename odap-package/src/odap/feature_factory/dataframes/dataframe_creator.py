@@ -44,7 +44,6 @@ def get_all_feature_tables(config: Dict) -> Iterable[str]:
 
 def create_metadata_df(feature_notebooks: FeatureNotebookList) -> DataFrame:
     features_metadata = []
-
     for notebook in feature_notebooks:
         features_metadata.extend(notebook.metadata)
 
