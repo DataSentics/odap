@@ -1,5 +1,5 @@
 import copy
-from typing import Any, Dict, Hashable, Iterable, List, Union, Optional
+from typing import Any, Dict, Hashable, Iterable, List, Union
 from pyspark.sql import DataFrame, SparkSession
 from databricks_cli.workspace.api import WorkspaceFileInfo
 

@@ -32,7 +32,9 @@ def get_feature_notebooks_from_dirs(config):
 
         features_path = feature_dir.get("path", "")
         prefix = feature_dir.get("prefix", "")
-        feature_notebooks.append(load_feature_notebooks(config, get_list_of_selected_feature_notebooks(features_path),prefix))
+        feature_notebooks.append(
+            load_feature_notebooks(config, get_list_of_selected_feature_notebooks(features_path), prefix)
+        )
 
     return feature_notebooks
 

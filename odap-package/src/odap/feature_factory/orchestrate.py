@@ -31,7 +31,9 @@ def feature_notebooks_from_dirs(config):
         feature_path = feature_dir.get("path", "")
         feature_prefix = feature_dir.get("prefix", "")
 
-        feature_notebooks.extend(load_feature_notebooks(config, get_list_of_selected_feature_notebooks(feature_path),feature_prefix))
+        feature_notebooks.extend(
+            load_feature_notebooks(config, get_list_of_selected_feature_notebooks(feature_path), feature_prefix)
+        )
 
     return feature_notebooks
 

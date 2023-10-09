@@ -36,15 +36,18 @@ class FeatureNotebook:
         self.post_load_actions(config)
 
     @classmethod
-    def from_api(cls, notebook_info: WorkspaceFileInfo, config: Config, workspace_api: WorkspaceApi, prefix: Optional[str]):
+    def from_api(
+        cls, notebook_info: WorkspaceFileInfo, config: Config, workspace_api: WorkspaceApi, prefix: Optional[str]
+    ):
         info = notebook_info
         cells = get_feature_notebook_cells(notebook_info, workspace_api, config)
         entity_primary_key = get_entity_primary_key(config)
         df = create_dataframe_from_notebook_cells(info, cells[:])
 
         if prefix:
-            columns = df.columns
-            renamed_columns = [f"{prefix}_{col}" if col not in [entity_primary_key, TIMESTAMP_COLUMN] else col for col in columns]
+            renamed_columns = [
+                f"{prefix}_{col}" if col not in [entity_primary_key, TIMESTAMP_COLUMN] else col for col in df.columns
+            ]
             df = df.toDF(*renamed_columns)
 
         metadata = resolve_metadata(cells, info.path, df, prefix)
@@ -78,7 +81,9 @@ def get_feature_notebook_cells(info: WorkspaceFileInfo, workspace_api: Workspace
     return notebook_cells
 
 
-def load_feature_notebooks(config: Config, notebooks_info: List[WorkspaceFileInfo], prefix: Optional[str]) -> FeatureNotebookList:
+def load_feature_notebooks(
+    config: Config, notebooks_info: List[WorkspaceFileInfo], prefix: Optional[str]
+) -> FeatureNotebookList:
     workspace_api = get_workspace_api()
 
     feature_notebooks = []
