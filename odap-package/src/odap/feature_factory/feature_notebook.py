@@ -89,7 +89,7 @@ def create_dataframe_with_prefix(info, cells, prefix, entity_primary_key):
         )
 
     else:
-        df = create_dataframe_from_notebook_cells(info, cells[:])
+        df = create_dataframe_from_notebook_cells(info, cells[:], prefix)
 
     return df
 

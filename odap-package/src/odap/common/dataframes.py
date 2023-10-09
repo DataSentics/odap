@@ -1,5 +1,5 @@
 import copy
-from typing import Any, Dict, Hashable, Iterable, List, Union
+from typing import Any, Dict, Hashable, Iterable, List, Union, Optional
 from pyspark.sql import DataFrame, SparkSession
 from databricks_cli.workspace.api import WorkspaceFileInfo
 
@@ -41,7 +41,7 @@ def get_sql_dataframe(notebook_cells: List[str]) -> DataFrame:
 
 # pylint: disable=too-many-statements
 def create_dataframe_from_notebook_cells(
-    notebook: WorkspaceFileInfo, notebook_cells: List[str], prefix: str = ""
+    notebook: WorkspaceFileInfo, notebook_cells: List[str], prefix: Optional[str]
 ) -> DataFrame:
     remove_blacklisted_cells(notebook_cells)
 

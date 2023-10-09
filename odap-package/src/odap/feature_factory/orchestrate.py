@@ -36,11 +36,6 @@ def feature_notebooks_from_dirs(config):
 
 def calculate_latest_table():
     config = get_config_namespace(ConfigNamespace.FEATURE_FACTORY)
-    feature_dirs = get_feature_dir(config)
-    feature_notebooks = []
-    for repo in feature_dirs:
-
-        feature_dir = repo.get("path", "")
-        feature_notebooks.extend(load_feature_notebooks(config, get_list_of_selected_feature_notebooks(feature_dir)))
+    feature_notebooks = feature_notebooks_from_dirs(config)
 
     write_latest_features(feature_notebooks, config)
