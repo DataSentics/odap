@@ -119,15 +119,16 @@ def resolve_global_metadata(feature_metadata: FeatureMetadataType, global_metada
         if key not in feature_metadata:
             feature_metadata[key] = value
 
-def add_prefix_to_features(raw_features: List[Dict[str,Any]], prefix: Optional[str]) -> List[Dict[str,Any]]:
-    if prefix: 
+
+def add_prefix_to_features(raw_features: List[Dict[str, Any]], prefix: Optional[str]) -> List[Dict[str, Any]]:
+    if prefix:
         for feature in raw_features:
             feature["feature"] = f'{prefix}_{feature["feature"]}'
     return raw_features
 
 
 def resolve_metadata(
-    notebook_cells: List[str], feature_path: str, feature_df: DataFrame, prefix: Optional[str]
+    notebook_cells: List[str], feature_path: str, feature_df: DataFrame, prefix: Optional[str] = None
 ) -> FeaturesMetadataType:
     raw_metadata = extract_raw_metadata_from_cells(notebook_cells, feature_path)
 
@@ -135,7 +136,7 @@ def resolve_metadata(
 
     raw_features = add_prefix_to_features(raw_features_init, prefix)
     global_metadata = get_global_metadata(raw_metadata, feature_path)
-    
+
     features_metadata = resolve_metadata_templates(feature_df, raw_features)
 
     for metadata in features_metadata:

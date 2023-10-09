@@ -41,7 +41,7 @@ def get_sql_dataframe(notebook_cells: List[str]) -> DataFrame:
 
 # pylint: disable=too-many-statements
 def create_dataframe_from_notebook_cells(
-    notebook: WorkspaceFileInfo, notebook_cells: List[str], prefix: Optional[str]
+    notebook: WorkspaceFileInfo, notebook_cells: List[str], prefix: Optional[str] = None
 ) -> DataFrame:
     remove_blacklisted_cells(notebook_cells)
 
