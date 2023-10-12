@@ -23,7 +23,7 @@ def create_notebooks_widget():
         ]
         feature_notebooks_all.extend(feature_notebooks)
 
-    dbutils.widgets.multiselect(const.FEATURE_WIDGET, const.ALL_FEATURES, [const.ALL_FEATURES] + feature_notebooks)
+    dbutils.widgets.multiselect(const.FEATURE_WIDGET, const.ALL_FEATURES, [const.ALL_FEATURES] + feature_notebooks_all)
 
 
 def create_dry_run_widgets():
