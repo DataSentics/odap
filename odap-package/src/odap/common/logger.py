@@ -13,8 +13,9 @@ def is_loguru_installed():
 
 
 def instantiate_simple_logger():
-    if logger:
-        return logger
+    global_logger = globals().get("logger")
+    if global_logger:
+        return global_logger
 
     _logger = logging.getLogger("odap_logger")
     _logger.setLevel(logging.INFO)
