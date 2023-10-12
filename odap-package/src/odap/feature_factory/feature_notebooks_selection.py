@@ -1,15 +1,26 @@
-from typing import List
+from typing import List, Optional
 
-from databricks_cli.workspace.api import WorkspaceFileInfo
+from databricks_cli.workspace.api import WorkspaceFileInfo, WorkspaceApi
 
 from odap.common.databricks import get_workspace_api
+from odap.common.utils import get_absolute_api_path, list_notebooks_info
 from odap.common.widgets import get_widget_value
 from odap.feature_factory import const
-from odap.feature_factory.feature_notebook import get_feature_notebooks_info
 from odap.feature_factory.exceptions import WidgetException
+from odap.feature_factory.utils import widget_prefix
 
 
-def get_list_of_selected_feature_notebooks(feature_dir: str) -> List[WorkspaceFileInfo]:
+def get_feature_notebooks_info(workspace_api: WorkspaceApi, feature_dir: str) -> List[WorkspaceFileInfo]:
+    features_path = get_absolute_api_path(feature_dir)
+
+    return list_notebooks_info(features_path, workspace_api, recurse=True)
+
+
+def remove_prefix(feature_notebook: str, prefix: Optional[str]) -> str:
+    return feature_notebook.replace(widget_prefix(prefix), "")
+
+
+def get_list_of_selected_feature_notebooks(feature_dir: str, prefix: Optional[str]) -> List[WorkspaceFileInfo]:
     feature_notebooks_str = get_widget_value(const.FEATURE_WIDGET)
     feature_notebooks = get_feature_notebooks_info(get_workspace_api(), feature_dir)
 
@@ -17,6 +28,11 @@ def get_list_of_selected_feature_notebooks(feature_dir: str) -> List[WorkspaceFi
         return feature_notebooks
 
     feature_notebooks_list = feature_notebooks_str.split(",")
+    feature_notebooks_list = [
+        remove_prefix(feature_notebook, prefix)
+        for feature_notebook in feature_notebooks_list
+        if widget_prefix(prefix) in feature_notebook
+    ]
 
     feature_notebooks = [
         feature_notebook

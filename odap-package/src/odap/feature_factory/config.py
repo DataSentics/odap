@@ -191,8 +191,26 @@ def use_no_target_optimization(config: Config) -> bool:
     return config.get("no_target_optimization") is not None
 
 
-def get_feature_dir(config: Config) -> str:
-    return config.get("feature_dir", "features")
+def get_feature_sources(config: Config) -> dict:
+    feature_sources = config.get("feature_sources")
+
+    if not feature_sources:
+        raise ConfigAttributeMissingException("feature_sources not defined in config.yaml")
+
+    return feature_sources
+
+
+def get_feature_source_dir(feature_source: Config) -> str:
+    path = feature_source.get("path")
+
+    if not path:
+        raise ConfigAttributeMissingException(f"path not defined in config.yaml for {feature_source}")
+
+    return path
+
+
+def get_feature_source_prefix(feature_source: Config) -> Optional[str]:
+    return feature_source.get("prefix")
 
 
 def get_checkpoint_dir(config: Config):

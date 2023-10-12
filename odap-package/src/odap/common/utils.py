@@ -52,7 +52,7 @@ def get_notebook_name(path: str):
 
 
 def get_absolute_api_path(*paths: str) -> str:
-    return os.path.join(get_project_root_api_path(), *paths)
+    return os.path.normpath(os.path.join(get_project_root_api_path(), *paths))
 
 
 def get_absolute_fs_path(*paths: str) -> str:

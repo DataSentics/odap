@@ -5,7 +5,8 @@ parameters:
     table: "use_cases"
     
   featurefactory:
-    feature_dir: "notebooks"
+    feature_sources:
+      - path: "notebooks"
 
     catalog: "{write_env}"
     preview_catalog: "on"
