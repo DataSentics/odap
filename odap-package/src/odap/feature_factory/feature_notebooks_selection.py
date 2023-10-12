@@ -15,6 +15,11 @@ def get_feature_notebooks_info(workspace_api: WorkspaceApi, feature_dir: str) ->
     return list_notebooks_info(features_path, workspace_api, recurse=True)
 
 
+def remove_prefix(feature_notebook: str) -> str:
+    index_start_notebook_name = feature_notebook.index("] ") + 2
+    return feature_notebook[index_start_notebook_name:]
+
+
 def get_list_of_selected_feature_notebooks(feature_dir: str) -> List[WorkspaceFileInfo]:
     feature_notebooks_str = get_widget_value(const.FEATURE_WIDGET)
     feature_notebooks = get_feature_notebooks_info(get_workspace_api(), feature_dir)
@@ -23,6 +28,7 @@ def get_list_of_selected_feature_notebooks(feature_dir: str) -> List[WorkspaceFi
         return feature_notebooks
 
     feature_notebooks_list = feature_notebooks_str.split(",")
+    feature_notebooks_list = [remove_prefix(feature_notebook) for feature_notebook in feature_notebooks_list]
 
     feature_notebooks = [
         feature_notebook
