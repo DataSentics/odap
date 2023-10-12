@@ -5,17 +5,14 @@ parameters:
     table: "use_cases"
     
   featurefactory:
-    feature_dir:
-      - path: "odapglobaltest/odap_framework_demo/notebooks"
+    feature_sources:
+      - path: "notebooks"
         prefix: "global"
       # - path: "odap/odap_framework_demo/notebooks"
       # - path: "odaplocaltest/odap_framework_demo/notebooks/notebooks2"
       #   prefix: "local"
       # - path: "odaplocaltest/odap_framework_demo/notebooks/notebooks3"
       #   prefix: "local"
-      
-        
-    # feature_dir: "notebooks"
 
     catalog: "{write_env}"
     preview_catalog: "on"

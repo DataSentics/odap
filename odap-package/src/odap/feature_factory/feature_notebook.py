@@ -1,6 +1,6 @@
 from typing import List, Dict, Optional
 from databricks_cli.workspace.api import WorkspaceFileInfo, WorkspaceApi
-from pyspark.sql import DataFrame
+from pyspark.sql import DataFrame, functions as F
 
 from odap.feature_factory import const
 
@@ -10,10 +10,15 @@ from odap.common.databricks import get_workspace_api
 from odap.common.dataframes import create_dataframe_from_notebook_cells
 from odap.common.notebook import eval_cell_with_header, get_notebook_cells
 
-from odap.common.utils import get_absolute_api_path
-from odap.common.utils import list_notebooks_info
-from odap.feature_factory.config import get_entity_primary_key, use_no_target_optimization
+from odap.feature_factory.config import (
+    get_entity_primary_key,
+    use_no_target_optimization,
+    get_feature_sources,
+    get_feature_source_dir,
+    get_feature_source_prefix,
+)
 from odap.feature_factory.dataframes.dataframe_checker import check_feature_df
+from odap.feature_factory.feature_notebooks_selection import get_list_of_selected_feature_notebooks
 from odap.feature_factory.metadata import resolve_metadata, set_fs_compatible_metadata
 from odap.feature_factory.metadata_schema import FeaturesMetadataType
 from odap.feature_factory.no_target_optimizer import replace_no_target
@@ -43,17 +48,12 @@ class FeatureNotebook:
         cells = get_feature_notebook_cells(notebook_info, workspace_api, config)
         entity_primary_key = get_entity_primary_key(config)
         df = create_dataframe_from_notebook_cells(info, cells[:])
+        df_prefixed = prefix_columns(df, entity_primary_key, prefix)
 
-        if prefix:
-            renamed_columns = [
-                f"{prefix}_{col}" if col not in [entity_primary_key, TIMESTAMP_COLUMN] else col for col in df.columns
-            ]
-            df = df.toDF(*renamed_columns)
-
-        metadata = resolve_metadata(cells, info.path, df, prefix)
+        metadata = resolve_metadata(cells, info.path, df_prefixed, prefix)
         df_check_list = get_dq_checks_list(info, cells)
 
-        return cls(info, df, metadata, config, df_check_list)
+        return cls(info, df_prefixed, metadata, config, df_check_list)
 
     def post_load_actions(self, config: Config):
         entity_primary_key = get_entity_primary_key(config)
@@ -68,10 +68,13 @@ class FeatureNotebook:
 FeatureNotebookList = List[FeatureNotebook]
 
 
-def get_feature_notebooks_info(workspace_api: WorkspaceApi, feature_dir: str) -> List[WorkspaceFileInfo]:
-    features_path = get_absolute_api_path(feature_dir)
+def prefix_columns(df: DataFrame, entity_primary_key: str, prefix: Optional[str]) -> DataFrame:
+    if not prefix:
+        return df
 
-    return list_notebooks_info(features_path, workspace_api, recurse=True)
+    primary_key = [entity_primary_key, TIMESTAMP_COLUMN]
+    renamed_columns = [F.col(col).alias(f"{prefix}_{col}") if col not in primary_key else col for col in df.columns]
+    return df.select(*renamed_columns)
 
 
 def get_feature_notebook_cells(info: WorkspaceFileInfo, workspace_api: WorkspaceApi, config: Config) -> List[str]:
@@ -111,3 +114,17 @@ def get_dq_checks_list(info, cells) -> List[str]:
     checks_list = eval_cell_with_header(cells, info.path, const.DQ_CHECKS_HEADER_REGEX, const.DQ_CHECKS)
 
     return checks_list or []
+
+
+def get_feature_notebooks_from_dirs(config: Config) -> FeatureNotebookList:
+    feature_sources = get_feature_sources(config)
+    feature_notebooks = []
+
+    for feature_source in feature_sources:
+        features_dir = get_feature_source_dir(feature_source)
+        prefix = get_feature_source_prefix(feature_source)
+        feature_notebooks.extend(
+            load_feature_notebooks(config, get_list_of_selected_feature_notebooks(features_dir), prefix)
+        )
+
+    return feature_notebooks

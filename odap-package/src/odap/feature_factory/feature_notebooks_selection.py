@@ -1,12 +1,18 @@
 from typing import List
 
-from databricks_cli.workspace.api import WorkspaceFileInfo
+from databricks_cli.workspace.api import WorkspaceFileInfo, WorkspaceApi
 
 from odap.common.databricks import get_workspace_api
+from odap.common.utils import get_absolute_api_path, list_notebooks_info
 from odap.common.widgets import get_widget_value
 from odap.feature_factory import const
-from odap.feature_factory.feature_notebook import get_feature_notebooks_info
 from odap.feature_factory.exceptions import WidgetException
+
+
+def get_feature_notebooks_info(workspace_api: WorkspaceApi, feature_dir: str) -> List[WorkspaceFileInfo]:
+    features_path = get_absolute_api_path(feature_dir)
+
+    return list_notebooks_info(features_path, workspace_api, recurse=True)
 
 
 def get_list_of_selected_feature_notebooks(feature_dir: str) -> List[WorkspaceFileInfo]:

@@ -52,16 +52,7 @@ def get_notebook_name(path: str):
 
 
 def get_absolute_api_path(*paths: str) -> str:
-    project_root_api_path = get_project_root_api_path()
-    project_root_parts = project_root_api_path.split("/")
-
-    if project_root_parts:
-        project_root_parts[-2] = paths[-1]
-        project_root_parts_final = project_root_parts[:-1]
-
-        return "/".join(project_root_parts_final)
-
-    return project_root_api_path
+    return os.path.normpath(os.path.join(get_project_root_api_path(), *paths))
 
 
 def get_absolute_fs_path(*paths: str) -> str:

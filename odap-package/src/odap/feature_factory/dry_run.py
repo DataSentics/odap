@@ -4,10 +4,11 @@ from odap.common.config import ConfigNamespace, get_config_namespace
 from odap.common.logger import logger
 from odap.common.widgets import get_widget_value
 from odap.feature_factory import const
-from odap.feature_factory.config import get_entity_primary_key, get_feature_dir
+from odap.feature_factory.config import (
+    get_entity_primary_key,
+)
 from odap.feature_factory.dataframes.dataframe_creator import create_features_df, create_metadata_df
-from odap.feature_factory.feature_notebook import load_feature_notebooks
-from odap.feature_factory.feature_notebooks_selection import get_list_of_selected_feature_notebooks
+from odap.feature_factory.feature_notebook import get_feature_notebooks_from_dirs
 
 
 def dry_run():
@@ -22,21 +23,6 @@ def dry_run():
     logger.info("Success. No errors found!")
 
     display_dataframes(features_df, metadata_df)
-
-
-def get_feature_notebooks_from_dirs(config):
-    feature_dirs_init = get_feature_dir(config)
-    feature_notebooks = []
-
-    for feature_dir in feature_dirs_init:
-
-        features_path = feature_dir.get("path", "")
-        prefix = feature_dir.get("prefix", "")
-        feature_notebooks.append(
-            load_feature_notebooks(config, get_list_of_selected_feature_notebooks(features_path), prefix)
-        )
-
-    return feature_notebooks
 
 
 def display_dataframes(features_df: DataFrame, metadata_df: DataFrame):
