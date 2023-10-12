@@ -76,6 +76,13 @@ jobs:
         with:
           miniforge-version: 4.10.3-6
 
+      - name: Install and configure Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: 1.5.1
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
       - name: Cache Venv
         id: cache-venv
         uses: actions/cache@v2
