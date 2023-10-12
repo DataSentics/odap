@@ -124,7 +124,7 @@ def get_feature_notebooks_from_dirs(config: Config) -> FeatureNotebookList:
         features_dir = get_feature_source_dir(feature_source)
         prefix = get_feature_source_prefix(feature_source)
         feature_notebooks.extend(
-            load_feature_notebooks(config, get_list_of_selected_feature_notebooks(features_dir), prefix)
+            load_feature_notebooks(config, get_list_of_selected_feature_notebooks(features_dir, prefix), prefix)
         )
 
     return feature_notebooks

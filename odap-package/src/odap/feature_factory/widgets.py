@@ -4,6 +4,7 @@ from odap.common.utils import get_notebook_name
 from odap.feature_factory import const
 from odap.feature_factory.config import get_feature_sources, get_feature_source_dir, get_feature_source_prefix
 from odap.feature_factory.feature_notebooks_selection import get_feature_notebooks_info
+from odap.feature_factory.utils import widget_prefix
 
 
 def create_notebooks_widget():
@@ -18,7 +19,7 @@ def create_notebooks_widget():
         prefix = get_feature_source_prefix(feature_source)
 
         feature_notebooks = [
-            f"[{prefix}] {get_notebook_name(notebook_info.path)}"
+            f"{widget_prefix(prefix)}{get_notebook_name(notebook_info.path)}"
             for notebook_info in get_feature_notebooks_info(get_workspace_api(), features_dir)
         ]
         feature_notebooks_all.extend(feature_notebooks)
