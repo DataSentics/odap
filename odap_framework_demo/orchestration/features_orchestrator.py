@@ -1,9 +1,19 @@
 # Databricks notebook source
+# MAGIC %md
+# MAGIC # Feature Orchestration
+
+# COMMAND ----------
+
 # MAGIC %run ../init/odap
 
 # COMMAND ----------
 
 from odap.feature_factory.widgets import create_notebooks_widget
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ### Widgets
 
 # COMMAND ----------
 
@@ -14,7 +24,17 @@ from odap.feature_factory.widgets import create_notebooks_widget
 
 # COMMAND ----------
 
+# MAGIC %md
+# MAGIC ### Notebook selector
+
+# COMMAND ----------
+
 create_notebooks_widget()
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ### Initialize target store
 
 # COMMAND ----------
 
@@ -22,13 +42,28 @@ create_notebooks_widget()
 
 # COMMAND ----------
 
+# MAGIC %md
+# MAGIC ### Initialize SQL window functions
+
+# COMMAND ----------
+
 # MAGIC %run ../init/window_functions
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ### Orchestrate
 
 # COMMAND ----------
 
 from odap.feature_factory.orchestrate import orchestrate
 
 orchestrate()
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ### Calculate latest features cache
 
 # COMMAND ----------
 
