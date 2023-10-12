@@ -28,11 +28,11 @@ def get_list_of_selected_feature_notebooks(feature_dir: str, prefix: Optional[st
         return feature_notebooks
 
     feature_notebooks_list = feature_notebooks_str.split(",")
-    feature_notebooks_list = (
-        [remove_prefix(feature_notebook, prefix) for feature_notebook in feature_notebooks_list]
-        if prefix
-        else feature_notebooks_list
-    )
+    feature_notebooks_list = [
+        remove_prefix(feature_notebook, prefix)
+        for feature_notebook in feature_notebooks_list
+        if widget_prefix(prefix) in feature_notebook
+    ]
 
     feature_notebooks = [
         feature_notebook
