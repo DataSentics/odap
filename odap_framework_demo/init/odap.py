@@ -3,6 +3,10 @@
 
 # COMMAND ----------
 
+# MAGIC %pip install "loguru==0.7.*"
+
+# COMMAND ----------
+
 import os
 import sys
 
