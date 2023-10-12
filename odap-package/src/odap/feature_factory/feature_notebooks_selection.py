@@ -16,7 +16,7 @@ def get_feature_notebooks_info(workspace_api: WorkspaceApi, feature_dir: str) ->
     return list_notebooks_info(features_path, workspace_api, recurse=True)
 
 
-def remove_prefix(feature_notebook: str, prefix: str) -> str:
+def remove_prefix(feature_notebook: str, prefix: Optional[str]) -> str:
     return feature_notebook.replace(widget_prefix(prefix), "")
 
 
