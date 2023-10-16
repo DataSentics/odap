@@ -56,6 +56,9 @@ environments:
             job_cluster_key: "default"
             notebook_task:
               notebook_path: "odap_framework_demo/orchestration/dry_run"
+              base_parameters:
+                target: "no target"
+                timestamp: "2020-12-12"
             depends_on:
               - task_key: "init"
           - &use-case-table
