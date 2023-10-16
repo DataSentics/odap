@@ -4,6 +4,9 @@ build:
 clusters:
   test-cluster-props: &test-cluster-props
     spark_version: "12.2.x-cpu-ml-scala2.12"
+    spark_conf:
+      spark.master: "local[*, 4]"
+      spark.databricks.cluster.profile": "singleNode"
     spark_env_vars:
       WRITE_ENV: "test"
       READ_ENV: "test"
@@ -17,8 +20,9 @@ clusters:
   test-cluster: &test-cluster
     new_cluster:
       <<: *test-cluster-props
-      num_workers: 1
+      num_workers: 0
       instance_pool_id: "0712-081441-voile3-pool-dt4ut8z6"
+      driver_instance_pool_id: "0712-081441-voile3-pool-dt4ut8z6"
 
   prod-cluster: &prod-cluster
     new_cluster:
@@ -88,7 +92,7 @@ environments:
               base_parameters:
                 export: "upsell_uc: upsell_uc_loan_interest"
             depends_on:
-              - task_key: "odap-features"
+              - task_key: "upsell-uc-investment-interest-export"
 
       - name: "odap-integration-test"
         git_source:
