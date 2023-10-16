@@ -67,7 +67,7 @@ environments:
             notebook_task:
               notebook_path: "odap_framework_demo/orchestration/generate_use_case_table"
             depends_on:
-              - task_key: "init"
+              - task_key: "dry_run"
           - &features
             task_key: "odap-features"
             job_cluster_key: "default"
@@ -77,7 +77,7 @@ environments:
                 target: "no target"
                 timestamp: "2020-12-12"
             depends_on:
-              - task_key: "init"
+              - task_key: "dry_run"
           - &uc-investment-export
             task_key: "upsell-uc-investment-interest-export"
             job_cluster_key: "default"
