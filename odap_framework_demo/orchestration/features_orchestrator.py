@@ -8,7 +8,11 @@
 
 # COMMAND ----------
 
-from odap.feature_factory.widgets import create_notebooks_widget
+from odap.feature_factory.imports import (
+    create_notebooks_widget,
+    orchestrate,
+    calculate_latest_table,
+)
 
 # COMMAND ----------
 
@@ -56,8 +60,6 @@ create_notebooks_widget()
 
 # COMMAND ----------
 
-from odap.feature_factory.orchestrate import orchestrate
-
 orchestrate()
 
 # COMMAND ----------
@@ -66,7 +68,5 @@ orchestrate()
 # MAGIC ### Calculate latest features cache
 
 # COMMAND ----------
-
-from odap.feature_factory.orchestrate import calculate_latest_table
 
 calculate_latest_table()

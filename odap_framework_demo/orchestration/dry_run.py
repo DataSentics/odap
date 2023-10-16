@@ -3,8 +3,7 @@
 
 # COMMAND ----------
 
-from odap.feature_factory.dry_run import dry_run
-from odap.feature_factory.widgets import create_dry_run_widgets
+from odap.feature_factory.imports import dry_run, create_dry_run_widgets
 
 # COMMAND ----------
 

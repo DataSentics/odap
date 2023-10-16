@@ -1,6 +1,6 @@
 from typing import Dict, Iterable
 
-from pyspark.sql import SparkSession, functions as f
+from pyspark.sql import SparkSession, functions as f, DataFrame
 from delta import DeltaTable
 
 from odap.common.config import TIMESTAMP_COLUMN, Config
@@ -47,12 +47,21 @@ def write_metadata_df(feature_notebooks: FeatureNotebookList, config: Config):
     )
 
 
-def write_features_df(notebook_table_mapping: Dict[str, FeatureNotebookList], config: Config):
+def get_table_df_mapping(
+    notebook_table_mapping: Dict[str, FeatureNotebookList], config: Config
+) -> Dict[str, DataFrame]:
     entity_primary_key = get_entity_primary_key(config)
 
-    for table_name, feature_notebooks_subset in notebook_table_mapping.items():
-        df = create_features_df(feature_notebooks_subset, entity_primary_key)
+    return {
+        table_name: create_features_df(feature_notebooks_subset, entity_primary_key)
+        for table_name, feature_notebooks_subset in notebook_table_mapping.items()
+    }
 
+
+def write_features_df(table_df_mapping: Dict[str, DataFrame], config: Config):
+    entity_primary_key = get_entity_primary_key(config)
+
+    for table_name, df in table_df_mapping.items():
         write_df_to_feature_store(
             df,
             table_name=get_features_table(table_name, config),

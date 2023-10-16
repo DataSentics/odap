@@ -4,9 +4,14 @@
 
 # COMMAND ----------
 
-import os
+# MAGIC %run ../init/odap
 
+# COMMAND ----------
+
+import os
 from pyspark.sql import functions as f
+
+from odap.feature_factory.imports import get_param
 
 # COMMAND ----------
 
@@ -34,8 +39,12 @@ dbutils.widgets.text("target", "no target")
 
 # COMMAND ----------
 
-time_windows = [14, 30, 90]
-products = ["investice", "pujcky", "hypoteky"]
+params = get_param("web_features")
+
+# COMMAND ----------
+
+time_windows = params["time_windows"]  # [14, 30, 90]
+products = params["products"]  # ["investice", "pujcky", "hypoteky"]
 
 # COMMAND ----------
 

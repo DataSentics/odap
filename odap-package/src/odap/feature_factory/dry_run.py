@@ -1,24 +1,21 @@
 from pyspark.sql import DataFrame
 
-from odap.common.config import ConfigNamespace, get_config_namespace
 from odap.common.logger import logger
 from odap.common.widgets import get_widget_value
 from odap.feature_factory import const
 from odap.feature_factory.config import (
     get_entity_primary_key,
 )
+from odap.feature_factory.context import Context
 from odap.feature_factory.dataframes.dataframe_creator import create_features_df, create_metadata_df
-from odap.feature_factory.feature_notebook import get_feature_notebooks_from_dirs
 
 
 def dry_run():
-    config = get_config_namespace(ConfigNamespace.FEATURE_FACTORY)
-    feature_notebooks = get_feature_notebooks_from_dirs(config)
+    context = Context()
+    entity_primary_key = get_entity_primary_key(context.config)
 
-    entity_primary_key = get_entity_primary_key(config)
-
-    features_df = create_features_df(feature_notebooks, entity_primary_key)
-    metadata_df = create_metadata_df(feature_notebooks)
+    features_df = create_features_df(context.feature_notebooks, entity_primary_key)
+    metadata_df = create_metadata_df(context.feature_notebooks)
 
     logger.info("Success. No errors found!")
 
