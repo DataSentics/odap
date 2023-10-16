@@ -31,5 +31,5 @@ jobs:
 
       - name: Run integration tests
         run: |
-          dbx deploy integration-test --deployment-file deployment.yaml
-          dbx launch integration-test --trace --existing-runs wait
+          dbx deploy odap-integration-test --deployment-file deployment.yaml
+          dbx launch odap-integration-test --trace --existing-runs wait
