@@ -117,6 +117,7 @@ df_final = df.groupBy(["customer_id", "timestamp"]).agg(
 # MAGIC metadata = {
 # MAGIC     "category": "web_visits",
 # MAGIC     "table": "product_features",
+# MAGIC     "owner": "lukas.langr@datasentics.com",
 # MAGIC     "features": {
 # MAGIC         "{product}_web_visits_count_in_last_{time_window}": {
 # MAGIC             "description": "Number of {product} web visits in last {time_window}",

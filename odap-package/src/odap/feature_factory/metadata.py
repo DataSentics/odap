@@ -89,7 +89,6 @@ def set_fs_compatible_metadata(features_metadata: FeaturesMetadataType, config: 
         metadata.update(get_feature_dates(existing_metadata_df, metadata[const.FEATURE], start_date, last_compute_date))
         metadata.update(
             {
-                const.OWNER: "unknown",
                 const.FREQUENCY: "daily",
                 const.BACKEND: "delta_table",
             }
@@ -126,6 +125,7 @@ def prefix_metadata(raw_features: List[Dict[str, Any]], prefix: Optional[str]) -
 
     for feature in raw_features:
         feature["feature"] = f'{prefix}_{feature["feature"]}'
+        feature["prefix"] = prefix
     return raw_features
 
 
