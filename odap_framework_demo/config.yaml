@@ -22,6 +22,14 @@ parameters:
     checkpoint_dir: "dbfs:/odap-demo/checkpoints"
     checkpoint_interval: 5
 
+    # Feature config
+    web_features:
+      time_windows: [14, 30, 90]
+      products:
+        - "investice"
+        - "pujcky"
+        - "hypoteky"
+
     entities:
       customer:
         id_column: "customer_id"

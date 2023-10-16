@@ -11,7 +11,7 @@ jobs:
       run:
         working-directory: odap-package
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.ref }}
 
@@ -67,7 +67,7 @@ jobs:
       run:
         working-directory: odap-package
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.ref }}
 

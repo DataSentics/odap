@@ -18,7 +18,7 @@ jobs:
         working-directory: odap_framework_demo
 
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
 
       - name: Set up Python 3.9
         uses: actions/setup-python@v4
@@ -31,4 +31,4 @@ jobs:
 
       - name: Deploy production pipeline
         run: |
-          dbx deploy prod-pipeline --deployment-file deployment.yaml
+          dbx deploy odap-integration-test --deployment-file deployment.yaml

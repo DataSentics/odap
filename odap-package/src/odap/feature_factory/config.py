@@ -2,10 +2,23 @@ import os
 from typing import Optional
 
 from odap.common.databricks import resolve_branch
-from odap.common.config import Config
+from odap.common.config import Config, get_config_namespace, ConfigNamespace
 
 from odap.common.exceptions import ConfigAttributeMissingException
 from odap.common.utils import concat_catalog_db_table
+
+
+def get_feature_factory_config() -> Config:
+    return get_config_namespace(ConfigNamespace.FEATURE_FACTORY)
+
+
+def get_param(key: str):
+    config = get_feature_factory_config()
+    param = config.get(key)
+
+    if not param:
+        raise ConfigAttributeMissingException(f"'{key}' not defined in config.yaml")
+    return param
 
 
 def get_entities(config: Config) -> Config:
