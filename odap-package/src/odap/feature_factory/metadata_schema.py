@@ -63,6 +63,7 @@ def get_metadata_columns() -> List[t.StructField]:
         t.StructField(const.NOTEBOOK_RELATIVE_PATH, t.StringType(), True),
         t.StructField(const.TABLE, t.StringType(), True),
         t.StructField(const.BACKEND, t.StringType(), True),
+        t.StructField(const.PREFIX, t.StringType(), True),
     ]
 
 

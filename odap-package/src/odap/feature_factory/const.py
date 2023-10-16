@@ -41,6 +41,7 @@ NOTEBOOK_ABSOLUTE_PATH = "notebook_absolute_path"
 NOTEBOOK_RELATIVE_PATH = "notebook_relative_path"
 TABLE = "table"
 BACKEND = "backend"
+PREFIX = "prefix"
 
 # Other
 
