@@ -29,7 +29,7 @@ def resolve_dev_database_name(database: str):
     return database
 
 
-class Config:  # pylint: disable=(too-many-public-methods)
+class Config:
     def __init__(self, config: ConfigType):
         self.__config = config
 
