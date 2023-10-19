@@ -9,7 +9,7 @@ from odap.common.config import TIMESTAMP_COLUMN
 
 from odap.feature_factory import const
 from odap.feature_factory.config import (
-    get_metadata_table,
+    Config,
 )
 from odap.feature_factory.dq_checks import execute_soda_checks_from_feature_notebooks
 from odap.feature_factory.feature_notebook import FeatureNotebookList
@@ -36,9 +36,9 @@ def join_dataframes(dataframes: List[DataFrame], join_columns: List[str]) -> Dat
     return joined_df
 
 
-def get_all_feature_tables(config: Dict) -> Iterable[str]:
+def get_all_feature_tables(config: Config) -> Iterable[str]:
     spark = SparkSession.getActiveSession()
-    metadata_table = get_metadata_table(config)
+    metadata_table = config.get_metadata_table()
     return {row.table for row in spark.table(metadata_table).select(const.TABLE).collect()}
 
 

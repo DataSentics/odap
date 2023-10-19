@@ -2,14 +2,11 @@ from typing import List, Optional
 from pyspark.sql import SparkSession, DataFrame, functions as f
 from databricks.feature_store import FeatureStoreClient, FeatureLookup
 
-from odap.common.config import ConfigNamespace, get_config_namespace
 from odap.common.logger import logger
 from odap.common.tables import hive_table_exists
 from odap.common.dataframes import get_values_missing_from_df_column
 from odap.feature_factory.config import (
-    get_features_table,
-    get_entity_primary_key_by_name,
-    get_metadata_table_for_entity,
+    Config
 )
 
 
@@ -89,10 +86,10 @@ def generate_feature_lookups(
     categories = categories if categories is not None else []
     lookup_all_features = not features and not categories
 
-    config = get_config_namespace(ConfigNamespace.FEATURE_FACTORY)
+    config = Config.load_feature_factory_config()
 
-    entity_primary_key = get_entity_primary_key_by_name(entity_name, config)
-    metadata_table = get_metadata_table_for_entity(entity_name, config)
+    entity_primary_key = config.get_entity_primary_key_by_name(entity_name)
+    metadata_table = config.get_metadata_table_for_entity(entity_name)
 
     metadata = SparkSession.getActiveSession().read.table(metadata_table)
 
@@ -106,7 +103,7 @@ def generate_feature_lookups(
 
     return [
         FeatureLookup(
-            table_name=get_features_table(row.table, config),
+            table_name=config.get_features_table(row.table),
             feature_names=row.features,
             lookup_key=entity_primary_key,
             timestamp_lookup_key="timestamp",

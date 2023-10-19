@@ -2,13 +2,13 @@ import os
 from typing import Optional
 
 from odap.common.databricks import resolve_branch
-from odap.common.config import Config, get_config_namespace, ConfigNamespace
+from odap.common.config import get_config_namespace, ConfigNamespace
 
 from odap.common.exceptions import ConfigAttributeMissingException
 from odap.common.utils import concat_catalog_db_table
 
 
-def get_feature_factory_config() -> Config:
+def get_feature_factory_config():
     return get_config_namespace(ConfigNamespace.FEATURE_FACTORY)
 
 
@@ -21,63 +21,6 @@ def get_param(key: str):
     return param
 
 
-def get_entities(config: Config) -> Config:
-    entities = config.get("entities")
-
-    if not entities:
-        raise ConfigAttributeMissingException("entities not defined in config.yaml")
-    return entities
-
-
-def get_entity_by_name(entity_name: str, config: Config):
-    entity = get_entities(config).get(entity_name)
-
-    if not entity:
-        raise ConfigAttributeMissingException(f"entity '{entity_name}' not defined in config.yaml")
-    return entity
-
-
-def get_entity(config: Config) -> str:
-    entities = get_entities(config)
-
-    return next(iter(entities))
-
-
-def get_entity_primary_key(config: Config) -> str:
-    entities = config.get("entities")
-
-    if not entities:
-        raise ConfigAttributeMissingException("entities not defined in config.yaml")
-
-    primary_entity = next(iter(entities))
-
-    return entities[primary_entity]["id_column"].lower()
-
-
-def get_entity_primary_key_by_name(entity_name: str, config: Config) -> str:
-    entity = get_entity_by_name(entity_name, config)
-
-    return entity["id_column"].lower()
-
-
-def get_features(config: Config):
-    features = config.get("features")
-
-    if not features:
-        raise ConfigAttributeMissingException("features not defined in config.yaml")
-
-    return features
-
-
-def get_metadata(config: Config):
-    metadata = config.get("metadata")
-
-    if not metadata:
-        raise ConfigAttributeMissingException("metadata not defined in config.yaml")
-
-    return metadata
-
-
 def resolve_dev_database_name(database: str):
     if os.environ.get("BRANCH_PREFIX") == "on":
         branch = resolve_branch()
@@ -86,134 +29,174 @@ def resolve_dev_database_name(database: str):
     return database
 
 
-def get_database_for_entity(entity_name: str, config: Config) -> str:
-    features_database = config.get("database")
+class Config:  # pylint: disable=(too-many-public-methods)
+    def __init__(self, config):
+        self.__config = config
 
-    if not features_database:
-        raise ConfigAttributeMissingException("features.database not defined in config.yaml")
+    @classmethod
+    def load_feature_factory_config(cls):
+        return cls(get_feature_factory_config())
 
-    database = features_database.format(entity=entity_name)
+    def get_entities(self):
+        entities = self.__config.get("entities")
 
-    return resolve_dev_database_name(database)
+        if not entities:
+            raise ConfigAttributeMissingException("entities not defined in config.yaml")
+        return entities
+
+    def get_entity_by_name(self, entity_name: str):
+        entity = self.get_entities().get(entity_name)
+
+        if not entity:
+            raise ConfigAttributeMissingException(f"entity '{entity_name}' not defined in config.yaml")
+        return entity
+
+    def get_entity(self) -> str:
+        entities = self.get_entities()
+
+        return next(iter(entities))
+
+    def get_entity_primary_key(self) -> str:
+        entities = self.__config.get("entities")
+
+        if not entities:
+            raise ConfigAttributeMissingException("entities not defined in config.yaml")
+
+        primary_entity = next(iter(entities))
+
+        return entities[primary_entity]["id_column"].lower()
+
+    def get_entity_primary_key_by_name(self, entity_name: str) -> str:
+        entity = self.get_entity_by_name(entity_name)
+
+        return entity["id_column"].lower()
+
+    def get_features(self):
+        features = self.__config.get("features")
+
+        if not features:
+            raise ConfigAttributeMissingException("features not defined in config.yaml")
+
+        return features
+
+    def get_metadata(self):
+        metadata = self.__config.get("metadata")
+
+        if not metadata:
+            raise ConfigAttributeMissingException("metadata not defined in config.yaml")
+
+        return metadata
+
+    def get_database_for_entity(self, entity_name: str) -> str:
+        features_database = self.__config.get("database")
+
+        if not features_database:
+            raise ConfigAttributeMissingException("features.database not defined in config.yaml")
+
+        database = features_database.format(entity=entity_name)
+
+        return resolve_dev_database_name(database)
+
+    def get_catalog(self) -> str:
+        catalog = self.__config.get("catalog")
+
+        if not catalog:
+            raise ConfigAttributeMissingException("features.catalog not defined in config.yaml")
+
+        return catalog
+
+    def get_database(self) -> str:
+        entity_name = self.get_entity()
+
+        return self.get_database_for_entity(entity_name)
+
+    def preview_catalog_enabled(self) -> bool:
+        return self.__config.get("preview_catalog") is not None
+
+    def get_features_table(self, table_name: str) -> str:
+        database = self.get_database()
+
+        catalog = self.get_catalog() if self.preview_catalog_enabled() else "hive_metastore"
+        return concat_catalog_db_table(catalog, database, table_name)
+
+    def get_features_table_dir_path(self) -> Optional[str]:
+        features_table_path = self.get_features().get("dir_path")
+
+        return features_table_path.format(entity=self.get_entity()) if features_table_path else None
+
+    def get_features_table_path(self, table_name: str) -> Optional[str]:
+        dir_path = self.get_features_table_dir_path()
+        return f"{dir_path}/{table_name}" if dir_path else None
+
+    def get_latest_features_table_for_entity(self, entity_name: str) -> str:
+        table_name = self.get_features().get("latest_table")
+
+        if not table_name:
+            raise ConfigAttributeMissingException("features.latest_table not defined in config.yaml")
+
+        table_name = table_name.format(entity=entity_name)
+        catalog = self.get_catalog()
+        database = self.get_database_for_entity(entity_name)
+        return concat_catalog_db_table(catalog, database, table_name)
+
+    def get_latest_features_table(self) -> str:
+        entity_name = self.get_entity()
+
+        return self.get_latest_features_table_for_entity(entity_name)
+
+    def get_latest_features_table_path(self) -> Optional[str]:
+        return self.get_features_table_path("latest")
+
+    def get_metadata_table_for_entity(self, entity_name: str) -> str:
+        metadata_table = self.get_metadata().get("table")
+
+        if not metadata_table:
+            raise ConfigAttributeMissingException("metadata.table not defined in config.yaml")
+
+        metadata_table = metadata_table.format(entity=entity_name)
+        catalog = self.get_catalog()
+        database = self.get_database_for_entity(entity_name)
+        return concat_catalog_db_table(catalog, database, metadata_table)
+
+    def get_metadata_table(self) -> str:
+        entity_name = self.get_entity()
+
+        return self.get_metadata_table_for_entity(entity_name)
+
+    def get_metadata_table_path(self) -> Optional[str]:
+        metadata_table_path = self.get_metadata().get("path")
+
+        return metadata_table_path.format(entity=self.get_entity()) if metadata_table_path else None
+
+    def use_no_target_optimization(self) -> bool:
+        return self.__config.get("no_target_optimization") is not None
+
+    def get_feature_sources(self) -> dict:
+        feature_sources = self.__config.get("feature_sources")
+
+        if not feature_sources:
+            raise ConfigAttributeMissingException("feature_sources not defined in config.yaml")
+
+        return feature_sources
+
+    def get_checkpoint_dir(self):
+        checkpoint_dir = self.__config.get("checkpoint_dir")
+
+        if not checkpoint_dir:
+            raise ConfigAttributeMissingException("checkpoint_dir not defined in config.yaml")
+
+        return checkpoint_dir
+
+    def get_checkpoint_interval(self):
+        checkpoint_interval = self.__config.get("checkpoint_interval")
+
+        if not checkpoint_interval:
+            raise ConfigAttributeMissingException("checkpoint_interval not defined in config.yaml")
+
+        return checkpoint_interval
 
 
-def get_catalog(config: Config) -> str:
-    catalog = config.get("catalog")
-
-    if not catalog:
-        raise ConfigAttributeMissingException("features.catalog not defined in config.yaml")
-
-    return catalog
-
-
-def get_database(config: Config) -> str:
-    entity_name = get_entity(config)
-
-    return get_database_for_entity(entity_name, config)
-
-
-def preview_catalog_enabled(config: Config) -> bool:
-    return config.get("preview_catalog") is not None
-
-
-def get_features_table(table_name: str, config: Config) -> str:
-    database = get_database(config)
-
-    catalog = get_catalog(config) if preview_catalog_enabled(config) else "hive_metastore"
-    return concat_catalog_db_table(catalog, database, table_name)
-
-
-def get_features_table_path(table_name: str, config: Config) -> Optional[str]:
-    dir_path = get_features_table_dir_path(config)
-    return f"{dir_path}/{table_name}" if dir_path else None
-
-
-def get_latest_features_table_for_entity(entity_name: str, config: Config) -> str:
-    table_name = get_features(config).get("latest_table")
-
-    if not table_name:
-        raise ConfigAttributeMissingException("features.latest_table not defined in config.yaml")
-
-    table_name = table_name.format(entity=entity_name)
-    catalog = get_catalog(config)
-    database = get_database_for_entity(entity_name, config)
-    return concat_catalog_db_table(catalog, database, table_name)
-
-
-def get_latest_features_table(config: Config) -> str:
-    entity_name = get_entity(config)
-
-    return get_latest_features_table_for_entity(entity_name, config)
-
-
-def get_features_table_dir_path(config: Config) -> Optional[str]:
-    features_table_path = get_features(config).get("dir_path")
-
-    return features_table_path.format(entity=get_entity(config)) if features_table_path else None
-
-
-def get_latest_features_table_path(config: Config) -> Optional[str]:
-    return get_features_table_path("latest", config)
-
-
-def get_metadata_table_for_entity(entity_name: str, config: Config) -> str:
-    metadata_table = get_metadata(config).get("table")
-
-    if not metadata_table:
-        raise ConfigAttributeMissingException("metadata.table not defined in config.yaml")
-
-    metadata_table = metadata_table.format(entity=entity_name)
-    catalog = get_catalog(config)
-    database = get_database_for_entity(entity_name, config)
-    return concat_catalog_db_table(catalog, database, metadata_table)
-
-
-def get_metadata_table(config: Config) -> str:
-    entity_name = get_entity(config)
-
-    return get_metadata_table_for_entity(entity_name, config)
-
-
-def get_metadata_table_path(config: Config) -> Optional[str]:
-    metadata_table_path = get_metadata(config).get("path")
-
-    return metadata_table_path.format(entity=get_entity(config)) if metadata_table_path else None
-
-
-def get_ids(config: Config):
-    features = config.get("ids")
-
-    if not features:
-        raise ConfigAttributeMissingException("ids not defined in config.yaml")
-
-    return features
-
-
-def get_ids_table(config: Config) -> str:
-    ids_table = get_ids(config).get("table")
-
-    if not ids_table:
-        raise ConfigAttributeMissingException("ids.table not defined in config.yaml")
-
-    entity_name = get_entity(config)
-
-    return ids_table.format(entity=entity_name)
-
-
-def use_no_target_optimization(config: Config) -> bool:
-    return config.get("no_target_optimization") is not None
-
-
-def get_feature_sources(config: Config) -> dict:
-    feature_sources = config.get("feature_sources")
-
-    if not feature_sources:
-        raise ConfigAttributeMissingException("feature_sources not defined in config.yaml")
-
-    return feature_sources
-
-
-def get_feature_source_dir(feature_source: Config) -> str:
+def get_feature_source_dir(feature_source) -> str:
     path = feature_source.get("path")
 
     if not path:
@@ -222,23 +205,5 @@ def get_feature_source_dir(feature_source: Config) -> str:
     return path
 
 
-def get_feature_source_prefix(feature_source: Config) -> Optional[str]:
+def get_feature_source_prefix(feature_source) -> Optional[str]:
     return feature_source.get("prefix")
-
-
-def get_checkpoint_dir(config: Config):
-    checkpoint_dir = config.get("checkpoint_dir")
-
-    if not checkpoint_dir:
-        raise ConfigAttributeMissingException("checkpoint_dir not defined in config.yaml")
-
-    return checkpoint_dir
-
-
-def get_checkpoint_interval(config: Config):
-    checkpoint_interval = config.get("checkpoint_interval")
-
-    if not checkpoint_interval:
-        raise ConfigAttributeMissingException("checkpoint_interval not defined in config.yaml")
-
-    return checkpoint_interval

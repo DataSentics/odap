@@ -5,15 +5,13 @@ from pyspark.sql import DataFrame, functions as F
 from odap.feature_factory import const
 
 from odap.common.logger import logger
-from odap.common.config import Config, TIMESTAMP_COLUMN
+from odap.common.config import TIMESTAMP_COLUMN
 from odap.common.databricks import get_workspace_api
 from odap.common.dataframes import create_dataframe_from_notebook_cells
 from odap.common.notebook import eval_cell_with_header, get_notebook_cells
 
 from odap.feature_factory.config import (
-    get_entity_primary_key,
-    use_no_target_optimization,
-    get_feature_sources,
+    Config,
     get_feature_source_dir,
     get_feature_source_prefix,
 )
@@ -46,17 +44,17 @@ class FeatureNotebook:
     ):
         info = notebook_info
         cells = get_feature_notebook_cells(notebook_info, workspace_api, config)
-        entity_primary_key = get_entity_primary_key(config)
+        entity_primary_key = config.get_entity_primary_key()
         df = create_dataframe_from_notebook_cells(info, cells[:])
         df_prefixed = prefix_columns(df, entity_primary_key, prefix)
 
-        metadata = resolve_metadata(cells, info.path, df_prefixed, prefix)
+        metadata = resolve_metadata(cells, info.path, df_prefixed, config.get_entity_primary_key(), prefix)
         df_check_list = get_dq_checks_list(info, cells)
 
         return cls(info, df_prefixed, metadata, config, df_check_list)
 
     def post_load_actions(self, config: Config):
-        entity_primary_key = get_entity_primary_key(config)
+        entity_primary_key = config.get_entity_primary_key()
 
         set_fs_compatible_metadata(self.metadata, config)
 
@@ -79,7 +77,7 @@ def prefix_columns(df: DataFrame, entity_primary_key: str, prefix: Optional[str]
 
 def get_feature_notebook_cells(info: WorkspaceFileInfo, workspace_api: WorkspaceApi, config: Config) -> List[str]:
     notebook_cells = get_notebook_cells(info, workspace_api)
-    if use_no_target_optimization(config):
+    if config.use_no_target_optimization():
         replace_no_target(info.language, notebook_cells)
     return notebook_cells
 
@@ -117,7 +115,7 @@ def get_dq_checks_list(info, cells) -> List[str]:
 
 
 def get_feature_notebooks_from_dirs(config: Config) -> FeatureNotebookList:
-    feature_sources = get_feature_sources(config)
+    feature_sources = config.get_feature_sources()
     feature_notebooks = []
 
     for feature_source in feature_sources:

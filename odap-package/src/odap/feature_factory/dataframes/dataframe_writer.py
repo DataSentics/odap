@@ -3,20 +3,10 @@ from typing import Dict, Iterable
 from pyspark.sql import SparkSession, functions as f, DataFrame
 from delta import DeltaTable
 
-from odap.common.config import TIMESTAMP_COLUMN, Config
+from odap.common.config import TIMESTAMP_COLUMN
 from odap.common.databricks import spark
 from odap.common.tables import create_table_if_not_exists, create_schema_if_not_exists
-from odap.feature_factory.config import (
-    get_entity_primary_key,
-    get_features_table,
-    get_features_table_path,
-    get_latest_features_table,
-    get_latest_features_table_path,
-    get_metadata_table,
-    get_metadata_table_path,
-    get_checkpoint_dir,
-    get_checkpoint_interval,
-)
+from odap.feature_factory.config import Config
 from odap.feature_factory.dataframes.dataframe_creator import (
     create_metadata_df,
     create_features_df,
@@ -29,9 +19,9 @@ from odap.feature_factory.feature_notebook import FeatureNotebookList
 
 def write_metadata_df(feature_notebooks: FeatureNotebookList, config: Config):
     create_schema_if_not_exists(config)
-    create_table_if_not_exists(get_metadata_table(config), get_metadata_table_path(config), get_metadata_schema())
+    create_table_if_not_exists(config.get_metadata_table(), config.get_metadata_table_path(), get_metadata_schema())
     metadata_df = create_metadata_df(feature_notebooks)
-    delta_table = DeltaTable.forName(SparkSession.getActiveSession(), get_metadata_table(config))
+    delta_table = DeltaTable.forName(SparkSession.getActiveSession(), config.get_metadata_table())
     metadata_pk_columns = get_metadata_pk_columns()
 
     update_set = {col.name: f"source.{col.name}" for col in get_metadata_columns()}
@@ -50,7 +40,7 @@ def write_metadata_df(feature_notebooks: FeatureNotebookList, config: Config):
 def get_table_df_mapping(
     notebook_table_mapping: Dict[str, FeatureNotebookList], config: Config
 ) -> Dict[str, DataFrame]:
-    entity_primary_key = get_entity_primary_key(config)
+    entity_primary_key = config.get_entity_primary_key()
 
     return {
         table_name: create_features_df(feature_notebooks_subset, entity_primary_key)
@@ -60,22 +50,22 @@ def get_table_df_mapping(
 
 def write_features_df(table_df_mapping: Dict[str, DataFrame], config: Config):
     create_schema_if_not_exists(config)
-    entity_primary_key = get_entity_primary_key(config)
+    entity_primary_key = config.get_entity_primary_key()
 
     for table_name, df in table_df_mapping.items():
         write_df_to_feature_store(
             df,
-            table_name=get_features_table(table_name, config),
-            table_path=get_features_table_path(table_name, config),
+            table_name=config.get_features_table(table_name),
+            table_path=config.get_features_table_path(table_name),
             primary_keys=[entity_primary_key],
             timestamp_keys=[TIMESTAMP_COLUMN],
         )
 
 
 def get_latest_dataframe(feature_tables: Iterable[str], config: Config):
-    spark.sparkContext.setCheckpointDir(get_checkpoint_dir(config))
+    spark.sparkContext.setCheckpointDir(config.get_checkpoint_dir())
 
-    features_dfs = [spark.table(get_features_table(table, config)) for table in feature_tables]
+    features_dfs = [spark.table(config.get_features_table(table)) for table in feature_tables]
 
     features_dfs_max_date = [(df, df.select(f.max(TIMESTAMP_COLUMN)).collect()[0][0]) for df in features_dfs]
 
@@ -86,21 +76,21 @@ def get_latest_dataframe(feature_tables: Iterable[str], config: Config):
     latest_df = features_dfs_max_date_filtered[0]
 
     for i, df in enumerate(features_dfs_max_date_filtered[1:]):
-        latest_df = latest_df.join(df, on=get_entity_primary_key(config), how="full")
-        if not i % get_checkpoint_interval(config):
+        latest_df = latest_df.join(df, on=config.get_entity_primary_key(), how="full")
+        if not i % config.get_checkpoint_interval():
             latest_df.checkpoint()
     return latest_df
 
 
 def write_latest_features(feature_notebooks: FeatureNotebookList, config: Config):
     create_schema_if_not_exists(config)
-    metadata_df = spark.table(get_metadata_table(config))
+    metadata_df = spark.table(config.get_metadata_table())
     feature_tables = [row.table for row in metadata_df.select("table").distinct().collect()]
 
     latest_df = get_latest_dataframe(feature_tables, config)
     latest_features_filled = fill_nulls(latest_df, feature_notebooks)
 
-    latest_table_path = get_latest_features_table_path(config)
-    latest_table_name = get_latest_features_table(config)
+    latest_table_path = config.get_latest_features_table_path()
+    latest_table_name = config.get_latest_features_table()
 
     write_latest_table(latest_features_filled, latest_table_name, latest_table_path)

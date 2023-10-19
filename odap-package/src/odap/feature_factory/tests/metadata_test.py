@@ -121,6 +121,6 @@ def test_metadata_integration(mocker):
     )
 
     assert (
-        sorted(resolve_metadata(["", metadata_cell, ""], FEATURE_PATH, df), key=lambda x: x["feature"])
+        sorted(resolve_metadata(["", metadata_cell, ""], FEATURE_PATH, df, "customer_id"), key=lambda x: x["feature"])
         == expected_metadata
     )
