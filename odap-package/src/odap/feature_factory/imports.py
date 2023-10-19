@@ -1,6 +1,7 @@
 # pylint: disable = unused-import
 
 from odap.feature_factory.config import get_param  # noqa
+from odap.feature_factory.feature_store import generate_feature_lookups  # noqa
 from odap.feature_factory.orchestrate import orchestrate, calculate_latest_table  # noqa
 from odap.feature_factory.widgets import create_notebooks_widget  # noqa
 

@@ -1,8 +1,7 @@
-from odap.common.config import get_config_namespace, ConfigNamespace
 from odap.common.databricks import resolve_dbutils, get_workspace_api
 from odap.common.utils import get_notebook_name
 from odap.feature_factory import const
-from odap.feature_factory.config import get_feature_sources, get_feature_source_dir, get_feature_source_prefix
+from odap.feature_factory.config import Config, get_feature_source_dir, get_feature_source_prefix
 from odap.feature_factory.feature_notebooks_selection import get_feature_notebooks_info
 from odap.feature_factory.utils import widget_prefix
 
@@ -10,8 +9,8 @@ from odap.feature_factory.utils import widget_prefix
 def create_notebooks_widget():
     dbutils = resolve_dbutils()
 
-    config = get_config_namespace(ConfigNamespace.FEATURE_FACTORY)
-    feature_sources = get_feature_sources(config)
+    config = Config.load_feature_factory_config()
+    feature_sources = config.get_feature_sources()
     feature_notebooks_all = []
 
     for feature_source in feature_sources:

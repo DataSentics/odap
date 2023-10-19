@@ -9,7 +9,7 @@ from odap.common.notebook import eval_cell_with_header
 from odap.common.tables import get_existing_table
 from odap.common.utils import get_notebook_name, get_relative_path
 from odap.common.exceptions import NotebookException
-from odap.feature_factory.config import get_metadata_table
+from odap.feature_factory.config import Config
 from odap.feature_factory.templates import resolve_metadata_templates
 from odap.feature_factory.type_checker import check_fillna_valid
 from odap.feature_factory.metadata_schema import (
@@ -79,8 +79,8 @@ def get_feature_dates(
     return {const.LAST_COMPUTE_DATE: last_compute_date, const.START_DATE: start_date}
 
 
-def set_fs_compatible_metadata(features_metadata: FeaturesMetadataType, config: Dict[str, Any]):
-    existing_metadata_df = get_existing_table(get_metadata_table(config))
+def set_fs_compatible_metadata(features_metadata: FeaturesMetadataType, config: Config):
+    existing_metadata_df = get_existing_table(config.get_metadata_table())
 
     start_date = datetime.today()
     last_compute_date = datetime.today()
@@ -130,7 +130,11 @@ def prefix_metadata(raw_features: List[Dict[str, Any]], prefix: Optional[str]) -
 
 
 def resolve_metadata(
-    notebook_cells: List[str], feature_path: str, feature_df: DataFrame, prefix: Optional[str] = None
+    notebook_cells: List[str],
+    feature_path: str,
+    feature_df: DataFrame,
+    entity_primary_key: str,
+    prefix: Optional[str] = None,
 ) -> FeaturesMetadataType:
     raw_metadata = extract_raw_metadata_from_cells(notebook_cells, feature_path)
     raw_features = get_features_from_raw_metadata(raw_metadata, feature_path)
@@ -138,7 +142,7 @@ def resolve_metadata(
     prefixed_features = prefix_metadata(raw_features, prefix)
     global_metadata = get_global_metadata(raw_metadata, feature_path)
 
-    features_metadata = resolve_metadata_templates(feature_df, prefixed_features)
+    features_metadata = resolve_metadata_templates(feature_df, prefixed_features, entity_primary_key)
 
     for metadata in features_metadata:
         resolve_global_metadata(metadata, global_metadata)

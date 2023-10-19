@@ -1,7 +1,7 @@
 from pyspark.sql import DataFrame, SparkSession
 
 from odap.common.config import get_config_namespace, ConfigNamespace
-from odap.feature_factory.config import get_entity_by_name, get_latest_features_table_for_entity
+from odap.feature_factory.config import Config
 from odap.segment_factory.config import get_destination, get_export, get_use_case_config
 from odap.segment_factory.exporters import resolve_exporter
 from odap.segment_factory.logs import write_export_log
@@ -27,13 +27,13 @@ class Export:
 
     def _join_segment_with_entities(self, segment_df: DataFrame) -> DataFrame:
         spark = SparkSession.getActiveSession()
-        feature_factory_config = get_config_namespace(ConfigNamespace.FEATURE_FACTORY)
+        feature_factory_config = Config.load_feature_factory_config()
 
         for entity_name in self._destination_config.get("attributes"):
-            id_column = get_entity_by_name(entity_name, feature_factory_config).get("id_column")
+            id_column = feature_factory_config.get_entity_by_name(entity_name).get("id_column")
 
             latest_features_df = spark.read.table(
-                get_latest_features_table_for_entity(entity_name, feature_factory_config)
+                feature_factory_config.get_latest_features_table_for_entity(entity_name)
             )
 
             if id_column not in segment_df.columns:

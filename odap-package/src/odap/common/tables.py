@@ -5,6 +5,7 @@ from delta import DeltaTable
 from databricks.feature_store import FeatureStoreClient
 
 from odap.common.logger import logger
+from odap.feature_factory.config import Config
 
 
 def hive_table_exists(full_table_name: str) -> bool:
@@ -52,6 +53,16 @@ def get_existing_table(table_name: str) -> Optional[DataFrame]:
         return spark.read.table(table_name)
 
     return None
+
+
+def create_schema_if_not_exists(config: Config):
+    spark = SparkSession.getActiveSession()
+    entity = config.get_entity()
+    catalog = config.get_catalog()
+    schema_name = config.get_database_for_entity(entity)
+
+    sql = f"CREATE SCHEMA IF NOT EXISTS {catalog}.{schema_name}"
+    spark.sql(sql)
 
 
 def create_table_if_not_exists(table_name: str, path: Optional[str], schema: StructType):

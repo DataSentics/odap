@@ -2,10 +2,9 @@ import re
 from copy import deepcopy
 from typing import Any, Dict, List, Set
 from pyspark.sql import DataFrame
-from odap.common.config import TIMESTAMP_COLUMN, ConfigNamespace, get_config_namespace
+from odap.common.config import TIMESTAMP_COLUMN
 
 from odap.feature_factory import const
-from odap.feature_factory.config import get_entity_primary_key
 
 from odap.feature_factory.metadata_schema import FeatureMetadataType, FeaturesMetadataType
 from odap.feature_factory.time_windows import TIME_WINDOW_PLACEHOLDER, parse_time_window, is_time_window_parsable
@@ -81,7 +80,9 @@ def resolve_placeholders_on_df_columns(
     return resolved_metadata
 
 
-def resolve_metadata_template(feature_df: DataFrame, feature_metadata: FeatureMetadataType) -> FeaturesMetadataType:
+def resolve_metadata_template(
+    feature_df: DataFrame, feature_metadata: FeatureMetadataType, entity_primary_key: str
+) -> FeaturesMetadataType:
     feature_metadata[const.FEATURE_TEMPLATE] = feature_metadata[const.FEATURE]
     feature_metadata[const.DESCRIPTION_TEMPLATE] = feature_metadata.get(const.DESCRIPTION, "")
 
@@ -90,17 +91,17 @@ def resolve_metadata_template(feature_df: DataFrame, feature_metadata: FeatureMe
     if not placeholders:
         return [feature_metadata]
 
-    config = get_config_namespace(ConfigNamespace.FEATURE_FACTORY)
-
-    resolvable_columns = set(feature_df.columns) - {get_entity_primary_key(config), TIMESTAMP_COLUMN}
+    resolvable_columns = set(feature_df.columns) - {entity_primary_key, TIMESTAMP_COLUMN}
 
     return resolve_placeholders_on_df_columns(resolvable_columns, feature_metadata, placeholders)
 
 
-def resolve_metadata_templates(feature_df: DataFrame, features_metadata: FeaturesMetadataType) -> FeaturesMetadataType:
+def resolve_metadata_templates(
+    feature_df: DataFrame, features_metadata: FeaturesMetadataType, entity_primary_key: str
+) -> FeaturesMetadataType:
     resolved_metadata = []
 
     for metadata in features_metadata:
-        resolved_metadata.extend(resolve_metadata_template(feature_df, metadata))
+        resolved_metadata.extend(resolve_metadata_template(feature_df, metadata, entity_primary_key))
 
     return resolved_metadata

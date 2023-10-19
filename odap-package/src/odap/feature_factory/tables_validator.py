@@ -1,8 +1,7 @@
 from typing import List
-from odap.common.config import Config
 from odap.common.tables import hive_table_exists, feature_store_table_exists
 from odap.feature_factory.config import (
-    get_features_table,
+    Config,
 )
 
 
@@ -12,7 +11,7 @@ def validate_feature_store_tables(feature_tables: List[str], config: Config):
 
 def validate_features_table(feature_tables: List[str], config: Config):
     for feature_table in feature_tables:
-        features_table = get_features_table(feature_table, config)
+        features_table = config.get_features_table(feature_table)
 
         validate_feature_store_and_hive(features_table)
 
