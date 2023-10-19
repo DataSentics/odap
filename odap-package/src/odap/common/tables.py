@@ -61,7 +61,7 @@ def create_schema_if_not_exists(config: Config):
     catalog = config.get_catalog()
     schema_name = config.get_database_for_entity(entity)
 
-    sql = f"CREATE SCHEMA {catalog}.{schema_name} IF NOT EXISTS"
+    sql = f"CREATE SCHEMA IF NOT EXISTS {catalog}.{schema_name}"
     spark.sql(sql)
 
 
