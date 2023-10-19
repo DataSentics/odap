@@ -80,7 +80,9 @@ def resolve_placeholders_on_df_columns(
     return resolved_metadata
 
 
-def resolve_metadata_template(feature_df: DataFrame, feature_metadata: FeatureMetadataType, entity_primary_key: str) -> FeaturesMetadataType:
+def resolve_metadata_template(
+    feature_df: DataFrame, feature_metadata: FeatureMetadataType, entity_primary_key: str
+) -> FeaturesMetadataType:
     feature_metadata[const.FEATURE_TEMPLATE] = feature_metadata[const.FEATURE]
     feature_metadata[const.DESCRIPTION_TEMPLATE] = feature_metadata.get(const.DESCRIPTION, "")
 
@@ -94,7 +96,9 @@ def resolve_metadata_template(feature_df: DataFrame, feature_metadata: FeatureMe
     return resolve_placeholders_on_df_columns(resolvable_columns, feature_metadata, placeholders)
 
 
-def resolve_metadata_templates(feature_df: DataFrame, features_metadata: FeaturesMetadataType, entity_primary_key: str) -> FeaturesMetadataType:
+def resolve_metadata_templates(
+    feature_df: DataFrame, features_metadata: FeaturesMetadataType, entity_primary_key: str
+) -> FeaturesMetadataType:
     resolved_metadata = []
 
     for metadata in features_metadata:

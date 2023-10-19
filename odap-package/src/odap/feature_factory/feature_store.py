@@ -5,9 +5,7 @@ from databricks.feature_store import FeatureStoreClient, FeatureLookup
 from odap.common.logger import logger
 from odap.common.tables import hive_table_exists
 from odap.common.dataframes import get_values_missing_from_df_column
-from odap.feature_factory.config import (
-    Config
-)
+from odap.feature_factory.config import Config
 
 
 def create_feature_store_table(

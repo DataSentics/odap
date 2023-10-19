@@ -130,7 +130,11 @@ def prefix_metadata(raw_features: List[Dict[str, Any]], prefix: Optional[str]) -
 
 
 def resolve_metadata(
-    notebook_cells: List[str], feature_path: str, feature_df: DataFrame, entity_primary_key: str, prefix: Optional[str] = None
+    notebook_cells: List[str],
+    feature_path: str,
+    feature_df: DataFrame,
+    entity_primary_key: str,
+    prefix: Optional[str] = None,
 ) -> FeaturesMetadataType:
     raw_metadata = extract_raw_metadata_from_cells(notebook_cells, feature_path)
     raw_features = get_features_from_raw_metadata(raw_metadata, feature_path)

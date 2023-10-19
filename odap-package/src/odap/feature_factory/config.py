@@ -2,7 +2,7 @@ import os
 from typing import Optional
 
 from odap.common.databricks import resolve_branch
-from odap.common.config import get_config_namespace, ConfigNamespace
+from odap.common.config import get_config_namespace, ConfigNamespace, Config as ConfigType
 
 from odap.common.exceptions import ConfigAttributeMissingException
 from odap.common.utils import concat_catalog_db_table
@@ -30,7 +30,7 @@ def resolve_dev_database_name(database: str):
 
 
 class Config:  # pylint: disable=(too-many-public-methods)
-    def __init__(self, config):
+    def __init__(self, config: ConfigType):
         self.__config = config
 
     @classmethod
