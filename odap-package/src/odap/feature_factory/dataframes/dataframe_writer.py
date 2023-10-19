@@ -5,7 +5,7 @@ from delta import DeltaTable
 
 from odap.common.config import TIMESTAMP_COLUMN, Config
 from odap.common.databricks import spark
-from odap.common.tables import create_table_if_not_exists
+from odap.common.tables import create_table_if_not_exists, create_schema_if_not_exists
 from odap.feature_factory.config import (
     get_entity_primary_key,
     get_features_table,
@@ -28,13 +28,13 @@ from odap.feature_factory.feature_notebook import FeatureNotebookList
 
 
 def write_metadata_df(feature_notebooks: FeatureNotebookList, config: Config):
+    create_schema_if_not_exists(config)
     create_table_if_not_exists(get_metadata_table(config), get_metadata_table_path(config), get_metadata_schema())
     metadata_df = create_metadata_df(feature_notebooks)
     delta_table = DeltaTable.forName(SparkSession.getActiveSession(), get_metadata_table(config))
     metadata_pk_columns = get_metadata_pk_columns()
-    metadata_columns = get_metadata_columns()
 
-    update_set = {col.name: f"source.{col.name}" for col in metadata_columns}
+    update_set = {col.name: f"source.{col.name}" for col in get_metadata_columns()}
     insert_set = {**{col.name: f"source.{col.name}" for col in metadata_pk_columns}, **update_set}
     merge_condition = " AND ".join(f"target.{col.name} = source.{col.name}" for col in metadata_pk_columns)
 
@@ -59,6 +59,7 @@ def get_table_df_mapping(
 
 
 def write_features_df(table_df_mapping: Dict[str, DataFrame], config: Config):
+    create_schema_if_not_exists(config)
     entity_primary_key = get_entity_primary_key(config)
 
     for table_name, df in table_df_mapping.items():
@@ -92,6 +93,7 @@ def get_latest_dataframe(feature_tables: Iterable[str], config: Config):
 
 
 def write_latest_features(feature_notebooks: FeatureNotebookList, config: Config):
+    create_schema_if_not_exists(config)
     metadata_df = spark.table(get_metadata_table(config))
     feature_tables = [row.table for row in metadata_df.select("table").distinct().collect()]
 
