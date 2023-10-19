@@ -8,7 +8,7 @@ from odap.common.exceptions import ConfigAttributeMissingException
 from odap.common.utils import concat_catalog_db_table
 
 
-def get_feature_factory_config():
+def get_feature_factory_config() -> ConfigType:
     return get_config_namespace(ConfigNamespace.FEATURE_FACTORY)
 
 
@@ -37,22 +37,46 @@ class Config:  # pylint: disable=(too-many-public-methods)
     def load_feature_factory_config(cls):
         return cls(get_feature_factory_config())
 
-    def get_entities(self):
+    def __get_entities(self):
         entities = self.__config.get("entities")
 
         if not entities:
             raise ConfigAttributeMissingException("entities not defined in config.yaml")
         return entities
 
+    def __get_metadata(self):
+        metadata = self.__config.get("metadata")
+
+        if not metadata:
+            raise ConfigAttributeMissingException("metadata not defined in config.yaml")
+
+        return metadata
+
+    def __get_features(self):
+        features = self.__config.get("features")
+
+        if not features:
+            raise ConfigAttributeMissingException("features not defined in config.yaml")
+
+        return features
+
+    def __get_database(self) -> str:
+        entity_name = self.get_entity()
+
+        return self.get_database_for_entity(entity_name)
+
+    def __preview_catalog_enabled(self) -> bool:
+        return self.__config.get("preview_catalog") is not None
+
     def get_entity_by_name(self, entity_name: str):
-        entity = self.get_entities().get(entity_name)
+        entity = self.__get_entities().get(entity_name)
 
         if not entity:
             raise ConfigAttributeMissingException(f"entity '{entity_name}' not defined in config.yaml")
         return entity
 
     def get_entity(self) -> str:
-        entities = self.get_entities()
+        entities = self.__get_entities()
 
         return next(iter(entities))
 
@@ -70,22 +94,6 @@ class Config:  # pylint: disable=(too-many-public-methods)
         entity = self.get_entity_by_name(entity_name)
 
         return entity["id_column"].lower()
-
-    def get_features(self):
-        features = self.__config.get("features")
-
-        if not features:
-            raise ConfigAttributeMissingException("features not defined in config.yaml")
-
-        return features
-
-    def get_metadata(self):
-        metadata = self.__config.get("metadata")
-
-        if not metadata:
-            raise ConfigAttributeMissingException("metadata not defined in config.yaml")
-
-        return metadata
 
     def get_database_for_entity(self, entity_name: str) -> str:
         features_database = self.__config.get("database")
@@ -105,22 +113,14 @@ class Config:  # pylint: disable=(too-many-public-methods)
 
         return catalog
 
-    def get_database(self) -> str:
-        entity_name = self.get_entity()
-
-        return self.get_database_for_entity(entity_name)
-
-    def preview_catalog_enabled(self) -> bool:
-        return self.__config.get("preview_catalog") is not None
-
     def get_features_table(self, table_name: str) -> str:
-        database = self.get_database()
+        database = self.__get_database()
 
-        catalog = self.get_catalog() if self.preview_catalog_enabled() else "hive_metastore"
+        catalog = self.get_catalog() if self.__preview_catalog_enabled() else "hive_metastore"
         return concat_catalog_db_table(catalog, database, table_name)
 
     def get_features_table_dir_path(self) -> Optional[str]:
-        features_table_path = self.get_features().get("dir_path")
+        features_table_path = self.__get_features().get("dir_path")
 
         return features_table_path.format(entity=self.get_entity()) if features_table_path else None
 
@@ -129,7 +129,7 @@ class Config:  # pylint: disable=(too-many-public-methods)
         return f"{dir_path}/{table_name}" if dir_path else None
 
     def get_latest_features_table_for_entity(self, entity_name: str) -> str:
-        table_name = self.get_features().get("latest_table")
+        table_name = self.__get_features().get("latest_table")
 
         if not table_name:
             raise ConfigAttributeMissingException("features.latest_table not defined in config.yaml")
@@ -148,7 +148,7 @@ class Config:  # pylint: disable=(too-many-public-methods)
         return self.get_features_table_path("latest")
 
     def get_metadata_table_for_entity(self, entity_name: str) -> str:
-        metadata_table = self.get_metadata().get("table")
+        metadata_table = self.__get_metadata().get("table")
 
         if not metadata_table:
             raise ConfigAttributeMissingException("metadata.table not defined in config.yaml")
@@ -164,7 +164,7 @@ class Config:  # pylint: disable=(too-many-public-methods)
         return self.get_metadata_table_for_entity(entity_name)
 
     def get_metadata_table_path(self) -> Optional[str]:
-        metadata_table_path = self.get_metadata().get("path")
+        metadata_table_path = self.__get_metadata().get("path")
 
         return metadata_table_path.format(entity=self.get_entity()) if metadata_table_path else None
 
