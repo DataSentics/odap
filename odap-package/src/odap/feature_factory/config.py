@@ -172,10 +172,10 @@ class Config:
         return self.__config.get("no_target_optimization") is not None
 
     def get_feature_sources(self) -> dict:
-        feature_sources = self.__config.get("feature_sources")
+        feature_sources = self.__get_features().get("sources")
 
         if not feature_sources:
-            raise ConfigAttributeMissingException("feature_sources not defined in config.yaml")
+            raise ConfigAttributeMissingException("features.sources not defined in config.yaml")
 
         return feature_sources
 
