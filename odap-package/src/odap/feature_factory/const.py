@@ -54,3 +54,5 @@ TARGET_STORE = "target_store"
 
 SQL_TIMESTAMP_LIT = ' timestamp("{timestamp}") as timestamp,'
 PYTHON_TIMESTAMP_LIT = '.withColumn("timestamp", f.lit("{timestamp}").cast("timestamp")).'
+
+INCLUDE_NOTEBOOKS_WILDCARD = "*"

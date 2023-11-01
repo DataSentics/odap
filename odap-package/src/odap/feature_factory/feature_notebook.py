@@ -125,4 +125,20 @@ def get_feature_notebooks_from_dirs(config: Config) -> FeatureNotebookList:
             load_feature_notebooks(config, get_list_of_selected_feature_notebooks(features_dir, prefix), prefix)
         )
 
-    return feature_notebooks
+    feature_notebooks_filtered = filter_active_notebooks(config, feature_notebooks)
+
+    return feature_notebooks_filtered
+
+
+def filter_active_notebooks(
+        config: Config, notebooks: FeatureNotebookList
+) -> FeatureNotebookList: 
+    # not optimal for large lists - both filters have quadratic complexity
+    notebooks_include = config.get_included_notebooks()
+    if const.INCLUDE_NOTEBOOKS_WILDCARD not in notebooks_include: 
+        notebooks = [ntb for ntb in notebooks if ntb.info.basename in notebooks_include]
+    notebooks_exclude = config.get_excluded_notebooks()
+    if notebooks_exclude: 
+        notebooks = [ntb for ntb in notebooks if ntb.info.basename not in notebooks_exclude]
+
+    return notebooks

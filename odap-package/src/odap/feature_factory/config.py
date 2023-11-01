@@ -1,11 +1,12 @@
 import os
-from typing import Optional
+from typing import List, Optional
 
 from odap.common.databricks import resolve_branch
 from odap.common.config import get_config_namespace, ConfigNamespace, Config as ConfigType
-
 from odap.common.exceptions import ConfigAttributeMissingException
 from odap.common.utils import concat_catalog_db_table
+
+from odap.feature_factory import const
 
 
 def get_feature_factory_config() -> ConfigType:
@@ -178,6 +179,28 @@ class Config:
             raise ConfigAttributeMissingException("features.sources not defined in config.yaml")
 
         return feature_sources
+
+    def get_included_notebooks(self): 
+        notebooks_include = self.__get_features().get("include_notebooks")
+        
+        if not notebooks_include: 
+            return [const.INCLUDE_NOTEBOOKS_WILDCARD, ]
+        
+        return notebooks_include
+
+    def get_excluded_notebooks(self) -> List[str]: 
+        notebooks_include = self.__get_features().get("include_notebooks")
+        notebooks_exclude = self.__get_features().get("exclude_notebooks")
+
+        if not notebooks_exclude:
+            return []
+        if not notebooks_include: 
+            raise ConfigAttributeMissingException(
+                "Cannot exclude notebooks without defining included ones. "
+                "(use wildcard symbol `*` for features.include_notebooks to include all notebooks)"
+            )
+
+        return notebooks_exclude
 
     def get_checkpoint_dir(self):
         checkpoint_dir = self.__config.get("checkpoint_dir")
