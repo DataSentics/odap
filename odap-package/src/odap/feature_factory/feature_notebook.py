@@ -138,7 +138,9 @@ def get_feature_notebooks_from_dirs(config: Config) -> FeatureNotebookList:
 def filter_active_notebooks(
     notebooks_to_include: List[str], notebooks_to_exclude: List[str], notebooks: FeatureNotebookList
 ) -> FeatureNotebookList:
-    # not optimal for large lists - both filters have quadratic complexity
+    notebooks_to_include = set(notebooks_to_include)
+    notebooks_to_exclude = set(notebooks_to_exclude)
+
     if const.INCLUDE_NOTEBOOKS_WILDCARD not in notebooks_to_include:
         notebooks = [ntb for ntb in notebooks if ntb.info.basename in notebooks_to_include]
     if notebooks_to_exclude:
