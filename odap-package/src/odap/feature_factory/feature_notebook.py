@@ -14,6 +14,8 @@ from odap.feature_factory.config import (
     Config,
     get_feature_source_dir,
     get_feature_source_prefix,
+    get_feature_source_included_notebooks,
+    get_feature_source_excluded_notebooks,
 )
 from odap.feature_factory.dataframes.dataframe_checker import check_feature_df
 from odap.feature_factory.feature_notebooks_selection import get_list_of_selected_feature_notebooks
@@ -121,24 +123,25 @@ def get_feature_notebooks_from_dirs(config: Config) -> FeatureNotebookList:
     for feature_source in feature_sources:
         features_dir = get_feature_source_dir(feature_source)
         prefix = get_feature_source_prefix(feature_source)
-        feature_notebooks.extend(
-            load_feature_notebooks(config, get_list_of_selected_feature_notebooks(features_dir, prefix), prefix)
+        notebooks_to_include = get_feature_source_included_notebooks(feature_source)
+        notebooks_to_exclude = get_feature_source_excluded_notebooks(feature_source)
+
+        notebooks_loaded = load_feature_notebooks(
+            config, get_list_of_selected_feature_notebooks(features_dir, prefix), prefix
         )
+        notebooks_filtered = filter_active_notebooks(notebooks_to_include, notebooks_to_exclude, notebooks_loaded)
+        feature_notebooks.extend(notebooks_filtered)
 
-    feature_notebooks_filtered = filter_active_notebooks(config, feature_notebooks)
-
-    return feature_notebooks_filtered
+    return feature_notebooks
 
 
 def filter_active_notebooks(
-        config: Config, notebooks: FeatureNotebookList
-) -> FeatureNotebookList: 
+    notebooks_to_include: List[str], notebooks_to_exclude: List[str], notebooks: FeatureNotebookList
+) -> FeatureNotebookList:
     # not optimal for large lists - both filters have quadratic complexity
-    notebooks_include = config.get_included_notebooks()
-    if const.INCLUDE_NOTEBOOKS_WILDCARD not in notebooks_include: 
-        notebooks = [ntb for ntb in notebooks if ntb.info.basename in notebooks_include]
-    notebooks_exclude = config.get_excluded_notebooks()
-    if notebooks_exclude: 
-        notebooks = [ntb for ntb in notebooks if ntb.info.basename not in notebooks_exclude]
+    if const.INCLUDE_NOTEBOOKS_WILDCARD not in notebooks_to_include:
+        notebooks = [ntb for ntb in notebooks if ntb.info.basename in notebooks_to_include]
+    if notebooks_to_exclude:
+        notebooks = [ntb for ntb in notebooks if ntb.info.basename not in notebooks_to_exclude]
 
     return notebooks

@@ -173,34 +173,12 @@ class Config:
         return self.__config.get("no_target_optimization") is not None
 
     def get_feature_sources(self) -> dict:
-        feature_sources = self.__get_features().get("sources")
+        feature_sources = self.__config.get("feature_sources")
 
         if not feature_sources:
-            raise ConfigAttributeMissingException("features.sources not defined in config.yaml")
+            raise ConfigAttributeMissingException("feature_sources not defined in config.yaml")
 
         return feature_sources
-
-    def get_included_notebooks(self): 
-        notebooks_include = self.__get_features().get("include_notebooks")
-        
-        if not notebooks_include: 
-            return [const.INCLUDE_NOTEBOOKS_WILDCARD, ]
-        
-        return notebooks_include
-
-    def get_excluded_notebooks(self) -> List[str]: 
-        notebooks_include = self.__get_features().get("include_notebooks")
-        notebooks_exclude = self.__get_features().get("exclude_notebooks")
-
-        if not notebooks_exclude:
-            return []
-        if not notebooks_include: 
-            raise ConfigAttributeMissingException(
-                "Cannot exclude notebooks without defining included ones. "
-                "(use wildcard symbol `*` for features.include_notebooks to include all notebooks)"
-            )
-
-        return notebooks_exclude
 
     def get_checkpoint_dir(self):
         checkpoint_dir = self.__config.get("checkpoint_dir")
@@ -219,7 +197,7 @@ class Config:
         return checkpoint_interval
 
 
-def get_feature_source_dir(feature_source) -> str:
+def get_feature_source_dir(feature_source: dict) -> str:
     path = feature_source.get("path")
 
     if not path:
@@ -228,5 +206,29 @@ def get_feature_source_dir(feature_source) -> str:
     return path
 
 
-def get_feature_source_prefix(feature_source) -> Optional[str]:
+def get_feature_source_prefix(feature_source: dict) -> Optional[str]:
     return feature_source.get("prefix")
+
+
+def get_feature_source_included_notebooks(feature_source: dict) -> List[str]:
+    notebooks_to_include = feature_source.get("include_notebooks")
+
+    if not notebooks_to_include:
+        return [const.INCLUDE_NOTEBOOKS_WILDCARD]
+
+    return notebooks_to_include
+
+
+def get_feature_source_excluded_notebooks(feature_source: dict) -> List[str]:
+    notebooks_to_include = feature_source.get("include_notebooks")
+    notebooks_to_exclude = feature_source.get("exclude_notebooks")
+
+    if not notebooks_to_exclude:
+        return []
+    if not notebooks_to_include:
+        raise ConfigAttributeMissingException(
+            "Cannot exclude notebooks without defining included ones. "
+            "(use wildcard symbol `*` for feature_sources.include_notebooks to include all notebooks)"
+        )
+
+    return notebooks_to_exclude

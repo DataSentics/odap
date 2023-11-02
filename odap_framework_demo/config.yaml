@@ -6,17 +6,17 @@ parameters:
     
   featurefactory:
     
-    features:
-      sources: 
-        - path: "notebooks"
-        
-      latest_table: "features_latest"
-      #dir_path: "dbfs:/{write_env}_odap_features/{entity}/features"
+    feature_sources:
+      - path: "notebooks"
 
     catalog: "{write_env}"
     preview_catalog: "on"
     database: "odap_features_{entity}"
-    
+
+    features:
+      latest_table: "features_latest"
+      #dir_path: "dbfs:/{write_env}_odap_features/{entity}/features"
+
     metadata:
       table: "metadata"
       #path: "dbfs:/{write_env}_odap_features/{entity}/metadata"
