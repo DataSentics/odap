@@ -1,4 +1,6 @@
+import os
 from typing import List, Iterable
+
 from odap.common.utils import get_project_root_fs_path
 from odap.common.config import get_config_on_rel_path
 from odap.segment_factory.config import USE_CASES_FOLDER
