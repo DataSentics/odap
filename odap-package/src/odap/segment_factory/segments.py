@@ -16,7 +16,6 @@ def write_segment(
     export_id: str,
     segment_factory_config: Dict,
 ):
-
     extended_segment_df = create_dataframe([[export_id]], get_segment_common_fields_schema()).join(df, how="full")
 
     table = get_segment_table(segment_factory_config)

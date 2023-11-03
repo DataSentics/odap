@@ -1,6 +1,6 @@
 from typing import List, Iterable
 from odap.common.utils import get_project_root_fs_path
-from odap.common.config import get_config_on_rel_path, CONFIG_NAME
+from odap.common.config import get_config_on_rel_path
 from odap.segment_factory.config import USE_CASES_FOLDER
 
 
@@ -17,9 +17,9 @@ def get_unique_segments(config: dict) -> List[str]:
 
 
 def get_unique_attributes(destinations: Iterable[dict]) -> dict:
-    config = get_config_on_rel_path(USE_CASES_FOLDER, get_project_root_fs_path(), CONFIG_NAME)["segmentfactory"][
-        "destinations"
-    ]
+    config = get_config_on_rel_path(USE_CASES_FOLDER, get_project_root_fs_path(), os.environ.get("CONFIG_PATH"))[
+        "segmentfactory"
+    ]["destinations"]
 
     result = {}
     for destination in destinations:
