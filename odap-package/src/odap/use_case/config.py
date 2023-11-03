@@ -1,6 +1,4 @@
-import os
-
-from odap.common.config import get_config_namespace, get_config_on_rel_path, ConfigNamespace
+from odap.common.config import get_config_namespace, get_config_on_rel_path, get_config_rel_path, ConfigNamespace
 from odap.common.exceptions import ConfigAttributeMissingException
 from odap.common.utils import concat_catalog_db_table
 from odap.segment_factory.config import USE_CASES_FOLDER, Config
@@ -39,7 +37,7 @@ def get_use_case_table():
 
 def get_use_case_config(use_case: str) -> dict:
     try:
-        config = get_config_on_rel_path(USE_CASES_FOLDER, use_case, os.environ.get("CONFIG_PATH"))
+        config = get_config_on_rel_path(USE_CASES_FOLDER, use_case, get_config_rel_path())
         config["name"] = use_case
         return config
     except FileNotFoundError:

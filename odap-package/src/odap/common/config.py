@@ -6,6 +6,7 @@ from odap.common.utils import get_project_root_fs_path
 from odap.common.exceptions import ConfigAttributeMissingException, WriteEnvNotSetException
 
 
+CONFIG_NAME_DEFAULT = "config.yaml"
 TIMESTAMP_COLUMN = "timestamp"
 ENV_PLACEHOLDER = "{write_env}"
 Config = Dict[str, Any]
@@ -47,11 +48,18 @@ def get_config_on_rel_path(*rel_path: str) -> Config:
 
 
 def get_config_namespace(namespace: ConfigNamespace) -> Config:
-    parameters = get_config_on_rel_path(os.environ.get("CONFIG_PATH"))
+    config_path = get_config_rel_path()
+    parameters = get_config_on_rel_path(config_path)
 
     config = parameters.get(namespace.value, None)
 
     if not config:
-        raise ConfigAttributeMissingException(f"'{namespace.value}' not defined in config.yaml")
+        raise ConfigAttributeMissingException(f"'{namespace.value}' not defined in {config_path}")
 
     return config
+
+
+def get_config_rel_path() -> str:
+    path = os.environ.get("CONFIG_PATH")
+
+    return path if path else CONFIG_NAME_DEFAULT
