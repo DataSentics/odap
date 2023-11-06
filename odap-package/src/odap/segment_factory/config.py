@@ -1,6 +1,6 @@
 from typing import Dict, Any, List, Optional
 
-from odap.common.config import get_config_on_rel_path, get_config_rel_path, ConfigNamespace
+from odap.common.config import get_config_on_rel_path, get_config_file_name, ConfigNamespace
 from odap.common.utils import get_absolute_api_path, list_folders, concat_catalog_db_table
 from odap.common.exceptions import ConfigAttributeMissingException
 from odap.common.databricks import get_workspace_api
@@ -104,4 +104,4 @@ def get_use_cases() -> List[str]:
 
 
 def get_use_case_config(use_case_name: str) -> Dict[str, Any]:
-    return get_config_on_rel_path(USE_CASES_FOLDER, use_case_name, get_config_rel_path())
+    return get_config_on_rel_path(USE_CASES_FOLDER, use_case_name, get_config_file_name())

@@ -48,7 +48,7 @@ def get_config_on_rel_path(*rel_path: str) -> Config:
 
 
 def get_config_namespace(namespace: ConfigNamespace) -> Config:
-    config_path = get_config_rel_path()
+    config_path = get_config_file_name()
     parameters = get_config_on_rel_path(config_path)
 
     config = parameters.get(namespace.value, None)
@@ -59,7 +59,7 @@ def get_config_namespace(namespace: ConfigNamespace) -> Config:
     return config
 
 
-def get_config_rel_path() -> str:
-    path = os.environ.get("CONFIG_PATH")
+def get_config_file_name() -> str:
+    file_path = os.environ.get("ODAP_CONFIG_PATH")
 
-    return path if path else CONFIG_NAME_DEFAULT
+    return file_path if file_path else CONFIG_NAME_DEFAULT
