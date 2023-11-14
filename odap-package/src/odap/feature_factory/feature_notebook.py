@@ -2,20 +2,16 @@ from typing import List, Dict, Optional
 from databricks_cli.workspace.api import WorkspaceFileInfo, WorkspaceApi
 from pyspark.sql import DataFrame, functions as F
 
-from odap.feature_factory import const
-
 from odap.common.logger import logger
 from odap.common.config import TIMESTAMP_COLUMN
 from odap.common.databricks import get_workspace_api
 from odap.common.dataframes import create_dataframe_from_notebook_cells
 from odap.common.notebook import eval_cell_with_header, get_notebook_cells
 
+from odap.feature_factory import const
 from odap.feature_factory.config import (
     Config,
-    get_feature_source_dir,
     get_feature_source_prefix,
-    get_feature_source_included_notebooks,
-    get_feature_source_excluded_notebooks,
 )
 from odap.feature_factory.dataframes.dataframe_checker import check_feature_df
 from odap.feature_factory.feature_notebooks_selection import get_list_of_selected_feature_notebooks
@@ -121,26 +117,11 @@ def get_feature_notebooks_from_dirs(config: Config) -> FeatureNotebookList:
     feature_notebooks = []
 
     for feature_source in feature_sources:
-        features_dir = get_feature_source_dir(feature_source)
         prefix = get_feature_source_prefix(feature_source)
-        notebooks_to_include = get_feature_source_included_notebooks(feature_source)
-        notebooks_to_exclude = get_feature_source_excluded_notebooks(feature_source)
 
-        notebooks_loaded = load_feature_notebooks(
-            config, get_list_of_selected_feature_notebooks(features_dir, prefix), prefix
-        )
-        notebooks_filtered = filter_active_notebooks(notebooks_to_include, notebooks_to_exclude, notebooks_loaded)
-        feature_notebooks.extend(notebooks_filtered)
+        notebooks_info = get_list_of_selected_feature_notebooks(feature_source)
+        notebooks_loaded = load_feature_notebooks(config, notebooks_info, prefix)
+
+        feature_notebooks.extend(notebooks_loaded)
 
     return feature_notebooks
-
-
-def filter_active_notebooks(
-    notebooks_to_include: List[str], notebooks_to_exclude: List[str], notebooks: FeatureNotebookList
-) -> FeatureNotebookList:
-    if const.INCLUDE_NOTEBOOKS_WILDCARD not in notebooks_to_include:
-        notebooks = [ntb for ntb in notebooks if ntb.info.basename in set(notebooks_to_include)]
-    if notebooks_to_exclude:
-        notebooks = [ntb for ntb in notebooks if ntb.info.basename not in set(notebooks_to_exclude)]
-
-    return notebooks
