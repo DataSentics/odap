@@ -1,5 +1,4 @@
 from odap.common.databricks import resolve_dbutils, get_workspace_api
-from odap.common.utils import get_notebook_name
 
 from odap.feature_factory import const
 from odap.feature_factory.config import (
