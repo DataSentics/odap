@@ -1,11 +1,12 @@
 import os
-from typing import Optional
+from typing import List, Optional
 
 from odap.common.databricks import resolve_branch
 from odap.common.config import get_config_namespace, ConfigNamespace, Config as ConfigType
-
 from odap.common.exceptions import ConfigAttributeMissingException
 from odap.common.utils import concat_catalog_db_table
+
+from odap.feature_factory import const
 
 
 def get_feature_factory_config() -> ConfigType:
@@ -196,7 +197,7 @@ class Config:
         return checkpoint_interval
 
 
-def get_feature_source_dir(feature_source) -> str:
+def get_feature_source_dir(feature_source: dict) -> str:
     path = feature_source.get("path")
 
     if not path:
@@ -205,5 +206,29 @@ def get_feature_source_dir(feature_source) -> str:
     return path
 
 
-def get_feature_source_prefix(feature_source) -> Optional[str]:
+def get_feature_source_prefix(feature_source: dict) -> Optional[str]:
     return feature_source.get("prefix")
+
+
+def get_feature_source_included_notebooks(feature_source: dict) -> List[str]:
+    notebooks_to_include = feature_source.get("include_notebooks")
+
+    if not notebooks_to_include:
+        return [const.INCLUDE_NOTEBOOKS_WILDCARD]
+
+    return notebooks_to_include
+
+
+def get_feature_source_excluded_notebooks(feature_source: dict) -> List[str]:
+    notebooks_to_include = feature_source.get("include_notebooks")
+    notebooks_to_exclude = feature_source.get("exclude_notebooks")
+
+    if not notebooks_to_exclude:
+        return []
+    if not notebooks_to_include:
+        raise ConfigAttributeMissingException(
+            "Cannot exclude notebooks without defining included ones. "
+            "(use wildcard symbol `*` for feature_sources.include_notebooks to include all notebooks)"
+        )
+
+    return notebooks_to_exclude

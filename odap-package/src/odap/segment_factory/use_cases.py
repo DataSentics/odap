@@ -4,6 +4,7 @@ from odap.segment_factory.Export import Export
 from odap.common.logger import logger
 from odap.segment_factory.widgets import ALL, UC_EXPORT_SEPARATOR
 
+
 # pylint: disable=too-many-statements
 def create_use_case_export_map(use_case_exports_list: List[str]) -> Dict[str, List[str]]:
     result_dict: Dict[str, List[str]] = {}
